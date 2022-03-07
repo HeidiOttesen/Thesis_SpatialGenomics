@@ -1,0 +1,108 @@
+---
+title: "Human DNA Colon"
+output: html_document
+---
+```{r}
+alias <- "human_colon_cancer_4_dna_200114_13"
+counts <- "human_colon_cancer_4_dna_200114_13.sparse_counts_1Mb.txt"
+bead <- ReadSlideSeq("human_colon_cancer_4_dna_200114_13.bead_locations.csv")
+barcodes <- rownames(bead@coordinates)
+#separator used in this count matrix
+sep = "\t"
+ctmp <- read.table(counts, header = TRUE, sep=sep ) %>% na.exclude()
+# Create DG matrix: i + j - row and column index - maybe a mix of row and columns - do as.counts instead
+sparse <- sparseMatrix(i= ctmp[,2],j=ctmp[,1],x=ctmp[,3]) 
+
+
+# invert/transpose/switch between rows and columns
+#sparse <- t(sparse)
+
+
+# human bins:
+hbins <- read.table("~/SlideSeq/GroupSlideSeq/hg19_1Mb_bins.txt", header = T)
+hbins <- hbins$bin_ind
+
+
+colnames(sparse) <- barcodes
+#rownames(sparse) <- str(mmbins)
+rownames(sparse) <- hbins
+```
+
+
+```{r}
+ctmp <- CreateSeuratObject(sparse, assay ="Spatial")
+bead <- bead[Cells(x = ctmp)]
+DefaultAssay(object = bead) <- "Spatial"
+ctmp[["slice1"]] <- bead
+```
+
+
+
+```{r}
+ctmp <- NormalizeData(ctmp)
+ctmp <- FindVariableFeatures(ctmp, nfeatures = 2000)
+ctmp <- ScaleData(ctmp)
+
+##Maybe do scTransform instead
+ctmp <- SCTransform(ctmp, assay = "Spatial", verbose = FALSE)
+```
+##Create image plotting function - coloured and grayscale
+
+```{r}
+cimg.plot <- function(image, step) {
+  ss <- subset(image, select=c(x, y, cc, value))
+  layout(matrix(1, 2))
+  g.or <- as.cimg(ss) %>% plot(main=c(step, "Array as.cimg"))
+  g <- grayscale(g.or) %>% plot(main =c(step, "Grayscale"))
+}
+
+```
+
+#Image processing:
+They all look gray, maybe a hint of green?
+
+```{r}
+
+#Test different number of slices
+ctmp <- rgbPCA(ctmp, slices = 3 , conserveSparse = FALSE)
+
+#test rgbUMAP as well!
+ctmp <- rgbUMAP(SO = ctmp.feat, conserveSparse=F)
+
+  #### Remember no split ! all in the same file!!!!!
+exportRGB.csv(ctmp,file = paste0(alias,"_rgbExport.csv"),split=F)
+
+image <- buildImageArray(ctmp,filterThreshold=0.9975,resolution=20, cores=5)
+g.or <- cimg.plot(image, 'Original')
+
+
+image <- equalizeHistogram(image,sleft = 2.5, sright=2.5,invert =T)
+g.eq <- cimg.plot(image, 'Equalized')
+
+
+image <- regulariseImage(image, lambda = 10,
+                                niter = 200, normalise=T)
+g.reg <- cimg.plot(image, 'Regularised')
+
+image <- iterativeSegmentation.array(image, colDepth = 6,
+                                            smoothIter = 20,
+                                            method = c("iso","median"),
+                                            sigma=1.5,box = 10,
+                                            useCenter = T)
+g.it <- cimg.plot(image, 'Iteratively segmented')
+image <- isolateTerritories.array(image,
+                                          captureRadius = 0.008,
+                                          minBar = 40)
+g.terr <- cimg.plot(image, 'Territories')
+layout(matrix(c(1,3,2,4), 2, 2))
+print(g.it + g.terr)
+```
+
+```{r}
+pdf(paste0(alias,"_image.pdf"))
+imagePlot(image)
+print(territoryPlot(image,cex=10))
+dev.off()
+write.csv(image, file = paste0(alias,"_ImageExport.csv"))
+```
+
