@@ -1,0 +1,274 @@
+---
+title: "SeqScope_ColonSW100x_DCT_FFT"
+output: html_document
+---
+
+#------------------------------------------------------------------------------#
+# Testing out seq scope segmented + DCT (+FFT)
+#------------------------------------------------------------------------------#
+```{r}
+library(imagerExtra)
+library(imager)
+library(Seurat)
+library(ggplot2)
+library(patchwork)
+library(viridis)
+library(RColorBrewer)
+library(dplyr)
+library(tvR)
+library(sp)
+library(grid)
+library(parallel)
+#library(vesalius)
+source("~/R/quickload.R")
+```
+
+
+
+
+### Annotated seurat object
+```{r}
+colon <-readRDS("~/group/seqScope/Colon_2112_inset_SW100X_anchored.rds")
+
+#seq <- rgbPCA(SO =seq, slices=1,conserveSparse=F)
+colon <- SCTransform(colon, assay = "Spatial", verbose = FALSE)
+#SpatialFeaturePlot(colon, features = c("Hpca", "Ttr"))
+colon.feat <- FindVariableFeatures(colon)
+ccells.id <- as.character(Idents(colon.feat))
+col.umap <- rgbUMAP(SO = colon.feat, conserveSparse=F)
+ccells <- data.frame(col.umap,cells=rep(ccells.id,times =3))
+```
+
+SCT gives 3000 variable features (12.281 features total)
+After FindVariable: 2000 variable features
+length of cell.ID: 4489
+colon.feat: 32.720 features across 4489 samples (3 assays)
+Umapped: length: 13467 samples
+    x: 8004-9984
+    y: 20.006-21.986 
+    Values: 0-1
+    ColorChannels: 0-1
+
+
+
+
+
+
+
+##Heidi extra plotting:
+
+2nd plot - "territory-based colours" based on cell-types
+In this case only 9 different cell types
+```{r}
+layout(matrix(c(1,3,2,4), 2, 2))
+an <- ggplot(ccells, aes(x,y,col = cells))+ geom_point(size=2, alpha = 1)+
+  theme_void() +
+  theme(legend.text = element_text(size = 12),
+        legend.title = element_text(size=12),
+        plot.title = element_text(size =15),
+        legend.position = "left")+
+  guides(colour = guide_legend(override.aes = list(size=10 * 0.3)))+
+  labs(colour = "Cell Type", title = "Cell Types")
+print(an)
+
+#From vesalius dev: (using brewer "accent" colour palette)
+
+ter_pal <- colorRampPalette(brewer.pal(8, "Accent"))
+ter_col <- ter_pal(length(unique(ccells$cells)))
+cex <- 10
+#gg.an <- ggplot(ccells, aes(x,y,col = cells))+ geom_point(size=1, alpha = 0.65)+
+#  theme_void() +
+#  scale_color_manual(values = ter_col)+
+#  theme(legend.text = element_text(size = 12),
+#        legend.title = element_text(size=12),
+#        plot.title = element_text(size =15),
+#        legend.position = "left")+
+#  guides(colour = guide_legend(override.aes = list(size=cex * 0.3)))+
+#  labs(colour = "Cell Type", title = "Cell Types")
+#layout(matrix(c(1,3,2,4), 2, 2))
+#print(an + gg.an)
+
+```
+
+
+
+
+
+
+
+##Build Image array from values 
+Removes any pixel overlaps + Fills gaps by tiling
+
+im.eq. are all the UMI values supposed to be 1? Gave NaN with regularize. Skip it.
+Without histogram equalization regularization gives more or less the same output as the the original image array..?
+
+OBS! - can create problem with the x,y divided by 10. Add jitter function before dividing to fix (get unique x,y).
+
+summary(col.umap) #1980*1980 pixels
+   barcodes               x              y               cc        value            slice  
+ Length:13467       Min.   :8004   Min.   :20006   Min.   :1   Min.   :0.0000   Min.   :1  
+ Class :character   1st Qu.:8484   1st Qu.:20486   1st Qu.:1   1st Qu.:0.2701   1st Qu.:1  
+ Mode  :character   Median :8994   Median :20996   Median :2   Median :0.4857   Median :1  
+                    Mean   :8994   Mean   :20996   Mean   :2   Mean   :0.4965   Mean   :1  
+                    3rd Qu.:9504   3rd Qu.:21506   3rd Qu.:3   3rd Qu.:0.7276   3rd Qu.:1  
+                    Max.   :9984   Max.   :21986   Max.   :3   Max.   :1.0000   Max.   :1  
+                    
+summary(image) #594*595 pixels 
+   barcodes               x               y               cc        value             tile       
+ Length:39021       Min.   :  1.0   Min.   :  1.0   Min.   :1   Min.   :0.0000   Min.   :0.0000  
+ Class :character   1st Qu.:149.0   1st Qu.:149.0   1st Qu.:1   1st Qu.:0.2739   1st Qu.:0.0000  
+ Mode  :character   Median :298.0   Median :298.0   Median :2   Median :0.4861   Median :0.0000  
+                    Mean   :297.3   Mean   :297.5   Mean   :2   Mean   :0.4970   Mean   :0.3333  
+                    3rd Qu.:446.0   3rd Qu.:446.0   3rd Qu.:3   3rd Qu.:0.7257   3rd Qu.:1.0000  
+                    Max.   :595.0   Max.   :595.0   Max.   :3   Max.   :1.0000   Max.   :1.0000 
+
+```{r}
+image <- buildImageArray(col.umap,resolution=30,filterThreshold=0.99, cores= 10)
+#im.eq <- equalizeHistogram(image, sleft = 2.5 , sright = 2.5)
+im.reg <- regulariseImage(image, lambda = 10,invert =F)
+im.itSeg <- iterativeSegmentation.array(im.reg,colDepth = 9,
+                                        smoothIter = 10,
+                                        method = c("box","iso"),
+                                        acrossLevels = "mean",
+                                        sigma = seq(1,3),
+                                        box = 10,
+                                        useCenter = T)
+im.terr <- isolateTerritories.array(im.itSeg,minBar=5,captureRadius = 0.035)
+```
+
+
+## DCT on ImageArray steps
+DCT cosine transform is an image processing algorithm in which it calculates the intesity or frequency of change in the original image and removes unnecessary information (less colour variation, keeping brightness, less frequency such as "fast jumps")
+
+Subset the image array in the different steps to test DCT transformation/compression/normalization
+```{r}
+ss1 <- subset(image, select=c(x, y, cc, value))
+#ss.eq <- subset(im.eq, select=c(x, y, cc, value))
+ss.reg <- subset(im.reg, select=c(x, y, cc, value))
+ss.itSeg <- subset(im.itSeg, select=c(x, y, cc, value))
+
+
+
+cimg.plot <- function(ss, step) {
+  layout(matrix(c(1,3,2,4), 2, 2))
+  g.or <- as.cimg(ss) %>% plot(main=c(step, "Array as.cimg"))
+  g <- grayscale(g.or) %>% plot(main =c(step, "Grayscale"))
+  gg1 <- DCT2D(g) %>% plot(main =c(step, "DCT Transformed"))
+  gg2 <- IDCT2D(gg1) %>% plot(main =c(step, "DCT Inversed"))
+  mean((g - gg2)^2)
+}
+cimg.plot(ss1, 'Original')
+#pdf("DCT_SW100xLiverSeqScope.pdf", width = 6, height= 5)
+
+
+```
+
+
+
+#### DCT ImagerExtra
+
+```{r}
+layout(matrix(c(1,3,2,4), 2, 2))
+g.or <- as.cimg(ss1) %>% plot(main= step + "Array as.cimg")
+g <- grayscale(g.or) %>% plot(main = step + "Grayscale")
+gg1 <- DCT2D(g) %>% plot(main = step + "DCT Transformed")
+gg2 <- IDCT2D(gg1) %>% plot(main = "DCT Inversed")
+mean((g - gg2)^2)
+```
+
+
+
+
+g.eq <- as.cimg(ss.eq) %>% plot(main="Equalized as.cimg")
+g <- grayscale(g.eq) %>% plot(main = "Equalized, gray")
+gg1 <- DCT2D(g) %>% plot(main = "DCT Transformed")
+gg2 <- IDCT2D(gg1) %>% plot(main = "DCT Inversed")
+mean((g - gg2)^2)
+
+g.reg <- as.cimg(ss.reg) %>% plot(main="Regularized as.cimg")
+g <- grayscale(g.reg) %>% plot(main = "Regularized, gray")
+gg1 <- DCT2D(g) %>% plot(main = "DCT Transformed")
+gg2 <- IDCT2D(gg1) %>% plot(main = "DCT Inversed")
+mean((g - gg2)^2)
+
+g.seg <- as.cimg(ss.itSeg) %>% plot(main="Iteratively segmented as.cimg")
+g <- grayscale(g.seg) %>% plot(main = "Segmented, gray")
+gg1 <- DCT2D(g) %>% plot(main = "DCT Transformed")
+gg2 <- IDCT2D(gg1) %>% plot(main = "DCT Inversed")
+mean((g - gg2)^2)
+
+
+dev.off()
+
+## Min Max normalization:
+normalize <- function(x) {return ((x - min(x)) / (max(x) - min(x)))}
+itSeg.dct <- as.data.frame(gg1)
+itSeg.dct$value <- normalize(itSeg.dct$value)
+gg1 <- as.cimg(itSeg.dct) %>% plot(main="DCT Transformed, Normalized")
+
+itSeg.dct.inv <- as.data.frame(gg2)
+itSeg.dct.inv$value <- normalize(itSeg.dct.inv$value)
+gg2 <- as.cimg(itSeg.dct.inv) %>% plot(main="DCT Inversed, Normalized")
+
+## Log transformation
+#logTrans <- function(mat){
+#  cons <- 255/log(1+abs(max(mat)-min(mat)))
+#  mat <- cons * log(mat)
+#  return(mat)
+#}
+logTrans <- function(mat){
+  mat <- mat + abs(min(mat)) + 1
+  cons <- 255/log(1+abs(max(mat)-min(mat)))
+  mat <- cons * log(mat)
+  return(mat)
+}
+itSeg.dct <- as.data.frame(gg1)
+itSeg.dct$value <- logTrans(itSeg.dct$value)
+gg1 <- as.cimg(itSeg.dct) %>% plot(main="DCT Transformed, log-Normalized")
+
+
+
+
+##FFT Imager
+ss1.cim <- as.cimg(ss1)
+tmp.fft <- FFT(ss1.cim)
+layout(matrix(c(1,3,2,4), 2, 2))
+plot(tmp.fft$real,main="Real part of the transform")
+plot(tmp.fft$imag,main="Imaginary part of the transform")
+sqrt(tmp.fft$real^2+tmp.fft$imag^2) %>% plot(main="Power spectrum")
+# Do we get our image back?:
+check <- FFT(tmp.fft$real,tmp.fft$imag,inverse=TRUE)$real #Should be the same as original
+mean((check-im)^2)
+
+
+
+
+
+## Vesalius resume:
+
+plotTmp <- im.terr
+
+
+for(i in seq_len(length(unique(plotTmp$territory)))){
+  print(i)
+  plotTmp$territory[plotTmp$territory == unique(plotTmp$territory)[i]] <- i
+}
+
+#pdf("seqScopeTerLiver.pdf", width = 7, height=6)
+g <- territoryPlot(plotTmp,cex = 15,cex.pt=1)+
+  theme_void()+
+  theme(legend.text = element_text(size = 10),
+        legend.title = element_text(size=10),
+        plot.title = element_text(size =12),
+        legend.position = "right")+
+  labs(title= "Vesalius - Territories", colour= "Territory nr.")
+print(g)
+#dev.off()
+
+#pdf("seqScopeLiver_combined.pdf",width = 10,height=4.5)
+print(an.sect2 + g)
+dev.off()
+
+
+
+
