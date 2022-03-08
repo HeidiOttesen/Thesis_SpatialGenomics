@@ -100,37 +100,38 @@ colnames(sparse) <- barcodes
 rownames(sparse) <- hbins
 ```
 
-## Create Seurat Object
+## Create Seurat Object - Milestone
 Insert the Barcode sequences in the bead vector
 
 ```{r}
-ctmp <- CreateSeuratObject(sparse, assay ="Spatial")
+ctmp.SO <- CreateSeuratObject(sparse, assay ="Spatial")
 
 #I don't understand how this part works
-bead <- bead[Cells(x = ctmp)]
+bead <- bead[Cells(x = ctmp.SO)]
 DefaultAssay(object = bead) <- "Spatial"
-ctmp[["slice1"]] <- bead
-```
-
-## Milestone: Seurat Object
-
-```{r}
-ctmp.or <- ctmp
+ctmp.SO[["slice1"]] <- bead
 ```
 
 
 ## Normalize / Find Features / Scale
-Either by Seurats functions or using SCTransform
+Either by Seurats functions or using SCTransform or not at all
 Do this make sense to do on the DNA data?
 
 ```{r}
 #norm <- "seuratNorm"
-#ctmp <- NormalizeData(ctmp)
+#ctmp.norm <- NormalizeData(ctmp.SO)
 #ctmp <- FindVariableFeatures(ctmp, nfeatures = 2000)
 #ctmp <- ScaleData(ctmp)
 
 norm <- "SCTransform"
-ctmp.sct <- SCTransform(ctmp, assay = "Spatial", verbose = FALSE)
+ctmp.sct <- SCTransform(ctmp.SO, assay = "Spatial", verbose = FALSE)
+ctmp <- FindVariableFeatures(ctmp.sct, nfeatures = 2000)
+ctmp <- ScaleData(ctmp)
+
+
+#norm <- "No_norm"
+#ctmp <- FindVariableFeatures(ctmp.SO, nfeatures = 2000)
+#ctmp <- ScaleData(ctmp)
 ```
 
 ## Create image plotting function - coloured and grayscale
