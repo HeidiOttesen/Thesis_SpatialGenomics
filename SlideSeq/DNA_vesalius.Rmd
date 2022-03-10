@@ -40,18 +40,21 @@ and create a sparse count matrix. (mostly 0's, bins as columns and barcodes as r
 
 ```{r}
 #alias <- "human_colon_cancer_4_dna_200114_13"
-#counts <- "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/human_colon_cancer_4_dna_200114_13.sparse_counts_1Mb.txt"
-#bead <- ReadSlideSeq("~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/human_colon_cancer_4_dna_200114_13.bead_locations.csv")
-
 
 #alias <- "human_colon_cancer_3_dna_191204_19"
-#counts <- "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/human_colon_cancer_3_dna_191204_19.sparse_counts_1Mb.txt"
-#bead <- ReadSlideSeq("~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/human_colon_cancer_3_dna_191204_19.bead_locations.csv")
 
-# Mouse liver sparse count already holds 
 alias <- "mouse_liver_met_2_dna_200114_10"
-counts <- "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/mouse_liver_met_2_dna_200114_10.sparse_counts_1Mb.txt"
-bead <- ReadSlideSeq("~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/mouse_liver_met_2_dna_200114_10.bead_locations.csv")
+
+norm <- "SeuratNorm"
+#norm <- "SCTransform"
+#norm <- "NoNorm"
+
+dimred <- "3slice_PCA"
+#dimred <- "30pcs_UMAP"
+
+
+counts <- paste0("~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/", alias, ".sparse_counts_1Mb.txt")
+bead <- ReadSlideSeq(paste0("~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/", alias, ".bead_locations.csv"))
 
 
 
@@ -76,22 +79,24 @@ hist(max)
 ```
 
 
-## Run this chunk for human samples:
+## Bins Human/Mouse:
 Each bin index corresponds to 1million bases in a specific location on a chromosome.
+bin size: 1 million bases, index 1 = chromosome 1 from base 1 -> 1.000.000
+Keep only the bin index numbers (1-3114. ~3.1bn bases)
+
+Human: 3114 bins human bins. Chr2 starts at bin 251 :
+Mouse: 2738 bins total 
 ```{r}
-# human bins - bin size: 1 million bases, index 1 = chromosome 1 from base 1 -> 1.000.000. Chr2 starts at bin 251 :
-hbins <- read.table("~/Thesis_SpatialGenomics/SlideSeq/GroupSlideSeq/hg19_1Mb_bins.txt", header = T)
-# Keep only the bin index numbers (1-3114. ~3.1bn bases)
-hbins <- hbins$bin_ind
+if(grepl("human",alias)){
+  bins <- read.table("~/Thesis_SpatialGenomics/SlideSeq/GroupSlideSeq/hg19_1Mb_bins.txt", header = T)
+  bins <- bins$bin_ind
+} else {
+  bins <- read.table("~/Thesis_SpatialGenomics/SlideSeq/GroupSlideSeq/mm10_1Mb_bins.txt", header = T)
+  bins <- bins$bin_ind
+}
 ```
 
 
-## Run this chunk for mouse
-2738 bins total of 1mill bases
-```{r}
-mmbins <- read.table("~/Thesis_SpatialGenomics/SlideSeq/GroupSlideSeq/mm10_1Mb_bins.txt", header = T)
-mmbins <- mmbins$bin_ind
-```
 
 
 ## Name column/rows in sparse matrix
@@ -102,11 +107,8 @@ Assign the barcodes to identify the columns
 ```{r}
 
 colnames(sparse) <- barcodes
-#Mouse bins:
-rownames(sparse) <- mmbins
+rownames(sparse) <- bins
 
-#Human bins:
-#rownames(sparse) <- hbins
 ```
 
 ## Create Seurat Object - Milestone
@@ -128,22 +130,14 @@ Do this make sense to do on the DNA data?
 
 ```{r}
 
+if(norm == "SeuratNorm"){
+  ctmp <- NormalizeData(ctmp.SO)
+} else if(norm == "SCTransform"){
+  ctmp <- SCTransform(ctmp.SO, assay = "Spatial", verbose = FALSE)
+}
 
 
-#norm <- "seuratNorm"
-#ctmp.norm <- NormalizeData(ctmp.SO)
-
-
-norm <- "SCTransform"
-ctmp.sct <- SCTransform(ctmp.SO, assay = "Spatial", verbose = FALSE)
-
-
-#norm <- "No_norm"
-
-
-
-#Pick ctmp.sct or ctmp.norm or ctmp.SO
-ctmp <- FindVariableFeatures(ctmp.sct, nfeatures = 2000)
+ctmp <- FindVariableFeatures(ctmp, nfeatures = 200)
 
 
 ctmp <- ScaleData(ctmp)
@@ -159,9 +153,7 @@ ctmp <- ScaleData(ctmp)
 
 cimg.plot <- function(image, step) {
   ss <- subset(image, select=c(x, y, cc, value))
-#  layout(matrix(1, 2))
   g <- as.cimg(ss) %>% plot(main=c(step, "Array (as.cimg)"))
-#  g <- grayscale(g) %>% plot(main =c(step, "Grayscale"))
 }
 
 ```
@@ -171,21 +163,16 @@ Latent space
 PCA / UMAP / tSNE (/Semantic Ves Dev?)
 
 ```{r}
-#Test different number of slices
-dimred <- "PCA_3slices"
-ctmp.pca <- rgbPCA(ctmp, slices = 3 , conserveSparse = FALSE)
 
-#test rgbUMAP as well!
-#dimred <- "UMAP_30pcs"
-#ctmp.umap <- rgbUMAP(SO = ctmp.pca, conserveSparse=F)
-#ctmp.umap <- rgbUMAP(SO = ctmp, conserveSparse=F)
-#count <- rgbUMAP(count, pcs =30, conserveSparse = FALSE)
-#countList[[i]] <- count
+if(grepl("UMAP",dimred)){
+  pc <- sub("pcs.*", "", dimred)
+  ctmp <- rgbUMAP(SO = ctmp, pcs = pc, conserveSparse=F)
+} else if(grepl("PCA",dimred)){
+  slice <- as.integer(substr(dimred, 1,1))
+  ctmp <- rgbPCA(ctmp, slices = slice, conserveSparse = FALSE)
+} else if(grepl("tSNE",dimred)){
+}
 
-
-
-  #### Remember no split ! all in the same file!!!!!
-#exportRGB.csv(ctmp,file = paste0(alias,"_rgbExport.csv"),split=F)
 ```
 
 
@@ -197,7 +184,7 @@ Try reducing resolution to 10% - for the trial
 
 ```{r}
 
-image <- buildImageArray(ctmp.pca,filterThreshold=0.9975,resolution=20, cores=5)
+image <- buildImageArray(ctmp,filterThreshold=0.9975,resolution=20, cores=5)
 
 #Keep a copy before messing up the rest
 image.array <- image
@@ -222,8 +209,8 @@ image <- isolateTerritories.array(image, captureRadius = 0.008, minBar = 40)
 DNA - Very gray with a hint of green?
 
 ```{r}
-now <- Sys.time()
-fname <- paste(format(now, "%Y%m%d_%H%M%S"), alias, norm, dimred, "images.pdf", sep="_")
+path.now <- paste0("~/home/hottesen/Thesis_SpatialGenomics/R_Output/", format(Sys.time(), "%Y%m%d_%H%M%S"))
+fname <- paste(path.now, alias, norm, dimred, "images.pdf", sep="_")
 pdf(fname)
 layout(matrix(c(1,3,2,4), 2, 2))
 
