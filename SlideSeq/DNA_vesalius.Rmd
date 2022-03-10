@@ -39,18 +39,19 @@ and create a sparse count matrix. (mostly 0's, bins as columns and barcodes as r
 
 
 ```{r}
-alias <- "human_colon_cancer_4_dna_200114_13"
-counts <- "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/human_colon_cancer_4_dna_200114_13.sparse_counts_1Mb.txt"
-bead <- ReadSlideSeq("~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/human_colon_cancer_4_dna_200114_13.bead_locations.csv")
+#alias <- "human_colon_cancer_4_dna_200114_13"
+#counts <- "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/human_colon_cancer_4_dna_200114_13.sparse_counts_1Mb.txt"
+#bead <- ReadSlideSeq("~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/human_colon_cancer_4_dna_200114_13.bead_locations.csv")
 
 
 #alias <- "human_colon_cancer_3_dna_191204_19"
 #counts <- "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/human_colon_cancer_3_dna_191204_19.sparse_counts_1Mb.txt"
 #bead <- ReadSlideSeq("~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/human_colon_cancer_3_dna_191204_19.bead_locations.csv")
 
-#alias <- "human_colon_cancer_3_dna_191204_19"
-#counts <- "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/human_colon_cancer_3_dna_191204_19.sparse_counts_1Mb.txt"
-#bead <- ReadSlideSeq("~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/human_colon_cancer_3_dna_191204_19.bead_locations.csv")
+# Mouse liver sparse count already holds 
+alias <- "mouse_liver_met_2_dna_200114_10"
+counts <- "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/mouse_liver_met_2_dna_200114_10.sparse_counts_1Mb.txt"
+bead <- ReadSlideSeq("~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/mouse_liver_met_2_dna_200114_10.bead_locations.csv")
 
 
 
@@ -62,6 +63,11 @@ sep = "\t"
 ctmp <- read.table(counts, header = TRUE, sep=sep ) %>% na.exclude()
 # Create DG matrix: i + j - row and column index - maybe a mix of row and columns - do as.counts instead
 sparse <- sparseMatrix(i= ctmp[,2],j=ctmp[,1],x=ctmp[,3]) 
+
+#Curious about the count distribution values
+max <- sort(sparse@x, decreasing = TRUE)
+hist(max)
+#axis(side=1, at=seq(0,100, 10), labels=seq(0,1000,100))
 
 
 # invert/transpose/switch between rows and columns
@@ -96,12 +102,15 @@ Assign the barcodes to identify the columns
 ```{r}
 
 colnames(sparse) <- barcodes
-#rownames(sparse) <- str(mmbins)
-rownames(sparse) <- hbins
+#Mouse bins:
+rownames(sparse) <- mmbins
+
+#Human bins:
+#rownames(sparse) <- hbins
 ```
 
 ## Create Seurat Object - Milestone
-Insert the Barcode sequences in the bead vector
+Insert the Barcode sequences in the bead vector?
 
 ```{r}
 ctmp.SO <- CreateSeuratObject(sparse, assay ="Spatial")
@@ -115,23 +124,32 @@ ctmp.SO[["slice1"]] <- bead
 
 ## Normalize / Find Features / Scale
 Either by Seurats functions or using SCTransform or not at all
-Do this make sense to do on the DNA data?
+Do this make sense to do on the DNA data? 
 
 ```{r}
+
+
+
 #norm <- "seuratNorm"
 #ctmp.norm <- NormalizeData(ctmp.SO)
-#ctmp <- FindVariableFeatures(ctmp, nfeatures = 2000)
-#ctmp <- ScaleData(ctmp)
+
 
 norm <- "SCTransform"
 ctmp.sct <- SCTransform(ctmp.SO, assay = "Spatial", verbose = FALSE)
-ctmp <- FindVariableFeatures(ctmp.sct, nfeatures = 2000)
-ctmp <- ScaleData(ctmp)
 
 
 #norm <- "No_norm"
-#ctmp <- FindVariableFeatures(ctmp.SO, nfeatures = 2000)
-#ctmp <- ScaleData(ctmp)
+
+
+
+#Pick ctmp.sct or ctmp.norm or ctmp.SO
+ctmp <- FindVariableFeatures(ctmp.sct, nfeatures = 2000)
+
+
+ctmp <- ScaleData(ctmp)
+
+
+
 ```
 
 ## Create image plotting function - coloured and grayscale
@@ -155,7 +173,7 @@ PCA / UMAP / tSNE (/Semantic Ves Dev?)
 ```{r}
 #Test different number of slices
 dimred <- "PCA_3slices"
-ctmp.pca <- rgbPCA(ctmp.sct, slices = 3 , conserveSparse = FALSE)
+ctmp.pca <- rgbPCA(ctmp, slices = 3 , conserveSparse = FALSE)
 
 #test rgbUMAP as well!
 #dimred <- "UMAP_30pcs"
@@ -172,9 +190,10 @@ ctmp.pca <- rgbPCA(ctmp.sct, slices = 3 , conserveSparse = FALSE)
 
 
 
-#Image processing:
+#Image processing: - Milestone - Image array
 
 Time consuming! (10mins - 1Gb Seurat)
+Try reducing resolution to 10% - for the trial
 
 ```{r}
 
