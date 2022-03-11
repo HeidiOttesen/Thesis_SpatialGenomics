@@ -4,8 +4,11 @@ output: html_document
 ---
 
 ## Preface
+
+
 Set working directory for the entire markdown/notebook. - doesn't work - still need to specify path
 Load packages needed
+
 
 ```{r setup, include=FALSE}
 knitr::opts_knit$set(root.dir = "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/")
@@ -33,25 +36,28 @@ library(grDevices)
 set.seed(1)
 ```
 
+Specify dataset + Normalisation + dimensionality reduction method and parameters
+
+```{r}
+#alias <- "human_colon_cancer_4_dna_200114_13"
+#alias <- "human_colon_cancer_3_dna_191204_19"
+alias <- "mouse_liver_met_2_dna_200114_10"
+
+#norm <- "SeuratNorm"
+norm <- "SCTransform"
+#norm <- "NoNorm"
+
+dimred <- "3slice_PCA" #(3 PCs -> 1 slice as 3 colour channels, 3 slices = 9 PCs)
+#dimred <- "30pcs_UMAP"
+```
+
+
 
 ## Read data from files
 and create a sparse count matrix. (mostly 0's, bins as columns and barcodes as rows? )
 
 
 ```{r}
-#alias <- "human_colon_cancer_4_dna_200114_13"
-
-#alias <- "human_colon_cancer_3_dna_191204_19"
-
-alias <- "mouse_liver_met_2_dna_200114_10"
-
-norm <- "SeuratNorm"
-#norm <- "SCTransform"
-#norm <- "NoNorm"
-
-dimred <- "3slice_PCA"
-#dimred <- "30pcs_UMAP"
-
 
 counts <- paste0("~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/", alias, ".sparse_counts_1Mb.txt")
 bead <- ReadSlideSeq(paste0("~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/", alias, ".bead_locations.csv"))
@@ -69,8 +75,7 @@ sparse <- sparseMatrix(i= ctmp[,2],j=ctmp[,1],x=ctmp[,3])
 
 #Curious about the count distribution values
 max <- sort(sparse@x, decreasing = TRUE)
-hist(max)
-#axis(side=1, at=seq(0,100, 10), labels=seq(0,1000,100))
+
 
 
 # invert/transpose/switch between rows and columns
