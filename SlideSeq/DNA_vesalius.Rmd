@@ -47,8 +47,11 @@ alias <- "mouse_liver_met_2_dna_200114_10"
 norm <- "SCTransform"
 #norm <- "NoNorm"
 
-dimred <- "3slice_PCA" #(3 PCs -> 1 slice as 3 colour channels, 3 slices = 9 PCs)
+dimred <- "1slice_PCA" #(3 PCs -> 1 slice as 3 colour channels, 3 slices = 9 top PCs)
 #dimred <- "30pcs_UMAP"
+
+in.path <- "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/"
+out.path <- "~/Thesis_SpatialGenomics/R_Output/"
 ```
 
 
@@ -59,8 +62,8 @@ and create a sparse count matrix. (mostly 0's, bins as columns and barcodes as r
 
 ```{r}
 
-counts <- paste0("~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/", alias, ".sparse_counts_1Mb.txt")
-bead <- ReadSlideSeq(paste0("~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/", alias, ".bead_locations.csv"))
+counts <- paste0(in.path, alias, ".sparse_counts_1Mb.txt")
+bead <- ReadSlideSeq(paste0(in.path, alias, ".bead_locations.csv"))
 
 
 
@@ -95,7 +98,7 @@ Mouse: 2738 bins total
 if(grepl("human",alias)){
   bins <- read.table("~/Thesis_SpatialGenomics/SlideSeq/GroupSlideSeq/hg19_1Mb_bins.txt", header = T)
   bins <- bins$bin_ind
-} else {
+} else if(grepl("mouse",alias)){
   bins <- read.table("~/Thesis_SpatialGenomics/SlideSeq/GroupSlideSeq/mm10_1Mb_bins.txt", header = T)
   bins <- bins$bin_ind
 }
@@ -214,8 +217,7 @@ image <- isolateTerritories.array(image, captureRadius = 0.008, minBar = 40)
 DNA - Very gray with a hint of green?
 
 ```{r}
-path.now <- paste0("~/home/hottesen/Thesis_SpatialGenomics/R_Output/", format(Sys.time(), "%Y%m%d_%H%M%S"))
-fname <- paste(path.now, alias, norm, dimred, "images.pdf", sep="_")
+fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), alias, norm, dimred, "images.pdf", sep="_")
 pdf(fname)
 layout(matrix(c(1,3,2,4), 2, 2))
 
@@ -227,6 +229,8 @@ cimg.plot(image, 'Isolated Territories')
 territoryPlot(image,cex=10)
 
 dev.off()
+
+file.rename(from = paste0(in.path, fname), to = paste0(out.path, fname))
 ```
 
 
