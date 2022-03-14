@@ -48,11 +48,15 @@ norm <- "SeuratNorm"
 #norm <- "SCTransform"
 #norm <- "NoNorm"
 
-dimred <- "1slice_PCA" #(3 PCs -> 1 slice as 3 colour channels, 3 slices = 9 top PCs)
-#dimred <- "30pcs_UMAP"
+#dimred <- "1slice_PCA" #(3 PCs -> 1 slice as 3 colour channels, 3 slices = 9 top PCs)
+dimred <- "5pcs_UMAP"
+#dimred <- "1slicePCA_5pcsUMAP"
+
+# percentage resolution in the buildimagearray - have used 20% for all before 14th March
+res <- "10"
+
 
 in.path <- "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/"
-im.path <- "~/Thesis_SpatialGenomics/SlideSeq/"
 out.path <- "~/Thesis_SpatialGenomics/R_Output/"
 ```
 
@@ -173,14 +177,17 @@ PCA / UMAP / tSNE (/Semantic Ves Dev?)
 
 ```{r}
 
-if(grepl("UMAP",dimred)){
-  pc <- sub("pcs.*", "", dimred)
-  ctmp <- rgbUMAP(SO = ctmp, pcs = pc, conserveSparse=F)
-} else if(grepl("PCA",dimred)){
+if(grepl("PCA",dimred)){
   slice <- as.integer(substr(dimred, 1,1))
   ctmp <- rgbPCA(ctmp, slices = slice, conserveSparse = FALSE)
+} else if(grepl("UMAP",dimred) & grepl("PCA",dimred)){
+  pc <- sub("pcs.*", "", dimred)
+  ctmp <- rgbUMAP(SO = ctmp, pcs = pc, conserveSparse=F)
 } else if(grepl("tSNE",dimred)){
 }
+#  slice <- as.integer(substr(dimred, 1,1))
+#  ctmp <- rgbPCA(ctmp, slices = slice, conserveSparse = FALSE)
+#  pc <- sub(".*PCA_", "", pc)
 
 ```
 
@@ -237,7 +244,8 @@ image <- isolateTerritories.array(image, captureRadius = 0.008, minBar = 40)
 DNA - Very gray with a hint of green?
 
 ```{r}
-fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), alias, "VesDev", norm, dimred, "images.pdf", sep="_")
+setwd(in.path)
+fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), alias, "VesDev", norm, dimred, res, "#Res", "images.pdf", sep="_")
 pdf(fname)
 layout(matrix(c(1,3,2,4), 2, 2))
 
@@ -250,7 +258,7 @@ territoryPlot(image,cex=10)
 
 dev.off()
 
-file.rename(from = paste0(im.path, fname), to = paste0(out.path, fname))
+file.rename(from = paste0(in.path, fname), to = paste0(out.path, fname))
 ```
 
 

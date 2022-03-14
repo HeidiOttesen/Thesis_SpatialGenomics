@@ -20,7 +20,7 @@ library(sp)
 library(grid)
 library(parallel)
 #library(vesalius)
-source("~/R/quickload.R")
+source("~/Thesis_SpatialGenomics/RScripts_Testing/quickload.R")
 ```
 
 
