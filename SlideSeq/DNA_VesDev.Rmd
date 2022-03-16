@@ -25,6 +25,7 @@ library(tvR)
 library(sp)
 library(grid)
 library(Matrix)
+library(MatrixExtra)
 source("~/Thesis_SpatialGenomics/RScripts_Testing/quickload.R") #Dev version of Vesalius
 
 
@@ -53,7 +54,7 @@ dimred <- "5pcs_UMAP"
 #dimred <- "1slicePCA_5pcsUMAP"
 
 # percentage resolution in the buildimagearray - have used 20% for all before 14th March
-res <- "10"
+res <- as.integer(10)
 
 
 in.path <- "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/"
@@ -151,7 +152,7 @@ if(norm == "SeuratNorm"){
 }
 
 
-ctmp <- FindVariableFeatures(ctmp, nfeatures = 200)
+ctmp <- FindVariableFeatures(ctmp, nfeatures = 1000)
 ctmp.id <- as.character(Idents(ctmp)) #Will this work?
 
 
@@ -180,14 +181,15 @@ PCA / UMAP / tSNE (/Semantic Ves Dev?)
 if(grepl("PCA",dimred)){
   slice <- as.integer(substr(dimred, 1,1))
   ctmp <- rgbPCA(ctmp, slices = slice, conserveSparse = FALSE)
-} else if(grepl("UMAP",dimred) & grepl("PCA",dimred)){
-  pc <- sub("pcs.*", "", dimred)
+} else if(grepl("UMAP",dimred)){
+  pc <- as.integer(sub("pcs.*", "", dimred))
   ctmp <- rgbUMAP(SO = ctmp, pcs = pc, conserveSparse=F)
 } else if(grepl("tSNE",dimred)){
 }
+#  & grepl("PCA",dimred))
 #  slice <- as.integer(substr(dimred, 1,1))
 #  ctmp <- rgbPCA(ctmp, slices = slice, conserveSparse = FALSE)
-#  pc <- sub(".*PCA_", "", pc)
+#  pc <- as.integer(sub(".*PCA_", "", pc))
 
 ```
 
@@ -196,18 +198,18 @@ Don't expect it to work..
 Nope - they all only have 1 feature = "SeuratProject" = 1 colour
 
 ```{r}
-ctmp.feat <- data.frame(ctmp,feat=rep(ctmp.id,times =3)) #will this work?!
+#ctmp.feat <- data.frame(ctmp,feat=rep(ctmp.id,times =3)) #will this work?!
 
-layout(matrix(c(1,3,2,4), 2, 2))
-an <- ggplot(ctmp.feat, aes(x,y,col = feat))+ geom_point(size=2, alpha = 1)+
-  theme_void() +
-  theme(legend.text = element_text(size = 12),
-        legend.title = element_text(size=12),
-        plot.title = element_text(size =15),
-        legend.position = "left")+
-  guides(colour = guide_legend(override.aes = list(size=10 * 0.3)))+
-  labs(colour = "feat", title = "Found Features")
-print(an)
+#layout(matrix(c(1,3,2,4), 2, 2))
+#an <- ggplot(ctmp.feat, aes(x,y,col = feat))+ geom_point(size=2, alpha = 1)+
+#  theme_void() +
+#  theme(legend.text = element_text(size = 12),
+#        legend.title = element_text(size=12),
+#        plot.title = element_text(size =15),
+#        legend.position = "left")+
+#  guides(colour = guide_legend(override.aes = list(size=10 * 0.3)))+
+#  labs(colour = "feat", title = "Found Features")
+#print(an)
 ```
 
 
@@ -219,7 +221,7 @@ Try reducing resolution to 10% - for the trial
 ```{r}
 
 
-image <- buildImageArray(ctmp,filterThreshold=0.9975,resolution=20, cores=5)
+image <- buildImageArray(ctmp,filterThreshold=0.9975,resolution=res, cores=5)
 
 #Keep a copy before messing up the rest
 image.array <- image

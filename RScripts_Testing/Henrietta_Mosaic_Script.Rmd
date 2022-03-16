@@ -1,0 +1,104 @@
+---
+title: "Henrietta mosaic script"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#### Test Runs for vesalius
+library(Matrix)
+library(parallel)
+library(imager)
+library(imagerExtra)
+library(Seurat)
+library(ggplot2)
+library(patchwork)
+library(viridis)
+library(RColorBrewer)
+library(dplyr)
+library(tvR)
+library(sp)
+library(grid)
+
+library(SuperpixelImageSegmentation)
+
+# Standard libraries - just in case you are a command line fiend
+library(utils)
+library(stats)
+library(graphics)
+library(grDevices)
+
+
+##### Load brain data
+slideBeadsBrain <-c("~/group/slide_seqV2/Puck_200115_08_bead_locations.csv")
+slideBeadsBrain <- read.csv(slideBeadsBrain, header=TRUE)
+slideCountsBrain <- c("~/group/slide_seqV2/Puck_200115_08.digital_expression.txt.gz")
+
+slideCountsBrain <- read.table(slideCountsBrain, header = TRUE )
+rownames(slideCountsBrain) <- slideCountsBrain[,1]
+slideCountsBrain <- slideCountsBrain[,-1]
+
+##### Load Vesalius Dev functions into memory (adapt path)
+files <- list.files("~/tissue-segmentation/VesaliusDev/R",pattern = ".R")
+files <- paste0("~/tissue-segmentation/VesaliusDev/R/",files)
+for(i in seq_along(files)){
+  source(files[i])
+}
+
+
+vesBrain <- buildVesaliusEmbeddings(
+  slideCountsBrain,
+  slideBeadsBrain,
+  method = "PCA",
+  pcs = 30,
+  tensorResolution = 0.1,
+  loadings = FALSE,
+  cores = 5
+)
+
+##### Build mosaic
+mosBrain <- buildMosaic(
+  vesBrain,
+  dims = seq(1, 30),
+  box = seq(3, 11),
+  sigma = c(0.5, 1, 1.5),
+  iter = 3,
+  maskThreshold = 0.9,
+  maskType = "double",
+  method = "Kmeans",
+  k = 5,
+  lambda = 5,
+  smoothingMethod = c("iso", "median")
+)
+
+
+###### Plotting function for final image (adapted from Patrick)
+.plotMos <- function(mos, revy=TRUE) {
+  # Make image
+  ter <- mos@territories
+  coord <- mos@tiles
+  
+  ter <- right_join(coord, ter,by = "barcodes") %>% distinct(barcodes,.keep_all=TRUE)
+  sorted_labels <- levels(as.factor(ter$territory))
+  # sorted_labels[length(sorted_labels)] <- "isolated"
+  ter$territory <- factor(ter$territory, levels = sorted_labels)
+  ter_col <- length(levels(ter$territory))
+  ter_pal <- colorRampPalette(brewer.pal(8, "Accent"))
+  ter_col <- sample(ter_pal(ter_col),ter_col)
+  image <- ggplot(ter,aes(x,y,col = as.factor(territory)))+
+    geom_point(size=0.5, alpha=1, shape=19)+
+    scale_color_manual(values = ter_col) +
+    theme_void() +
+    theme(legend.position = "none")
+  
+  # revert y axis (flip image)
+  if (revy) {
+    image <- image + scale_y_reverse()
+  }
+  return(image)
+}
+
+
+.plotMos(mosBrain)
