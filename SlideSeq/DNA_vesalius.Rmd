@@ -41,8 +41,8 @@ Specify dataset + Normalisation + dimensionality reduction method and parameters
 
 ```{r}
 #alias <- "human_colon_cancer_4_dna_200114_13"
-#alias <- "human_colon_cancer_3_dna_191204_19"
-alias <- "mouse_liver_met_2_dna_200114_10"
+alias <- "human_colon_cancer_3_dna_191204_19"
+#alias <- "mouse_liver_met_2_dna_200114_10"
 
 norm <- "SeuratNorm"
 #norm <- "SCTransform"
