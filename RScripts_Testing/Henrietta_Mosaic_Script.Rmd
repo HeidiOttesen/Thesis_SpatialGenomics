@@ -21,6 +21,7 @@ library(dplyr)
 library(tvR)
 library(sp)
 library(grid)
+library(N2R)
 
 library(SuperpixelImageSegmentation)
 

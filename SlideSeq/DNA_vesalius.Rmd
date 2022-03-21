@@ -63,6 +63,7 @@ max.count <- 6
 
 ## Read data from files
 and create a sparse count matrix. (mostly 0's, bins as columns and barcodes as rows? )
+To access slots of an S4 object you use @, not $
 
 
 ```{r}
@@ -121,6 +122,8 @@ Assign the barcodes to identify the columns
 
 colnames(sparse) <- barcodes
 rownames(sparse) <- bins
+
+
 
 # Remove outliers - keep only counts up to 6 (CNA = 6):
 sparse <- filterSparse(sparse, function(x) x <= max.count)
@@ -257,11 +260,5 @@ territoryPlot(image,cex=10)
 dev.off()
 
 file.rename(from = paste0(in.path, fname), to = paste0(out.path, fname))
-```
-
-
-```{r}
-
-#write.csv(image, file = paste0(alias,"_ImageExport.csv"))
 ```
 
