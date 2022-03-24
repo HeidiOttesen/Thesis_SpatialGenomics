@@ -41,14 +41,14 @@ Specify dataset + Normalisation + dimensionality reduction method and parameters
 
 ```{r}
 #alias <- "human_colon_cancer_4_dna_200114_13"
-alias <- "human_colon_cancer_3_dna_191204_19"
-#alias <- "mouse_liver_met_2_dna_200114_10"
+#alias <- "human_colon_cancer_3_dna_191204_19"
+alias <- "mouse_liver_met_2_dna_200114_10"
 
 norm <- "SeuratNorm"
 #norm <- "SCTransform"
 #norm <- "NoNorm"
 
-dimred <- "1slice_PCA" #(3 PCs -> 1 slice as 3 colour channels, 3 slices = 9 top PCs)
+dimred <- "3slice_PCA" #(3 PCs -> 1 slice as 3 colour channels, 3 slices = 9 top PCs)
 #dimred <- "30pcs_UMAP"
 
 in.path <- "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/"
@@ -149,16 +149,21 @@ Don't know how to filter out columns (barcodes) with fewer than 100 non-zero val
 
 
 ## Create Seurat Object - Milestone
-Insert the Barcode sequences in the bead vector?
+Based on the counts
+
+Cells - Takes the barcodes instead of cellID?
+slice 1 - This is where the x+y coordinates are added from bead, identifier - barcode
 
 ```{r}
 ctmp.SO <- CreateSeuratObject(sparse, assay ="Spatial")
 
-#I don't understand how this part works
 bead <- bead[Cells(x = ctmp.SO)]
 DefaultAssay(object = bead) <- "Spatial"
 ctmp.SO[["slice1"]] <- bead
+
 ```
+
+
 
 
 ## Normalize / Find Features / Scale

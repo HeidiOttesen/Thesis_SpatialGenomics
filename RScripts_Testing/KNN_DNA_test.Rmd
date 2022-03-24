@@ -1,0 +1,314 @@
+---
+title: "KNN testing"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(sdpep)
+```
+
+
+
+
+
+#Let's make some sample data so people can run it. First a matrix of point coordinates:
+```{r}
+#coords <- cbind(runif(100), runif(100)) # Example code
+
+coords <- bead@coordinates
+coords <- cbind(coords$xcoord, coords$ycoord)
+
+#coords <- cbind(ctmp[,2],ctmp[,1])
+#coords <- coords[1:sub, ]
+```
+
+
+
+
+#Then suppose we have A measured at each of the 100 points:
+# counts / weights to each coordinate:
+
+
+#And some ID values which we might need:
+
+#Then we compute the nearest neighbours (I'm doing 5 nearest for simplicity):
+#Each element of knn50 is a vector of the index in coords of the neighbours:
+```{r}
+#A <- runif(100)
+A <- ctmp[,3]
+a <- A[1:sub]
+#IDs = paste0("ID-",1:100)
+IDs <- bins[1:sub]
+ctmp.knearneigh <- knearneigh(coords, k = 5)
+
+#knn50 <- knn2nb(knn, row.names = IDs)
+
+knn50[[1]]
+```
+
+
+
+So for example we can plot all the points, plot the neighbours of point 5 in green, then point 5 itself in red:
+  
+Then if we want to average over some measure at each of those points, here A, we can use sapply and a function that subsets from A according to those nearest elements:
+
+
+giving the mean of A for the 5 nearest neighbours of each of the 100 points. Note the A value of the point itself isn't included.
+
+
+```{r}
+plot(coords)
+points(coords[knn50[[5]],],col="green",pch=19)
+points(coords[5,,drop=FALSE],col="red",pch=19)
+sapply(1:length(knn50), function(N){mean(A[N])})
+```
+
+
+
+
+
+
+
+
+https://github.com/patrickCNMartin/VesaliusDev/blob/main/R/embeddings.R#:~:text=%23%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D%2D-,%23,-%23%20creating%20new%20merged
+
+
+```{r}
+library("dbscan")
+data(iris)
+x <- iris[, -5]
+nn <- kNN(x, k = 5)
+ctmp.knn <- kNN(coords, k = 5)
+```
+
+
+
+Patrick's code:
+"the nearest neighbour index (nn in the first one and id in the second one) you can use that to get the barcode name (what ever each bin is called) and then group that into g number of groups."
+Distance pooling array
+https://github.com/patrickCNMartin/Vesalius/blob/3567500a00d5baff9274cb8e153622c5f84e15c8/R/IsolatingTerritories.R#L736-L873
+
+
+```{r}
+.distancePooling.array <- function(img,captureRadius,minBar){
+    #--------------------------------------------------------------------------#
+    # Select center point of each tile for only one channel
+    # Dont need to run it for all channels
+    #--------------------------------------------------------------------------#
+
+    imgCopy <- img %>% filter(tile == 1) %>% distinct(barcodes,.keep_all = TRUE)
+    if(nrow(imgCopy)<1){return(NULL)}
+
+
+    #--------------------------------------------------------------------------#
+    # Compute distances
+    #--------------------------------------------------------------------------#
+    idx <- seq_len(nrow(imgCopy))
+    distanceMatrix <- lapply(idx, function(idx,mat){
+                            xo <- mat$x[idx]
+                            yo <- mat$y[idx]
+                            xp <- mat$x
+                            yp <- mat$y
+                            distance <- sqrt(((abs(xp-xo))^2 + (abs(yp-yo))^2))
+                            return(distance)
+    }, imgCopy)
+
+
+    #--------------------------------------------------------------------------#
+    # Buildan actual matrix
+    #--------------------------------------------------------------------------#
+
+    distanceMatrix <- do.call("rbind",distanceMatrix)
+    colnames(distanceMatrix) <- imgCopy$barcodes
+    rownames(distanceMatrix) <- imgCopy$barcodes
+
+    #--------------------------------------------------------------------------#
+    # If there is only one point
+    # In this case you only have one territory as well
+    # Don't need to any pooling
+    #--------------------------------------------------------------------------#
+
+    if(sum(dim(distanceMatrix))==2){
+        return(1)
+    }
+
+
+    #--------------------------------------------------------------------------#
+    # Pooling points together
+    #--------------------------------------------------------------------------#
+    barcodes <- imgCopy$barcodes
+    territories <- list()
+    count <- 1
+
+    while(length(barcodes) >0){
+         #---------------------------------------------------------------------#
+         # First lets select a random barcode in the colour segment
+         # And create a pool of barcodes to select based on capture radius
+         # This first while loop checks if there are still barcodes
+         # left in the colour segment
+         #---------------------------------------------------------------------#
+          tmp <- distanceMatrix[,sample(barcodes,1)]
+          pool <- names(tmp)[tmp <= captureRadius]
+          inter <- pool
+          converge <- FALSE
+
+          while(!converge){
+            #------------------------------------------------------------------#
+            # This while loop checks if all possible barcodes have been pooled
+            # into the current territory
+            #------------------------------------------------------------------#
+              if(length(inter)==1){
+                  #------------------------------------------------------------#
+                  # when there is only one barcodes
+                  # remove barcode from pool and move on
+                  #------------------------------------------------------------#
+                  territories[[count]] <- pool
+                  barcodes <- barcodes[!barcodes %in% pool]
+                  count <- count + 1
+                  converge <- TRUE
+              } else {
+                  #------------------------------------------------------------#
+                  # Get a new pool from the distance matrix
+                  # and check which ones are within capture radius
+                  #------------------------------------------------------------#
+                  newPool <- distanceMatrix[,inter]
+
+                  newPool <- unique(unlist(lapply(seq_len(ncol(newPool)),
+                                           function(idx,np,captureRadius){
+
+                                            res <- rownames(np)[np[,idx] <=
+                                                                captureRadius]
+                                            return(res)
+                                          },newPool,captureRadius)))
+                  #------------------------------------------------------------#
+                  # check which barcodes in the new pool overlap with
+                  # the ones in the full pool
+                  # If there is a perfect overlap then there are no new bacodes
+                  # to pool into a territory
+                  #------------------------------------------------------------#
+                  overlap <- newPool %in% pool
+
+                  if(sum(overlap) != length(newPool)){
+                        #------------------------------------------------------#
+                        # There are still some new barcodes to pool
+                        # lets do some more looping then
+                        #------------------------------------------------------#
+                        pool <- unique(c(pool,newPool[!overlap]))
+                        inter <- unique(newPool[!overlap])
+                  } else {
+                        #------------------------------------------------------#
+                        # it is done ! no more barcodes for this territory
+                        #------------------------------------------------------#
+                        territories[[count]] <- pool
+                        count <- count +1
+                        barcodes <- barcodes[!barcodes %in% pool]
+
+                        converge <- TRUE
+
+                  }
+              }
+          }
+      }
+    #--------------------------------------------------------------------------#
+    # Clean up drop outs
+    #--------------------------------------------------------------------------#
+
+      allTers <- img$territory
+
+      for(ter in seq_along(territories)){
+            loc <- img$barcodes %in% territories[[ter]]
+            if(length(territories[[ter]]) <= minBar){
+               allTers[loc] <- "isolated"
+            } else {
+               allTers[loc] <- ter
+            }
+
+
+
+      }
+      return(allTers)
+}
+```
+
+
+Patrick
+Reduce tensor Resolution
+https://github.com/patrickCNMartin/VesaliusDev/blob/main/R/embeddings.R
+
+
+```{r}
+.reduceTensorResolution <- function(coordinates,tensorResolution = 1){
+  #----------------------------------------------------------------------------#
+  # we will reduce number of points this way
+  # this should keep all barcodes - with overlapping coordinates
+  #----------------------------------------------------------------------------#
+  coordinates$x <- round(coordinates$x * tensorResolution)
+  coordinates$y <- round(coordinates$y * tensorResolution)
+  #----------------------------------------------------------------------------#
+  # Now we get coordinate tags - we use this to find all the merge locations
+  # sorting and using rle to ensure that we actually merge them
+  #----------------------------------------------------------------------------#
+  tag <- paste0(coordinates$x,"_",coordinates$y)
+
+  locs <- rle(sort(tag))
+  dup <- locs$values[which(locs$length >1)]
+  #----------------------------------------------------------------------------#
+  # creating new merged labels
+  #----------------------------------------------------------------------------#
+  dupTags <- lapply(dup,function(dup,tag,barcodes){
+    tmpLocs <- which(tag == dup)
+    barcodes<- paste0(barcodes[tmpLocs],sep ="_et_", collapse ="")
+    barcodes <- rep(barcodes,times = length(tmpLocs))
+    return(barcodes)
+  },tag = tag,barcodes = coordinates$barcodes)
+  #----------------------------------------------------------------------------#
+  # assigning new merged barcodes
+  # for some reason match doesn't seem to work here - it only returns one of the
+  # values
+  #----------------------------------------------------------------------------#
+  locs <- unlist(lapply(dup, function(dup,tag){
+      return(which(tag == dup))
+  },tag = tag))
+  coordinates$barcodes[locs] <- unlist(dupTags)
+  coordinates <- coordinates %>% distinct(barcodes,.keep_all = TRUE)
+  return(coordinates)
+}
+```
+
+
+
+Patrick 
+Adjust counts:
+https://github.com/patrickCNMartin/VesaliusDev/blob/main/R/embeddings.R
+
+```{r}
+.adjustCounts <- function(coordinates, counts,cores = 1){
+    #--------------------------------------------------------------------------#
+    # First get all barcode names and compare which ones are missing
+    #--------------------------------------------------------------------------#
+    coordBar <- unique(coordinates$barcodes)
+    countBar <- unique(colnames(counts))
+    concat <- sapply(strsplit(coordBar,"_et_"),length) > 1
+    coordBar <- coordBar[concat]
+    countBar <- countBar[!concat]
+
+    #--------------------------------------------------------------------------#
+    # next we merge counts together when barcodes have been merged
+    #--------------------------------------------------------------------------#
+    tmpBar <- strsplit(coordBar,"_et_")
+
+    empty <- parallel::mclapply(tmpBar, function(coord,count){
+        tmp <- rowSums(count[,coord])
+        return(tmp)
+    },count = counts, mc.cores = cores)
+
+    empty <- do.call("cbind",empty)
+
+    colnames(empty) <- coordBar
+
+    merged <- cbind(counts[,countBar],empty)
+    return(merged)
+}
+```
+
