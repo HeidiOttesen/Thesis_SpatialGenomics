@@ -101,16 +101,8 @@ knn50[[1]]
 One way to think about the pooling algorithm is:
 Get all the nearest neighbours for each set of coordinates (essentially Knn) associated to each barcode
 1. create a vector that contains all your barcodes.
-2. Create an empty list that will grow as you assign more groups to it.
-3. Take one random barcode from your barcode vector ( you can also just take the first 1 in the list) and all of its neighbours and put them in the list.
-4. Remove those barcodes from your barcodes vector.
-5. Repeat step 4 and 5 until all barcodes have been assigned into your list.
-6. take the median x and y coordinates of all barcodes present in each group and create a new coordinate file with a new set of barcode names
-7. Once you have this list, you will combine all the counts associated to each group.
-8. Create empty list of length equal to the group list
-9. Loop through your group list and extract all columns in your count matrix associated with the barcodes in each group
-10. Add counts together. Essentially RowSums for all columns you’ve just extracted. The bins stay the same so you sum over rows.
-11. Rename the columns in your count matrix to reflect you new barcode names
+
+
 
 Patrick's code:
 "the nearest neighbour index (nn in the first one and id in the second one) you can use that to get the barcode name (what ever each bin is called) and then group that into g number of groups."
@@ -119,49 +111,104 @@ https://github.com/patrickCNMartin/Vesalius/blob/3567500a00d5baff9274cb8e153622c
 
 .distancePooling.array <- function(img,captureRadius,minBar){
 
-## Create groups of barcodes (from knn)
+## Get knn groups of barcodes (from knn)
 I don't know how to keep only unique barcodes
 the length of the list should be the length / k - but I still have the full length number of groups..
 
 There are also 14 leftovers no in any group If I understand correctly?
-```{r}
 
+## Unique barcode knn list
+2. Create an empty list that will grow as you assign more groups to it.
+3. Take one random barcode from your barcode vector ( you can also just take the first 1 in the list) and all of its neighbours and put them in the list.
+4. Remove those barcodes from your barcodes vector.
+5. Repeat step 4 and 5 until all barcodes have been assigned into your list.
+
+```{r}
 knn5 <- knn50[1:l]
 
 bc <- barcodes
-knn5.bc <- vector(mode="list", length=l)
+knn5.bc <- vector(mode="list", length=l) #holds unique barcodes in groups of up to k
+doubles <- vector(mode="list", length=l) #Probably don't need this..
+knn5.bc1 <- vector(mode="list", length=l) #unique again but without NA's
 i <- 1
-
 
 while(i <= l){
   j <- 1
   while(j <= k){
     ix <- knn5[[i]][j]
-    knn5.bc[[i]][j] <- barcodes[ix]
+    b <- barcodes[ix]
+    if(b %in% bc){
+      knn5.bc[[i]][j] <- b
+    }else{
+      doubles[[i]][j] <- b
+    }
     j <- j + 1
-    bc <- bc[!bc %in% barcodes[ix]]
+    bc <- bc[!bc %in% b]
   }
+  x <- knn5.bc[[i]]
+  knn5.bc1[[i]] <- x[!is.na(x)]
   i <- i + 1
 }
 
+```
 
-#2. Create an empty list that will grow as you assign more groups to it.
+
+
+6. take the median x and y coordinates of all barcodes present in each group and create a new coordinate file with a new set of barcode names
+
+```{r}
+bead.x <- data.frame(bead.coords$xcoord)
+bead.y <- data.frame(bead.coords$ycoord)
+
+rownames(bead.x) <- rownames(bead@coordinates)
+rownames(bead.y) <- rownames(bead@coordinates)
+
+l <- length(knn5.bc1)
+bc.g <- vector(length=l)
+knn.x <- vector(length=l)
+knn.y <- vector(length=l)
+i <- 1
+
+while(i <= l){
+  lth <- length(knn5.bc1[[i]])
+  x <- vector(length=lth)
+  y <- vector(length=lth)
+  j <- 1
+  while(j <= lth){
+    b <- knn5.bc1[[i]][j]
+    x[[j]] <- bead.x[b, ]
+    y[[j]] <- bead.y[b, ]
+    j <- j + 1
+  }
+  if(length(knn5.bc1[[i]]) > 0){
+    bc.g[[i]] <- knn5.bc1[[i]][1]
+  }
+  knn.x[[i]] <- median(x)
+  knn.y[[i]] <- median(y)
+  i <- i + 1
+}
+
+  
+
+
+```
+
+
+7. Once you have this list, you will combine all the counts associated to each group.
+8. Create empty list of length equal to the group list
+9. Loop through your group list and extract all columns in your count matrix associated with the barcodes in each group
+10. Add counts together. Essentially RowSums for all columns you’ve just extracted. The bins stay the same so you sum over rows.
+11. Rename the columns in your count matrix to reflect you new barcode names
+```{r}
+
+bc <- barcodes
 tmp <- data.frame()
 ls <- list()
 i <- 1
 while(length(bc) >0){
-  #---------------------------------------------------------------------#
-  # First lets select a random barcode in the colour segment
-  # And create a pool of barcodes to select based on capture radius
-  # This first while loop checks if there are still barcodes
-  # left in the colour segment
-  #---------------------------------------------------------------------#
-  
-  pool <- bc[i] #select a barcode from top to bottom
-  tmp[i] <- cbind(pool)
-  inter <- pool
+  pool <- sample(bc,1)
+  res <- lapply(knn, function(ch) grep("a", ch))
   converge <- FALSE
-  
   while(!converge){
     #------------------------------------------------------------------#
     # This while loop checks if all possible barcodes have been pooled
@@ -172,13 +219,14 @@ while(length(bc) >0){
       # when there is only one barcodes
       # remove barcode from pool and move on
       #------------------------------------------------------------#
-      ls[i] <- pool
-      bc <- bc[!bc %in% pool] #remove used barcode
+      ls[[i]] <- pool
+      barcodes <- barcodes[!barcodes %in% pool]
       i <- i + 1
       converge <- TRUE
     }
   }
 }
+
 ```
  else {
       #------------------------------------------------------------#
