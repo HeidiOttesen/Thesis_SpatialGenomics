@@ -49,12 +49,14 @@ Then if we want to average over some measure at each of those points, here A, we
 
 giving the mean of A for the 5 nearest neighbours of each of the 100 points. Note the A value of the point itself isn't included.
 
+## Visualize single dots:
 
 ```{r}
+
 plot(coords)
 points(coords[knn50[[5]],],col="green",pch=19)
 points(coords[5,,drop=FALSE],col="red",pch=19)
-sapply(1:length(knn50), function(N){mean(A[N])})
+sapply(1:length(knn50), function(N){mean(A[N])}) #What is this?! - Applying weights/counts to the dots? 
 ```
 
 
@@ -64,12 +66,12 @@ https://github.com/patrickCNMartin/VesaliusDev/blob/main/R/embeddings.R
 
 ```{r}
 library("dbscan")
-data(iris)
-x <- iris[, -5]
-nn <- kNN(x, k = 5)
 ctmp.knn <- kNN(coords, k = 5)
 ```
 
+## Collecting data:
+
+Barcodes and coordinates from bead_locations
 
 
 
@@ -115,7 +117,7 @@ https://github.com/patrickCNMartin/Vesalius/blob/3567500a00d5baff9274cb8e153622c
 I don't know how to keep only unique barcodes
 the length of the list should be the length / k - but I still have the full length number of groups..
 
-There are also 14 leftovers no in any group If I understand correctly?
+There are also 14 leftovers not in any group If I understand correctly?
 
 ## Unique barcode knn list
 2. Create an empty list that will grow as you assign more groups to it.
@@ -124,12 +126,13 @@ There are also 14 leftovers no in any group If I understand correctly?
 5. Repeat step 4 and 5 until all barcodes have been assigned into your list.
 
 ```{r}
-knn5 <- knn50[1:l]
+knn5 <- knn50[1:l] #Just the grouped indexes (to the barcodes) - not the other attributes
 
 bc <- barcodes
 knn5.bc <- vector(mode="list", length=l) #holds unique barcodes in groups of up to k
 doubles <- vector(mode="list", length=l) #Probably don't need this..
-knn5.bc1 <- vector(mode="list", length=l) #unique again but without NA's
+knn5.bc1 <- vector(mode="list", length=l) #unique again but without NA elements (Still null groups)
+
 i <- 1
 
 while(i <= l){
@@ -149,6 +152,8 @@ while(i <= l){
   knn5.bc1[[i]] <- x[!is.na(x)]
   i <- i + 1
 }
+
+length(bc) #leftovers
 
 ```
 
@@ -187,10 +192,10 @@ while(i <= l){
   knn.y[[i]] <- median(y)
   i <- i + 1
 }
-knn.x %>% drop_na()
-knn.y %>% drop_na()
+#knn.x %>% drop_na()
+#knn.y %>% drop_na()
 
-knn5.bc1[[i]] <- x[!is.na(x)]
+#knn5.bc1[[i]] <- x[!is.na(x)]
 
 comb <- cbind(knn.x, knn.y)
 as.data.frame(comb)
@@ -198,18 +203,85 @@ as.data.frame(comb)
 rownames(comb) <- bc.g
 
 row.has.na <- apply(comb, 1, function(x){any(is.na(x))})
-sum(row.has.na)
+sum(row.has.na) #number of rows with na's to be removed
 comb.filtered <- comb[!row.has.na,]
 
 
 ```
 
+## Remove empty groups from list
+knn.bc - New list is same length as comb.filtered
 
-7. Once you have this list, you will combine all the counts associated to each group.
+```{r}
+filt.l <- length(comb.filtered[,1])
+knn.bc <- vector(mode="list", length=filt.l) #unique + no NAs + no empty groups
+i <- 1
+
+while(i <= filt.l){
+  x <- knn5.bc1[[i]]
+  if(length(x)){
+    knn.bc[[i]] <- x
+  }
+  i <- i + 1
+}
+```
+
+Once you have this list, you will combine all the counts associated to each group.
 8. Create empty list of length equal to the group list
 9. Loop through your group list and extract all columns in your count matrix associated with the barcodes in each group
 10. Add counts together. Essentially RowSums for all columns you’ve just extracted. The bins stay the same so you sum over rows.
+
+
+## Summing counts over knn-groups:
+df - Sparse matrix vector from the DNA vesalius script - Barcodes as columns, bins as rows.
+rowSums - doesn't work on groups with just 1 barcode.. 
+
+
+- Iterate over knn groups 
+- take the counts for those barcodes for all bins from the sparsematrix
+- Sum the counts for each group and each bin 
+
+```{r}
+# knn.bc <- knn5.bc1[!is.null(knn5.bc1)] ## Doesn't work still have null groups in my list.
+
+spMtrx <- df
+i <- 1
+l <- length(knn.bc)
+grMtrx <- matrix(0, nrow = nrow(spMtrx), ncol = l)
+
+
+
+while(i <= l){
+  tmp <- knn.bc[[i]]
+  t <- spMtrx[,tmp]
+  ltmp <- length(tmp)
+  if(ltmp > 1){
+    grMtrx[,i] <- rowSums(t)
+  }else if(ltmp == 1){
+    grMtrx[,i] <- t
+  }
+  i <- i + 1 
+}
+
+
+
+
+```
+
+# Rename columns with my new barcode names
+
+- The first member barcode ID represents the group - stored in vector bc.g
+- Same barcodes as used as rownames in vector "comb"
+
+
 11. Rename the columns in your count matrix to reflect you new barcode names
+
+```{r}
+colnames(grMtrx) <- bc.g
+```
+
+
+
 ```{r}
 
 bc <- barcodes
