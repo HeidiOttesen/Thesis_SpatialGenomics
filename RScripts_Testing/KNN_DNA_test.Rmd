@@ -187,8 +187,19 @@ while(i <= l){
   knn.y[[i]] <- median(y)
   i <- i + 1
 }
+knn.x %>% drop_na()
+knn.y %>% drop_na()
 
-  
+knn5.bc1[[i]] <- x[!is.na(x)]
+
+comb <- cbind(knn.x, knn.y)
+as.data.frame(comb)
+
+rownames(comb) <- bc.g
+
+row.has.na <- apply(comb, 1, function(x){any(is.na(x))})
+sum(row.has.na)
+comb.filtered <- comb[!row.has.na,]
 
 
 ```
