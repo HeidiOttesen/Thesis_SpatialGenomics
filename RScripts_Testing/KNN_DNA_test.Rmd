@@ -204,52 +204,33 @@ rownames(comb) <- bc.g
 
 row.has.na <- apply(comb, 1, function(x){any(is.na(x))})
 sum(row.has.na) #number of rows with na's to be removed
-comb.filtered <- comb[!row.has.na,]
+
+
+#Final output: (Should be the same length)
+
+comb <- comb[!row.has.na,]
+
+knn.bc <- knn5.bc1[!sapply(knn5.bc1,is.null)]
 
 
 ```
 
-## Remove empty groups from list
-knn.bc - New list is same length as comb.filtered
-
-```{r}
-filt.l <- length(comb.filtered[,1])
-knn.bc <- vector(mode="list", length=filt.l) #unique + no NAs + no empty groups
-i <- 1
-
-while(i <= filt.l){
-  x <- knn5.bc1[[i]]
-  if(length(x)){
-    knn.bc[[i]] <- x
-  }
-  i <- i + 1
-}
-```
-
-Once you have this list, you will combine all the counts associated to each group.
-8. Create empty list of length equal to the group list
-9. Loop through your group list and extract all columns in your count matrix associated with the barcodes in each group
-10. Add counts together. Essentially RowSums for all columns you’ve just extracted. The bins stay the same so you sum over rows.
 
 
 ## Summing counts over knn-groups:
-df - Sparse matrix vector from the DNA vesalius script - Barcodes as columns, bins as rows.
-rowSums - doesn't work on groups with just 1 barcode.. 
-
 
 - Iterate over knn groups 
 - take the counts for those barcodes for all bins from the sparsematrix
+  - df - Sparse matrix vector from the DNA vesalius script - Barcodes as columns, bins as rows.
 - Sum the counts for each group and each bin 
 
-```{r}
-# knn.bc <- knn5.bc1[!is.null(knn5.bc1)] ## Doesn't work still have null groups in my list.
+rowSums - doesn't work on groups with just 1 barcode.. 
 
+```{r}
 spMtrx <- df
 i <- 1
 l <- length(knn.bc)
 grMtrx <- matrix(0, nrow = nrow(spMtrx), ncol = l)
-
-
 
 while(i <= l){
   tmp <- knn.bc[[i]]
@@ -263,9 +244,6 @@ while(i <= l){
   i <- i + 1 
 }
 
-
-
-
 ```
 
 # Rename columns with my new barcode names
@@ -277,180 +255,8 @@ while(i <= l){
 11. Rename the columns in your count matrix to reflect you new barcode names
 
 ```{r}
-colnames(grMtrx) <- bc.g
-```
 
-
-
-```{r}
-
-bc <- barcodes
-tmp <- data.frame()
-ls <- list()
-i <- 1
-while(length(bc) >0){
-  pool <- sample(bc,1)
-  res <- lapply(knn, function(ch) grep("a", ch))
-  converge <- FALSE
-  while(!converge){
-    #------------------------------------------------------------------#
-    # This while loop checks if all possible barcodes have been pooled
-    # into the current territory
-    #------------------------------------------------------------------#
-    if(length(inter)==1){
-      #------------------------------------------------------------#
-      # when there is only one barcodes
-      # remove barcode from pool and move on
-      #------------------------------------------------------------#
-      ls[[i]] <- pool
-      barcodes <- barcodes[!barcodes %in% pool]
-      i <- i + 1
-      converge <- TRUE
-    }
-  }
-}
+bc.comb <- rownames(comb)
+colnames(grMtrx) <- bc.comb
 
 ```
- else {
-      #------------------------------------------------------------#
-      # Get a new pool from the distance matrix
-      # and check which ones are within capture radius
-      #------------------------------------------------------------#
-      newPool <- distanceMatrix[,inter] # 1 dimension with distances to current inter-barcode
-      
-      newPool <- unique(unlist(lapply(seq_len(ncol(newPool)),
-                                      function(idx,np,captureRadius){
-                                        
-                                        res <- rownames(np)[np[,idx] <=
-                                                              captureRadius]
-                                        return(res)
-                                      },newPool,captureRadius)))
-      #------------------------------------------------------------#
-      # check which barcodes in the new pool overlap with
-      # the ones in the full pool
-      # If there is a perfect overlap then there are no new bacodes
-      # to pool into a territory
-      #------------------------------------------------------------#
-      overlap <- newPool %in% pool
-      
-      if(sum(overlap) != length(newPool)){
-        #------------------------------------------------------#
-        # There are still some new barcodes to pool
-        # lets do some more looping then
-                        #------------------------------------------------------#
-                        pool <- unique(c(pool,newPool[!overlap]))
-                        inter <- unique(newPool[!overlap])
-                  } else {
-                        #------------------------------------------------------#
-                        # it is done ! no more barcodes for this territory
-                        #------------------------------------------------------#
-                        territories[[count]] <- pool
-                        count <- count +1
-                        barcodes <- barcodes[!barcodes %in% pool]
-
-                        converge <- TRUE
-
-                  }
-              }
-          }
-      }
-    #--------------------------------------------------------------------------#
-    # Clean up drop outs
-    #--------------------------------------------------------------------------#
-
-      allTers <- img$territory
-
-      for(ter in seq_along(territories)){
-            loc <- img$barcodes %in% territories[[ter]]
-            if(length(territories[[ter]]) <= minBar){
-               allTers[loc] <- "isolated"
-            } else {
-               allTers[loc] <- ter
-            }
-
-
-
-      }
-      return(allTers)
-}
-
-Patrick
-Reduce tensor Resolution
-https://github.com/patrickCNMartin/VesaliusDev/blob/main/R/embeddings.R
-
-
-```{r}
-.reduceTensorResolution <- function(coordinates,tensorResolution = 1){
-  #----------------------------------------------------------------------------#
-  # we will reduce number of points this way
-  # this should keep all barcodes - with overlapping coordinates
-  #----------------------------------------------------------------------------#
-  coordinates$x <- round(coordinates$x * tensorResolution)
-  coordinates$y <- round(coordinates$y * tensorResolution)
-  #----------------------------------------------------------------------------#
-  # Now we get coordinate tags - we use this to find all the merge locations
-  # sorting and using rle to ensure that we actually merge them
-  #----------------------------------------------------------------------------#
-  tag <- paste0(coordinates$x,"_",coordinates$y)
-
-  locs <- rle(sort(tag))
-  dup <- locs$values[which(locs$length >1)]
-  #----------------------------------------------------------------------------#
-  # creating new merged labels
-  #----------------------------------------------------------------------------#
-  dupTags <- lapply(dup,function(dup,tag,barcodes){
-    tmpLocs <- which(tag == dup)
-    barcodes<- paste0(barcodes[tmpLocs],sep ="_et_", collapse ="")
-    barcodes <- rep(barcodes,times = length(tmpLocs))
-    return(barcodes)
-  },tag = tag,barcodes = coordinates$barcodes)
-  #----------------------------------------------------------------------------#
-  # assigning new merged barcodes
-  # for some reason match doesn't seem to work here - it only returns one of the
-  # values
-  #----------------------------------------------------------------------------#
-  locs <- unlist(lapply(dup, function(dup,tag){
-      return(which(tag == dup))
-  },tag = tag))
-  coordinates$barcodes[locs] <- unlist(dupTags)
-  coordinates <- coordinates %>% distinct(barcodes,.keep_all = TRUE)
-  return(coordinates)
-}
-```
-
-
-
-Patrick 
-Adjust counts:
-https://github.com/patrickCNMartin/VesaliusDev/blob/main/R/embeddings.R
-
-```{r}
-#.adjustCounts <- function(coordinates, counts,cores = 1){
-    #--------------------------------------------------------------------------#
-    # First get all barcode names and compare which ones are missing
-    #--------------------------------------------------------------------------#
-coordBar <- unique(coordinates$barcodes)
-countBar <- unique(colnames(counts))
-concat <- sapply(strsplit(coordBar,"_et_"),length) > 1
-coordBar <- coordBar[concat]
-countBar <- countBar[!concat]
-
-    #--------------------------------------------------------------------------#
-    # next we merge counts together when barcodes have been merged
-    #--------------------------------------------------------------------------#
-    tmpBar <- strsplit(coordBar,"_et_")
-
-    empty <- parallel::mclapply(tmpBar, function(coord,count){
-        tmp <- rowSums(count[,coord])
-        return(tmp)
-    },count = counts, mc.cores = cores)
-
-    empty <- do.call("cbind",empty)
-
-    colnames(empty) <- coordBar
-
-    merged <- cbind(counts[,countBar],empty)
-    return(merged)
-}
-```
-

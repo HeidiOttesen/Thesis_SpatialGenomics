@@ -54,8 +54,12 @@ dimred <- "3slice_PCA" #(3 PCs -> 1 slice as 3 colour channels, 3 slices = 9 top
 in.path <- "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/"
 out.path <- "~/Thesis_SpatialGenomics/R_Output/"
 
-min.count <- 2
-max.count <- 6
+#min.count <- 2
+#max.count <- 6
+
+k <- 10
+
+param <- paste0(norm, dimred, sep="_")
 
 ```
 
@@ -69,7 +73,8 @@ To access slots of an S4 object you use @, not $
 ```{r}
 
 counts <- paste0(in.path, alias, ".sparse_counts_1Mb.txt")
-bead <- ReadSlideSeq(paste0(in.path, alias, ".bead_locations.csv"))
+#bead <- ReadSlideSeq(paste0(in.path, alias, ".bead_locations.csv"))
+bead <- ReadSlideSeq(paste0(fname, ".bead_locations.csv"))
 
 
 
@@ -126,9 +131,19 @@ rownames(sparse) <- bins
 
 
 # Remove outliers - keep only counts up to 6 (CNA = 6):
-sparse <- filterSparse(sparse, function(x) x <= max.count)
-sparse <- filterSparse(sparse, function(x) x >= min.count)
-miax <- paste0("counts", min.count, "-", max.count)
+
+if(min.count){
+  sparse <- filterSparse(sparse, function(x) x >= min.count)
+}
+if(max.count){
+  sparse <- filterSparse(sparse, function(x) x <= max.count)
+  miax <- paste0("counts", min.count, "-", max.count)
+  param <- paste0(miax, param, sep="_")
+}
+
+
+
+
 
 
 
@@ -139,6 +154,16 @@ hist(df)
 #pct <- length(barcodes)*0.10
 sparse.filt <- sparse[colSums(sparse > 0) >= 100, ]
 
+```
+```{r}
+if(k){
+  ls <- KNN.DNA(bead, df, k)
+  sparse <- ls[[1]]
+  fname <- ls[[2]]
+  param <- paste0(param, "knn", k, sep="_")
+  bead <- ReadSlideSeq(paste0(fname, ".bead_locations.csv"))
+  barcodes <- rownames(bead@coordinates)
+}
 ```
 
 
@@ -155,7 +180,10 @@ Cells - Takes the barcodes instead of cellID?
 slice 1 - This is where the x+y coordinates are added from bead, identifier - barcode
 
 ```{r}
+#sparse <- knnSpMtx
 ctmp.SO <- CreateSeuratObject(sparse, assay ="Spatial")
+
+
 
 bead <- bead[Cells(x = ctmp.SO)]
 DefaultAssay(object = bead) <- "Spatial"
@@ -251,7 +279,7 @@ image <- isolateTerritories.array(image, captureRadius = 0.008, minBar = 40)
 
 ```{r}
 setwd(in.path)
-fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), alias, miax, norm, dimred, "images.pdf", sep="_")
+fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), alias, param, "images.pdf", sep="_")
 pdf(fname)
 layout(matrix(c(1,3,2,4), 2, 2))
 
