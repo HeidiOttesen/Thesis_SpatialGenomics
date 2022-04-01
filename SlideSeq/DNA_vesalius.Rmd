@@ -49,16 +49,16 @@ norm <- "SeuratNorm"
 #norm <- "SCTransform"
 #norm <- "NoNorm"
 
-dimred <- "3slice_PCA" #(3 PCs -> 1 slice as 3 colour channels, 3 slices = 9 top PCs)
+dimred <- "1slice_PCA" #(3 PCs -> 1 slice as 3 colour channels, 3 slices = 9 top PCs)
 #dimred <- "30pcs_UMAP"
 
 in.path <- "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/"
 out.path <- "~/Thesis_SpatialGenomics/R_Output/"
 
-min.count <- 2
-max.count <- 6
+#min.count <- 2
+#max.count <- 6
 
-k <- 20
+k <- 30
 
 param <- paste(norm, dimred, sep = "_")
 
@@ -268,8 +268,8 @@ Try reducing resolution to 10% - for the trial
 
 image <- buildImageArray(ctmp,filterThreshold=0.9975,resolution=20, cores=5)
 
-#Keep a copy before messing up the rest
-#image.array <- image
+#Keep a copy for plotting later (maybe do a plot here instead and remove the large array, print the plot later?)
+image.array <- image
 
 ```
 
@@ -278,7 +278,7 @@ image <- buildImageArray(ctmp,filterThreshold=0.9975,resolution=20, cores=5)
 
 
 ```{r}
-image <- equalizeHistogram(image.array, sleft = 2.5, sright=2.5,invert =T)
+image <- equalizeHistogram(image, sleft = 2.5, sright=2.5,invert =T)
 image <- regulariseImage(image, lambda = 10, niter = 200, normalise=T)
 
 image <- iterativeSegmentation.array(image, colDepth = 6,
