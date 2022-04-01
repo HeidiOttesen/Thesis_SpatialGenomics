@@ -55,10 +55,10 @@ dimred <- "3slice_PCA" #(3 PCs -> 1 slice as 3 colour channels, 3 slices = 9 top
 in.path <- "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/"
 out.path <- "~/Thesis_SpatialGenomics/R_Output/"
 
-#min.count <- 2
-#max.count <- 6
+min.count <- 2
+max.count <- 6
 
-k <- 10
+k <- 20
 
 param <- paste(norm, dimred, sep = "_")
 
@@ -90,6 +90,9 @@ sparse <- sparseMatrix(i= ctmp[,2],j=ctmp[,1],x=ctmp[,3])
 
 #Curious about the count distribution values
 max <- sort(sparse@x, decreasing = TRUE)
+
+# Set point size for plotting - adjusted for knn later
+pt.sz <- 0.25
 
 
 
@@ -170,6 +173,8 @@ if(exists("k")){
   param <- paste(param, "knn", k, sep="_")
   bead <- ReadSlideSeq(paste0(fname, ".bead_locations.csv"))
   barcodes <- rownames(bead@coordinates)
+  pt.sz <- k/15
+  rm(ls)
 }
 ```
 
@@ -295,7 +300,7 @@ cimg.plot(image.array, 'Original')
 
 cimg.plot(image, 'Isolated Territories')
 
-territoryPlot(image,cex=10)
+territoryPlot(image,cex=10,cex.pt=pt.sz)
 
 dev.off()
 
