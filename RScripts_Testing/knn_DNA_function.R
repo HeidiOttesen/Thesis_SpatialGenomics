@@ -83,8 +83,5 @@ KNN.DNA <- function(bead, df, k){
   colnames(grMtrx) <- bc.comb
   rownames(grMtrx) <- bins
   knnSpMtx <- Matrix(grMtrx, sparse = TRUE)
-  fname <- paste0(in.path, "knn/", alias, "_knn", k)
-  write.csv(comb, file = paste0(fname, ".bead_locations.csv"), row.names = TRUE, quote = FALSE)
-  cat(paste(Sys.time()," New bead location file saved as ", paste0(fname, ".bead_locations.csv"), "\n"))
-  return(list(knnSpMtx, fname))
+  return(list(knnSpMtx, comb))
 }
