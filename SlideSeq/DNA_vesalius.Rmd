@@ -58,7 +58,7 @@ out.path <- "~/Thesis_SpatialGenomics/R_Output/"
 #min.count <- 2
 #max.count <- 6
 
-k <- 5
+k <- 20
 
 colD <- 3
 
