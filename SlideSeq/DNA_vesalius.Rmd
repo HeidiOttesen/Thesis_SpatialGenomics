@@ -55,10 +55,10 @@ dimred <- "3slice_PCA" #(3 PCs -> 1 slice as 3 colour channels, 3 slices = 9 top
 in.path <- "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/"
 out.path <- "~/Thesis_SpatialGenomics/R_Output/"
 
-min.count <- 2
-max.count <- 6
+#min.count <- 2
+#max.count <- 6
 
-k <- 5
+k <- 20
 
 param <- paste(norm, dimred, sep = "_")
 
