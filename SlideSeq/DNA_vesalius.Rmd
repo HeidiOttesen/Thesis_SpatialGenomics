@@ -176,12 +176,12 @@ Don't know how to filter out columns (barcodes) with fewer than 100 non-zero val
 
 ```{r}
 if(exists("k")){
-  ls <- KNN.DNA(bead, df, k)
-  #ls <- KNN.DNA.Unique(bead, df, k)
+  #ls <- KNN.DNA(bead, df, k)
+  ls <- KNN.DNA.Unique(bead, df, k)
   sparse <- ls[[1]]
   bead <- ls[[2]]
-  param <- paste(param, "knn", k, sep="_")
-  #param <- paste(param, "knnUnique", k, sep="_")
+  #param <- paste(param, "knn", k, sep="_")
+  param <- paste(param, "knnUnique", k, sep="_")
   #barcodes <- rownames(bead@coordinates)
   pt.sz <- k/15
   rm(ls)
