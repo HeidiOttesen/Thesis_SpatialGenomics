@@ -1,5 +1,5 @@
 ---
-title: "Human DNA Colon"
+title: "Slide DNA Colon"
 output: html_document
 ---
 
@@ -45,20 +45,20 @@ Specify dataset + Normalisation + dimensionality reduction method and parameters
 #alias <- "human_colon_cancer_3_dna_191204_19"
 alias <- "mouse_liver_met_2_dna_200114_10"
 
-norm <- "SeuratNorm"
-#norm <- "SCTransform"
+#norm <- "SeuratNorm"
+norm <- "SCTransform"
 #norm <- "NoNorm"
 
 dimred <- "3slice_PCA" #(3 PCs -> 1 slice as 3 colour channels, 3 slices = 9 top PCs)
-#dimred <- "30pcs_UMAP"
+#dimred <- "10pcs_UMAP"
 
 in.path <- "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/"
 out.path <- "~/Thesis_SpatialGenomics/R_Output/"
 
-#min.count <- 2
-#max.count <- 6
+min.count <- 2
+max.count <- 6
 
-k <- 30
+k <- 5
 
 param <- paste(norm, dimred, sep = "_")
 
@@ -148,10 +148,10 @@ if(exists("max.count")){
 
 df <- as.matrix(sparse) 
 
-if(exists("max.count")){
-  hist(sparse@x)
-  hist(df)
-}
+#if(exists("max.count")){
+#  hist(sparse@x)
+#  hist(df)
+#}
 
 #sparse <- filterSparse(sparse, function(x) x >= 3)
 #pct <- length(barcodes)*0.10
@@ -173,14 +173,13 @@ if(exists("k")){
   sparse <- ls[[1]]
   bead <- ls[[2]]
   param <- paste(param, "knn", k, sep="_")
-  fname <- paste0(in.path, "knn/", alias, "_knn", k)
-  write.csv(bead, file = paste0(fname, ".bead_locations.csv"), row.names = TRUE, quote = FALSE)
-  cat(paste(Sys.time()," New bead location file saved as ", paste0(fname, ".bead_locations.csv"), "\n"))
-  bead <- ReadSlideSeq(paste0(fname, ".bead_locations.csv"))
-  barcodes <- rownames(bead@coordinates)
+  #barcodes <- rownames(bead@coordinates)
   pt.sz <- k/15
   rm(ls)
 }
+
+
+
 ```
 
 

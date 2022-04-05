@@ -59,6 +59,8 @@ KNN.DNA <- function(bead, df, k){
   
   row.has.na <- apply(comb, 1, function(x){any(is.na(x))})
   comb <- comb[!row.has.na,]
+  
+  
   knn.bc <- knn5.bc1[!sapply(knn5.bc1,is.null)]
   spMtrx <- df
   i <- 1
@@ -80,8 +82,21 @@ KNN.DNA <- function(bead, df, k){
   }
   bc.comb <- rownames(comb)
   
+  fname <- paste0(in.path, "knn/", alias, "_knn", k)
+  
+  # If reading slideseq bead info from file:
+  #write.csv(comb, file = paste0(fname, ".bead_locations.csv"), row.names = TRUE, quote = FALSE)
+  #cat(paste(Sys.time()," New bead location file saved as ", paste0(fname, ".bead_locations.csv"), "\n"))
+  #ss <- ReadSlideSeq(paste0(fname, ".bead_locations.csv"))
+  
+  # If creating slideseq bead info as object in list instead:
+  comb <- as.data.frame(comb)
+  ss <- new(Class = 'SlideSeq',assay = "Spatial",
+            coordinates = comb[,c("xcoord","ycoord")])
+  rownames(ss@coordinates) <- rownames(comb)
+  
   colnames(grMtrx) <- bc.comb
   rownames(grMtrx) <- bins
   knnSpMtx <- Matrix(grMtrx, sparse = TRUE)
-  return(list(knnSpMtx, comb))
+  return(list(knnSpMtx, ss))
 }
