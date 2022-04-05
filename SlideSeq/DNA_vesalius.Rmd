@@ -1,5 +1,5 @@
 ---
-title: "Slide DNA Colon"
+title: "SlideSeqDNA"
 output: html_document
 ---
 
@@ -45,8 +45,8 @@ Specify dataset + Normalisation + dimensionality reduction method and parameters
 #alias <- "human_colon_cancer_3_dna_191204_19"
 alias <- "mouse_liver_met_2_dna_200114_10"
 
-#norm <- "SeuratNorm"
-norm <- "SCTransform"
+norm <- "SeuratNorm"
+#norm <- "SCTransform"
 #norm <- "NoNorm"
 
 dimred <- "3slice_PCA" #(3 PCs -> 1 slice as 3 colour channels, 3 slices = 9 top PCs)
@@ -58,7 +58,9 @@ out.path <- "~/Thesis_SpatialGenomics/R_Output/"
 #min.count <- 2
 #max.count <- 6
 
-k <- 20
+k <- 5
+
+colD <- 3
 
 param <- paste(norm, dimred, sep = "_")
 
@@ -167,12 +169,19 @@ Mouse liver before: Dimensions: 2,738(bins) x 38,580(barcodes). (8,771,833 entri
 Don't know how to filter out columns (barcodes) with fewer than 100 non-zero values...?!?!?!
 
 
+## Run KNN
+- Decide between only using each barcode once in KNN.DNA.Unique 
+  or having many duplicate groups of barcodes (each barcode gets a group of k nearest neighbors)
+  
+
 ```{r}
 if(exists("k")){
   ls <- KNN.DNA(bead, df, k)
+  #ls <- KNN.DNA.Unique(bead, df, k)
   sparse <- ls[[1]]
   bead <- ls[[2]]
   param <- paste(param, "knn", k, sep="_")
+  #param <- paste(param, "knnUnique", k, sep="_")
   #barcodes <- rownames(bead@coordinates)
   pt.sz <- k/15
   rm(ls)
@@ -191,6 +200,7 @@ Based on the counts
 
 Cells - Takes the barcodes instead of cellID?
 slice 1 - This is where the x+y coordinates are added from bead, identifier - barcode?
+- With knn non-unique I also have non-unique cell names in the input matrix..
 
 ```{r}
 #sparse <- knnSpMtx
@@ -213,15 +223,14 @@ Do this make sense to do on the DNA data?
 
 if(norm == "SeuratNorm"){
   ctmp <- NormalizeData(ctmp.SO)
+  ctmp <- FindVariableFeatures(ctmp, nfeatures = 200)
+  ctmp <- ScaleData(ctmp)
 } else if(norm == "SCTransform"){
   ctmp <- SCTransform(ctmp.SO, assay = "Spatial", verbose = FALSE)
 }
 
 
-ctmp <- FindVariableFeatures(ctmp, nfeatures = 200)
 
-
-ctmp <- ScaleData(ctmp)
 
 
 
@@ -280,10 +289,12 @@ image.array <- image
 image <- equalizeHistogram(image, sleft = 2.5, sright=2.5,invert =T)
 image <- regulariseImage(image, lambda = 10, niter = 200, normalise=T)
 
-image <- iterativeSegmentation.array(image, colDepth = 6,
+image <- iterativeSegmentation.array(image, colDepth = colD,
                                             smoothIter = 20, method = c("iso","median"), sigma=1.5,box = 10, useCenter = T)
 
 image <- isolateTerritories.array(image, captureRadius = 0.008, minBar = 40)
+
+param <- paste(param, paste0("IterativeSegColDepth", colD), sep="_")
 ```
 
 ## Publish plots in pdf

@@ -36,17 +36,11 @@ knn50 <- knn2nb(coords.knearneigh, row.names = barcodes)
 ```
 
 
-## Get knn groups of barcodes (from knn)
-I don't know how to keep only unique barcodes
-the length of the list should be the length / k - but I still have the full length number of groups..
-
-There are also 14 leftovers not in any group If I understand correctly?
-
 ## Unique barcode knn list
-2. Create an empty list that will grow as you assign more groups to it.
-3. Take one random barcode from your barcode vector ( you can also just take the first 1 in the list) and all of its neighbours and put them in the list.
-4. Remove those barcodes from your barcodes vector.
-5. Repeat step 4 and 5 until all barcodes have been assigned into your list.
+- take the first barcode from the list and all of its neighbours and put them in the list.
+- Remove those barcodes from your barcodes vector so that each barcode is only used once
+- There are also 14 leftovers not in any group If I understand correctly?
+
 
 ```{r}
 knn5 <- knn50[1:l] #Just the grouped indexes (to the barcodes) - not the other attributes
