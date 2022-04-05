@@ -59,8 +59,11 @@ out.path <- "~/Thesis_SpatialGenomics/R_Output/"
 #max.count <- 6
 
 k <- 20
+#knn.type <- "Unique"
+knn.type <- "Duplicate"
 
 colD <- 3
+smIter <- 10
 
 param <- paste(norm, dimred, sep = "_")
 
@@ -176,12 +179,14 @@ Don't know how to filter out columns (barcodes) with fewer than 100 non-zero val
 
 ```{r}
 if(exists("k")){
-  #ls <- KNN.DNA(bead, df, k)
-  ls <- KNN.DNA.Unique(bead, df, k)
+  if(knn.type == "Unique"){
+    ls <- KNN.DNA.Unique(bead, df, k)
+  }else{
+    ls <- KNN.DNA(bead, df, k)
+  }
+  param <- paste(param, paste0("knn", knn.type, k), sep="_")
   sparse <- ls[[1]]
   bead <- ls[[2]]
-  #param <- paste(param, "knn", k, sep="_")
-  param <- paste(param, "knnUnique", k, sep="_")
   #barcodes <- rownames(bead@coordinates)
   pt.sz <- k/15
   rm(ls)
@@ -290,11 +295,11 @@ image <- equalizeHistogram(image, sleft = 2.5, sright=2.5,invert =T)
 image <- regulariseImage(image, lambda = 10, niter = 200, normalise=T)
 
 image <- iterativeSegmentation.array(image, colDepth = colD,
-                                            smoothIter = 20, method = c("iso","median"), sigma=1.5,box = 10, useCenter = T)
+                                            smoothIter = smIter, method = c("iso","median"), sigma=1.5,box = 10, useCenter = T)
 
 image <- isolateTerritories.array(image, captureRadius = 0.008, minBar = 40)
 
-param <- paste(param, paste0("IterativeSegColDepth", colD), sep="_")
+param <- paste(param, paste0("ItSegColDepth", colD), sep="_")
 ```
 
 ## Publish plots in pdf
