@@ -198,12 +198,17 @@ if(exists("k")){
   }
   param <- paste(param, paste0("knn", knn.type, k), sep="_")
   sparse <- ls[[1]]
+
   bead <- ls[[2]]
+
   pt.sz <- k/15
   rm(ls)
 }
 
-
+sparseUq <- ls[[1]] #15737 length(unique(sparseUq@Dimnames[[2]])): 15736
+sparseDup <- ls[[1]] #38581? + 38580 length(unique(sparseDup@Dimnames[[2]])): 14612
+beadUq <- ls[[2]] #15736
+beadDup <- ls[[2]] #38580
 
 ```
 
@@ -219,10 +224,10 @@ slice 1 - This is where the x+y coordinates are added from bead, identifier - ba
 - With knn non-unique I also have non-unique cell names in the input matrix..
 
 ```{r}
-#sparse <- knnSpMtx
-ctmp.SO <- CreateSeuratObject(sparse, assay ="Spatial")
 
-bead <- bead[Cells(x = ctmp.SO)]
+ctmp.SO <- CreateSeuratObject(sparseDup, assay ="Spatial")
+
+bead <- beadDup[Cells(x = ctmp.SO)]
 DefaultAssay(object = bead) <- "Spatial"
 ctmp.SO[["slice1"]] <- bead
 
@@ -248,7 +253,7 @@ if(norm == "SeuratNorm"){
 
 
 
-
+ctmpDup <- ctmp
 
 ```
 

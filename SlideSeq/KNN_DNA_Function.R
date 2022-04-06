@@ -1,5 +1,70 @@
 # Copied from KNN_DNA markdown file
 
+
+comb <- matrix(0, nrow = l, ncol = ncol(bead.coords))
+bc.g <- vector(length=l)
+cat(paste(Sys.time()," Finding median coordinate for each knn group", "\n"))
+for(i in seq_along(knn.bc)){
+  tmp <- knn.bc[[i]]
+  t <- bead.coords[tmp,]
+  comb[i,] <- apply(t, 2, median)
+  bc.g[[i]] <- tmp[[1]]
+  i <- i + 1
+}
+
+knnIx <- as.data.frame(knnIx)
+
+i <- 1
+j <- 2
+b <- matrix(, l, k)
+for(i in seq_along(barcodes)){
+  ix <- cbind(knnIx[i, ]) 
+  for(j in seq_along(k)){
+    t <- knnIx[i,j]
+    b[i, j] <- barcodes[[t]]
+  }
+}
+
+
+for(i in seq_along(barcodes)){
+  ix <- knnIx[i, ]
+  b <- barcodes[[ix]]
+}
+
+
+# Convert barcode index to barcode string
+i <- 1
+knn.bc <- vector(mode="list", length=l) #holds unique barcodes in groups of up to k
+while(i <= l){
+  j <- 1
+  while(j <= k){
+    ix <- knnIx[i,j]
+    b <- barcodes[ix]
+    knn.bc[[i]][j] <- b
+    j <- j + 1
+  }
+  i <- i + 1
+}
+
+i <- 2
+knn.sort <- vector(mode="list", length=l) #holds unique barcodes in groups of up to k
+numb <- c(1:l)
+numb.used <- vector()
+## Sort based on original barcode list order
+for(i in seq_along(barcodes)){
+  b <- barcodes[[i]]
+  ix <- grep(b, knn.bc)
+  if(ix[[1]] %in% numb){
+    ix <- ix[[1]]
+    knn.sort[[i]] <- knn.bc[[ix]]
+    numb <- numb[!numb %in% numb.used]
+  }
+}
+
+length(numb)
+length(knn.sort)
+
+
 KNN.DNA.Unique <- function(bead, df, k){
   ## Start
   #- Make sure you have the count df and bead info from the DNA_vesalius markdown..
@@ -12,16 +77,25 @@ KNN.DNA.Unique <- function(bead, df, k){
   #Perform KNN:
   cat( paste(Sys.time()," Running K-Nearest Neighbor with k =",k, "number of neighbors", "\n"))
   coords.knearneigh <- knearneigh(coords, k = k)
-  knn50 <- knn2nb(coords.knearneigh, row.names = barcodes)
-  knn5 <- knn50[1:l] #Just the grouped indexes (to the barcodes) - not the other attributes
+  #coords.knearneigh <- kNN(coords, k=5)
+  #knn50 <- knn2nb(coords.knearneigh, row.names = barcodes)
+  #knn5 <- knn50[1:l]
+  #knnIx <- coords.knearneigh$id #Just the grouped indexes (to the barcodes) - not the other attributes
+  knnIx <- coords.knearneigh$nn
+  
+  ## Sort knn groups based on the barcode order:
+  i <- 5
+  for(i in seq_along(barcodes)){
+    b <- barcodes[[i]]
+    t <- grep(b, knnIx)
+  }
   
   ## Unique barcode knn list
   #- take the first barcode from the list and all of its neighbours and put them in the list.
   #- Remove those barcodes from your barcodes vector so that each barcode is only used once
   #- There are also sometimes leftovers not placed in any group
-  
+  length(unique(barcodes))
     
-  
   bc <- barcodes
   knn5.bc <- vector(mode="list", length=l) #holds unique barcodes in groups of up to k
   doubles <- vector(mode="list", length=l) #Probably don't need this..
@@ -33,7 +107,7 @@ KNN.DNA.Unique <- function(bead, df, k){
   while(i <= l){
     j <- 1
     while(j <= k){
-      ix <- knn5[[i]][j]
+      ix <- knnIx[[i]][j]
       b <- barcodes[ix]
       if(b %in% bc){
         knn5.bc[[i]][j] <- b
@@ -73,6 +147,9 @@ KNN.DNA.Unique <- function(bead, df, k){
     i <- i + 1 
   }
   
+  length(unique(bc.g)) #15737
+  length(bc.g) #38313
+ 
   rownames(comb) <- bc.g
   colnames(comb) <- c("xcoord", "ycoord")
   
@@ -139,9 +216,6 @@ KNN.DNA.Unique <- function(bead, df, k){
 
 
 
-
-
-
 KNN.DNA <- function(bead, df, k){
   ## Start
   #- Make sure you have the count df and bead info from the DNA_vesalius markdown..
@@ -154,9 +228,9 @@ KNN.DNA <- function(bead, df, k){
   #Perform KNN:
   cat( paste(Sys.time()," Running K-Nearest Neighbor with k =",k, "number of neighbors", "\n"))
   coords.knearneigh <- knearneigh(coords, k = k)
-  knn50 <- knn2nb(coords.knearneigh, row.names = barcodes)
-  knn5 <- knn50[1:l] #Just the grouped indexes (to the barcodes) - not the other knn attributes
-  
+  #knnIx <- knn2nb(coords.knearneigh, row.names = barcodes)
+  #knnIdx <- knnIx[1:l] #Just the grouped indexes (to the barcodes) - not the other knn attributes
+  knnIx <- list(coords.knearneigh$nn, coords.knearneigh$x)
   
   #Replace barcode index number with barcode string
   knn.bc <- vector(mode="list", length=l) #holds unique barcodes in groups of up to k
@@ -165,7 +239,7 @@ KNN.DNA <- function(bead, df, k){
   while(i <= l){
     j <- 1
     while(j <= k){
-      ix <- knn5[[i]][j]
+      ix <- knnIx[[i]][j]
       b <- barcodes[ix]
       knn.bc[[i]][j] <- b
       j <- j + 1
@@ -181,8 +255,6 @@ KNN.DNA <- function(bead, df, k){
   
   comb <- matrix(0, nrow = l, ncol = ncol(bead.coords))
   bc.g <- vector(length=l)
-  
-  
   cat(paste(Sys.time()," Finding median coordinate for each knn group", "\n"))
   for(i in seq_along(knn.bc)){
     tmp <- knn.bc[[i]]
@@ -192,6 +264,17 @@ KNN.DNA <- function(bead, df, k){
     i <- i + 1
   }
   
+  ## Check if every group's first barcode is the same order as the original barcode list of beads - It is not!
+  is.same <- list(l)
+  for(i in seq_along(barcodes)){
+    if(barcodes[[i]] == knn.bc[[i]][1]){
+      is.same[[i]] <- "TRUE"
+    }else{
+  is.same[[i]] <- "FALSE"
+    }
+  }
+  
+  ## Take the coordinate for that first barcode of each group instead of the median (to avoid possible overlaps)
   rownames(comb) <- bc.g
   colnames(comb) <- c("xcoord", "ycoord")
   
@@ -202,10 +285,7 @@ KNN.DNA <- function(bead, df, k){
   #- df - Sparse matrix vector from the DNA vesalius script - Barcodes as columns, bins as rows.
   #- Sum the counts for each group and each bin 
   
-  #spMtrx <- df
-  #i <- 1
-  #l <- length(knn.bc)
-  grMtrx <- matrix(0, nrow = nrow(spMtrx), ncol = l)
+  grMtrx <- matrix(0, nrow = nrow(df), ncol = l)
   cat( paste(Sys.time()," Summing the counts for each group and bin", "\n"))
   for(i in seq_along(knn.bc)){
     tmp <- knn.bc[[i]]
@@ -214,9 +294,6 @@ KNN.DNA <- function(bead, df, k){
     ltmp <- length(tmp)
     i <- i + 1 
   }
-  
-  #Naming rows using new list of barcode names (first barcode of each knn group)
-  bc.comb <- rownames(comb)
   
   
   # If reading slideseq bead info from file:
@@ -230,8 +307,20 @@ KNN.DNA <- function(bead, df, k){
   ss <- new(Class = 'SlideSeq',assay = "Spatial",
             coordinates = comb[,c("xcoord","ycoord")])
   rownames(ss@coordinates) <- rownames(comb)
+  bc.c <- rownames(comb)
   
-  colnames(grMtrx) <- bc.comb
+  ## Check if every group's first barcode is the same order as the original barcode list of beads - It is
+  is.same <- list(l)
+  for(i in seq_along(bc.g)){
+    if(bc.g[[i]] == bc.c[[i]]){
+      is.same[[i]] <- "TRUE"
+    }else{
+      is.same[[i]] <- "FALSE"
+    }
+  }
+
+  
+  colnames(grMtrx) <- bc.g
   rownames(grMtrx) <- bins
   knnSpMtx <- Matrix(grMtrx, sparse = TRUE)
   return(list(knnSpMtx, ss))
