@@ -171,6 +171,18 @@ Mouse liver before: Dimensions: 2,738(bins) x 38,580(barcodes). (8,771,833 entri
 
 Don't know how to filter out columns (barcodes) with fewer than 100 non-zero values...?!?!?!
 
+## Vector holders for testing..
+
+```{r}
+df1 <- df
+bead1 <- bead
+param1 <- param
+
+df <- df1
+bead <- bead1
+param <- param1
+```
+
 
 ## Run KNN
 - Decide between only using each barcode once in KNN.DNA.Unique 
@@ -187,7 +199,6 @@ if(exists("k")){
   param <- paste(param, paste0("knn", knn.type, k), sep="_")
   sparse <- ls[[1]]
   bead <- ls[[2]]
-  #barcodes <- rownames(bead@coordinates)
   pt.sz <- k/15
   rm(ls)
 }

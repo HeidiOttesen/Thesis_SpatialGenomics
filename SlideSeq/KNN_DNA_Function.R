@@ -155,7 +155,7 @@ KNN.DNA <- function(bead, df, k){
   cat( paste(Sys.time()," Running K-Nearest Neighbor with k =",k, "number of neighbors", "\n"))
   coords.knearneigh <- knearneigh(coords, k = k)
   knn50 <- knn2nb(coords.knearneigh, row.names = barcodes)
-  knn5 <- knn50[1:l] #Just the grouped indexes (to the barcodes) - not the other attributes
+  knn5 <- knn50[1:l] #Just the grouped indexes (to the barcodes) - not the other knn attributes
   
   
   #Replace barcode index number with barcode string
@@ -179,22 +179,17 @@ KNN.DNA <- function(bead, df, k){
   #- Stores the median x and y for each column in new list - comb
   #- makes a new list of new barcode names, bc.g - the first barcode in each group
   
-  i <- 1
-  l <- length(knn.bc)
   comb <- matrix(0, nrow = l, ncol = ncol(bead.coords))
   bc.g <- vector(length=l)
   
   
   cat(paste(Sys.time()," Finding median coordinate for each knn group", "\n"))
-  while(i <= l){
+  for(i in seq_along(knn.bc)){
     tmp <- knn.bc[[i]]
     t <- bead.coords[tmp,]
-    ltmp <- length(tmp)
     comb[i,] <- apply(t, 2, median)
-    if(ltmp > 0){
-      bc.g[[i]] <- tmp[[1]]
-    }
-    i <- i + 1 
+    bc.g[[i]] <- tmp[[1]]
+    i <- i + 1
   }
   
   rownames(comb) <- bc.g
@@ -202,26 +197,21 @@ KNN.DNA <- function(bead, df, k){
   
   
   ## Summing counts over knn-groups:
-  #- Iterate over knn groups 
-  #- take the counts for those barcodes for all bins from the sparsematrix
+  #- Iterate over knn groups - take their barcodes in tmp
+  #- take the counts for those barcodes for all bins from the sparsematrix df and store in t
   #- df - Sparse matrix vector from the DNA vesalius script - Barcodes as columns, bins as rows.
   #- Sum the counts for each group and each bin 
   
-  spMtrx <- df
-  i <- 1
-  
-  l <- length(knn.bc)
+  #spMtrx <- df
+  #i <- 1
+  #l <- length(knn.bc)
   grMtrx <- matrix(0, nrow = nrow(spMtrx), ncol = l)
   cat( paste(Sys.time()," Summing the counts for each group and bin", "\n"))
-  while(i <= l){
+  for(i in seq_along(knn.bc)){
     tmp <- knn.bc[[i]]
-    t <- spMtrx[,tmp]
+    t <- df[,tmp]
+    grMtrx[,i] <- rowSums(t)
     ltmp <- length(tmp)
-    if(ltmp > 1){
-      grMtrx[,i] <- rowSums(t)
-    }else if(ltmp == 1){
-      grMtrx[,i] <- t
-    }
     i <- i + 1 
   }
   
