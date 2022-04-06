@@ -58,12 +58,12 @@ out.path <- "~/Thesis_SpatialGenomics/R_Output/"
 #min.count <- 2
 #max.count <- 6
 
-k <- 20
+k <- 5
 #knn.type <- "Unique"
 knn.type <- "Duplicate"
 
 colD <- 3
-smIter <- 10
+smIter <- 20
 
 param <- paste(norm, dimred, sep = "_")
 
