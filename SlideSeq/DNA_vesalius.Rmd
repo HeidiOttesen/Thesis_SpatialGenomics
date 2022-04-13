@@ -115,6 +115,7 @@ Keep only the bin index numbers (1-3114. ~3.1bn bases)
 Human: 3114 bins human bins. Chr2 starts at bin 251 :
 Mouse: 2738 bins total 
 ```{r}
+
 if(grepl("human",alias)){
   bins <- read.table("~/Thesis_SpatialGenomics/SlideSeq/GroupSlideSeq/hg19_1Mb_bins.txt", header = T)
   bins <- bins$bin_ind

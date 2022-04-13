@@ -305,7 +305,8 @@ KNN.DNA <- function(bead, df, k){
   rownames(ss@coordinates) <- rownames(comb)
   bc.c <- rownames(comb)
   
-  ## Check if every group's first barcode is the same order as the original barcode list of beads - It is
+  ## Check if every group's first barcode is the same order as the (original - Nope Current!)  barcode list of beads 
+  # It is since current barcode list is based on the groups first member..
   is.same <- list(l)
   for(i in seq_along(bc.g)){
     if(bc.g[[i]] == bc.c[[i]]){
