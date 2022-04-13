@@ -96,7 +96,7 @@ sparse <- sparseMatrix(i= ctmp[,2],j=ctmp[,1],x=ctmp[,3])
 #Curious about the count distribution values
 max <- sort(sparse@x, decreasing = TRUE)
 
-# Set point size for plotting - adjusted for knn later
+# Set point size for plotting the UMIs - adjusted for knn later
 pt.sz <- 0.25
 
 
@@ -193,22 +193,25 @@ param <- param1
 if(exists("k")){
   if(knn.type == "Unique"){
     ls <- KNN.DNA.Unique(bead, df, k)
+    sparseUq <- ls[[1]] #15737 length(unique(sparseUq@Dimnames[[2]])): 15736
+    beadUq <- ls[[2]] #15736
   }else{
     ls <- KNN.DNA(bead, df, k)
+    sparseDup <- ls[[1]] #38581? + 38580 length(unique(sparseDup@Dimnames[[2]])): 14612
+    beadDup <- ls[[2]] #38580
   }
   param <- paste(param, paste0("knn", knn.type, k), sep="_")
-  sparse <- ls[[1]]
+  sparse <- ls[[1]] #Retrieve sparse matrix output from knn function
+  bead <- ls[[2]] #Retrieve Bead info (barcodes and coordinates) in SlideSeq assay format compatible with Seurat object
 
-  bead <- ls[[2]]
-
-  pt.sz <- k/15
+  pt.sz <- k/15 #Adjusting point size for plotting
   rm(ls)
 }
 
-sparseUq <- ls[[1]] #15737 length(unique(sparseUq@Dimnames[[2]])): 15736
-sparseDup <- ls[[1]] #38581? + 38580 length(unique(sparseDup@Dimnames[[2]])): 14612
-beadUq <- ls[[2]] #15736
-beadDup <- ls[[2]] #38580
+
+
+
+
 
 ```
 

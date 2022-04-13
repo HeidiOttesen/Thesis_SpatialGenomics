@@ -51,7 +51,7 @@ knn.sort <- vector(mode="list", length=l) #holds unique barcodes in groups of up
 numb <- c(1:l)
 numb.used <- vector()
 ## Sort based on original barcode list order
-for(i in seq_along(barcodes)){
+for(i in 1:20){
   b <- barcodes[[i]]
   ix <- grep(b, knn.bc)
   if(ix[[1]] %in% numb){
@@ -65,6 +65,7 @@ length(numb)
 length(knn.sort)
 
 
+
 KNN.DNA.Unique <- function(bead, df, k){
   ## Start
   #- Make sure you have the count df and bead info from the DNA_vesalius markdown..
@@ -75,7 +76,7 @@ KNN.DNA.Unique <- function(bead, df, k){
   l <- length(barcodes)
   
   #Perform KNN:
-  cat( paste(Sys.time()," Running K-Nearest Neighbor with k =",k, "number of neighbors", "\n"))
+  cat( paste(Sys.time()," Running K-Nearest Neighbor with k =",k, "number of neighbors", "\n", "Number of unique barcodes:", length(unique(barcodes)), "\n"))
   coords.knearneigh <- knearneigh(coords, k = k)
   #coords.knearneigh <- kNN(coords, k=5)
   #knn50 <- knn2nb(coords.knearneigh, row.names = barcodes)
@@ -83,18 +84,13 @@ KNN.DNA.Unique <- function(bead, df, k){
   #knnIx <- coords.knearneigh$id #Just the grouped indexes (to the barcodes) - not the other attributes
   knnIx <- coords.knearneigh$nn
   
-  ## Sort knn groups based on the barcode order:
-  i <- 5
-  for(i in seq_along(barcodes)){
-    b <- barcodes[[i]]
-    t <- grep(b, knnIx)
-  }
+
   
   ## Unique barcode knn list
   #- take the first barcode from the list and all of its neighbours and put them in the list.
   #- Remove those barcodes from your barcodes vector so that each barcode is only used once
+  #- Lots of groups with only 1/2/3... neighbors - not full groups
   #- There are also sometimes leftovers not placed in any group
-  length(unique(barcodes))
     
   bc <- barcodes
   knn5.bc <- vector(mode="list", length=l) #holds unique barcodes in groups of up to k
@@ -230,7 +226,7 @@ KNN.DNA <- function(bead, df, k){
   coords.knearneigh <- knearneigh(coords, k = k)
   #knnIx <- knn2nb(coords.knearneigh, row.names = barcodes)
   #knnIdx <- knnIx[1:l] #Just the grouped indexes (to the barcodes) - not the other knn attributes
-  knnIx <- list(coords.knearneigh$nn, coords.knearneigh$x)
+  knnIx <- coords.knearneigh$nn
   
   #Replace barcode index number with barcode string
   knn.bc <- vector(mode="list", length=l) #holds unique barcodes in groups of up to k
@@ -239,7 +235,7 @@ KNN.DNA <- function(bead, df, k){
   while(i <= l){
     j <- 1
     while(j <= k){
-      ix <- knnIx[[i]][j]
+      ix <- knnIx[i,j]
       b <- barcodes[ix]
       knn.bc[[i]][j] <- b
       j <- j + 1
