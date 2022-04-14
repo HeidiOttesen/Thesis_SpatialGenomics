@@ -103,7 +103,7 @@ KNN.DNA.Unique <- function(bead, df, k){
   while(i <= l){
     j <- 1
     while(j <= k){
-      ix <- knnIx[[i]][j]
+      ix <- knnIx[i,j]
       b <- barcodes[ix]
       if(b %in% bc){
         knn5.bc[[i]][j] <- b
