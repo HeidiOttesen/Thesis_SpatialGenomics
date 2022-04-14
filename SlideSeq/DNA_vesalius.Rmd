@@ -210,8 +210,9 @@ if(exists("k")){
 }
 
 
-
-
+#April14_knnsparse <- sparseUq
+#April14_bead <- beadUq
+#April14_param <- param
 
 
 ```
@@ -229,9 +230,9 @@ slice 1 - This is where the x+y coordinates are added from bead, identifier - ba
 
 ```{r}
 
-ctmp.SO <- CreateSeuratObject(sparseDup, assay ="Spatial")
+ctmp.SO <- CreateSeuratObject(sparse, assay ="Spatial")
 
-bead <- beadDup[Cells(x = ctmp.SO)]
+bead <- bead[Cells(x = ctmp.SO)]
 DefaultAssay(object = bead) <- "Spatial"
 ctmp.SO[["slice1"]] <- bead
 
@@ -303,6 +304,7 @@ image <- buildImageArray(ctmp,filterThreshold=0.9975,resolution=20, cores=5)
 
 #Keep a copy for plotting later (maybe do a plot here instead and remove the large array, print the plot later?)
 image.array <- image
+#April14_imageArray <- image.array
 
 ```
 
@@ -318,6 +320,8 @@ image <- iterativeSegmentation.array(image, colDepth = colD,
                                             smoothIter = smIter, method = c("iso","median"), sigma=1.5,box = 10, useCenter = T)
 
 image <- isolateTerritories.array(image, captureRadius = 0.008, minBar = 40)
+
+#April14_image <- image
 
 param <- paste(param, paste0("ItSegColDepth", colD), sep="_")
 ```

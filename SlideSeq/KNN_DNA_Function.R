@@ -87,7 +87,8 @@ KNN.DNA.Unique <- function(bead, df, k){
 
   
   ## Unique barcode knn list
-  #- take the first barcode from the list and all of its neighbours and put them in the list.
+  #- take the first barcode from the list and all of its neighbours (their barcode indexes) 
+  #- put the string barcodes in the new list if the barcodes still exists in bc and haven't been used yet.
   #- Remove those barcodes from your barcodes vector so that each barcode is only used once
   #- Lots of groups with only 1/2/3... neighbors - not full groups
   #- There are also sometimes leftovers not placed in any group
