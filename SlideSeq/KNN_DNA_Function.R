@@ -1,5 +1,5 @@
 # Copied from KNN_DNA markdown file
-
+## Take the coordinate for that first barcode of each group instead of the median (to avoid possible overlaps)
 
 comb <- matrix(0, nrow = l, ncol = ncol(bead.coords))
 bc.g <- vector(length=l)
@@ -262,16 +262,16 @@ KNN.DNA <- function(bead, df, k){
   }
   
   ## Check if every group's first barcode is the same order as the original barcode list of beads - It is not!
-  is.same <- list(l)
-  for(i in seq_along(barcodes)){
-    if(barcodes[[i]] == knn.bc[[i]][1]){
-      is.same[[i]] <- "TRUE"
-    }else{
-  is.same[[i]] <- "FALSE"
-    }
-  }
+  #is.same <- list(l)
+  #for(i in seq_along(barcodes)){
+  #  if(barcodes[[i]] == knn.bc[[i]][1]){
+  #    is.same[[i]] <- "TRUE"
+  #  }else{
+  #is.same[[i]] <- "FALSE"
+  #  }
+  #}
   
-  ## Take the coordinate for that first barcode of each group instead of the median (to avoid possible overlaps)
+ 
   rownames(comb) <- bc.g
   colnames(comb) <- c("xcoord", "ycoord")
   
@@ -279,7 +279,7 @@ KNN.DNA <- function(bead, df, k){
   ## Summing counts over knn-groups:
   #- Iterate over knn groups - take their barcodes in tmp
   #- take the counts for those barcodes for all bins from the sparsematrix df and store in t
-  #- df - Sparse matrix vector from the DNA vesalius script - Barcodes as columns, bins as rows.
+  #- df - Sparse matrix vector from the DNA_vesalius markdown script - Barcodes as columns, bins as rows.
   #- Sum the counts for each group and each bin 
   
   grMtrx <- matrix(0, nrow = nrow(df), ncol = l)
@@ -316,9 +316,12 @@ KNN.DNA <- function(bead, df, k){
       is.same[[i]] <- "FALSE"
     }
   }
+  #setdiff(bc.c, bc.g) #Show differences
 
+  #bc.c has barcode names with added .1 to make them unique, bc.g has duplicates 
   
-  colnames(grMtrx) <- bc.g
+  
+  colnames(grMtrx) <- bc.c
   rownames(grMtrx) <- bins
   knnSpMtx <- Matrix(grMtrx, sparse = TRUE)
   return(list(knnSpMtx, ss))

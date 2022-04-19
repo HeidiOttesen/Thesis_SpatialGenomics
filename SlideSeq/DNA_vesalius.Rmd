@@ -58,9 +58,9 @@ out.path <- "~/Thesis_SpatialGenomics/R_Output/"
 #min.count <- 2
 #max.count <- 6
 
-k <- 5
-#knn.type <- "Unique"
-knn.type <- "Duplicate"
+k <- 50
+knn.type <- "Unique"
+#knn.type <- "Duplicate"
 
 colD <- 3
 smIter <- 20
@@ -69,7 +69,7 @@ param <- paste(norm, dimred, sep = "_")
 
 ```
 
-
+In paper they do k 50 for smoothing the beads before PCA
 
 ## Read data from files
 and create a sparse count matrix. (mostly 0's, bins as columns and barcodes as rows? )
@@ -189,6 +189,13 @@ param <- param1
 - Decide between only using each barcode once in KNN.DNA.Unique 
   or having many duplicate groups of barcodes (each barcode gets a group of k nearest neighbors)
   
+  
+length(unique(sparseDup@Dimnames[[2]])) - because I used bc.g (with duplicates) instead of bc.c (with .1 added) in the function script..
+[1] 26453
+length(unique(rownames(bead@coordinates)))
+[1] 38580
+bead rownames have been given numbers when not unique..
+  
 
 ```{r}
 if(exists("k")){
@@ -210,14 +217,15 @@ if(exists("k")){
 }
 
 
-#April14_knnsparse <- sparseUq
-#April14_bead <- beadUq
-#April14_param <- param
+sparse <- sparseDup
+bead <- beadDup
+
 
 
 ```
 
 
+plot(beadDup@coordinates)
 
 
 
@@ -238,7 +246,8 @@ ctmp.SO[["slice1"]] <- bead
 
 ```
 
-
+length(unique(ctmp.SO@assays$Spatial@counts@Dimnames[[2]]))
+[1] 38580
 
 
 ## Normalize / Find Features / Scale
@@ -254,11 +263,6 @@ if(norm == "SeuratNorm"){
 } else if(norm == "SCTransform"){
   ctmp <- SCTransform(ctmp.SO, assay = "Spatial", verbose = FALSE)
 }
-
-
-
-
-ctmpDup <- ctmp
 
 ```
 
@@ -291,7 +295,10 @@ if(grepl("UMAP",dimred)){
 
 ```
 
+ctmp.coords <- cbind(ctmp[[2]], ctmp[[3]])
+plot(ctmp.coords)
 
+Still have all my many bead dots..
 
 #Image processing: - Milestone - Image array
 
@@ -309,6 +316,13 @@ image.array <- image
 ```
 
 
+2929734 observations of 6 variables
+
+## Imsplit for grayscale
+
+```{r}
+split <- imsplit(image.array, cc)
+```
 
 
 
