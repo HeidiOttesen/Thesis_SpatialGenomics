@@ -76,7 +76,7 @@ KNN.DNA.Unique <- function(bead, df, k){
   l <- length(barcodes)
   
   #Perform KNN:
-  cat( paste(Sys.time()," Running K-Nearest Neighbor with k =",k, "number of neighbors", "\n", "Number of unique barcodes:", length(unique(barcodes)), "\n"))
+  cat( paste(Sys.time()," Running K-Nearest Neighbor with k =",k, "number of neighbors", "\n", "Number of input barcodes:", length(unique(barcodes)), "\n"))
   coords.knearneigh <- knearneigh(coords, k = k)
   #coords.knearneigh <- kNN(coords, k=5)
   #knn50 <- knn2nb(coords.knearneigh, row.names = barcodes)
