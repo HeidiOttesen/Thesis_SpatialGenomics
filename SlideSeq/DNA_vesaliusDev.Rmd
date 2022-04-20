@@ -194,7 +194,9 @@ if(exists("k")){
 bead.test <- cbind(rownames(bead.coords), bead.coords[[1]], bead.coords[[2]])
 colnames(bead.test) <- c("barcodes","xcoord","ycoord")
 
-sparse.test <- as.data.frame(grMtrx)
+sparse.test <- as.data.frame(sparse)
+sparse.test <- Matrix(grMtrx, sparse = TRUE)
+
 ```
 
 
@@ -217,7 +219,7 @@ slice 1 - This is where the x+y coordinates are added from bead, identifier - ba
 
 ```{r}
 
-vesalius <- buildVesaliusObject(bead.test,grMtrx)
+vesalius <- buildVesaliusObject(bead.test,sparse.test)
 ves <- buildVesaliusEmbeddings(vesalius,
   method ="PCA",pcs = 12,
   tensorResolution = 0.1,cores =10)

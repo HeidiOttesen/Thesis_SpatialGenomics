@@ -41,6 +41,7 @@ KNN.DNA.Unique <- function(bead, df, k){
   
   cat(paste(Sys.time()," Number of barcodes not included: ", length(bc), "\n"))
   
+  
   ## Find median coordinate within knn group
   #- iterate over groups of knn 
   #- stores their corresponding x and y coordinates in vector t
@@ -51,8 +52,6 @@ KNN.DNA.Unique <- function(bead, df, k){
   l <- length(knn.bc2)
   comb <- matrix(0, nrow = l, ncol = ncol(bead.coords))
   bc.g <- vector(length=l)
-  
-  
   cat(paste(Sys.time()," Finding median coordinate for each knn group", "\n"))
   while(i <= l){
     tmp <- knn.bc2[[i]]
@@ -165,14 +164,11 @@ KNN.DNA <- function(bead, df, k){
     grMtrx[,i] <- rowSums(df[,knn.bc[[i]]])
   }
   
-  # If creating slideseq bead info as object in list instead of exporting to :
- 
-
-
+  # If creating bead info and count matrix as object in list instead of exporting to files:
   colnames(grMtrx) <- rownames(bead.coords)
   rownames(grMtrx) <- bins
-  knnSpMtx <- Matrix(grMtrx, sparse = TRUE)
-  return(list(knnSpMtx, bead.coords))
+  #knnSpMtx <- Matrix(grMtrx, sparse = TRUE)
+  return(list(grMtrx, bead.coords))
 }
 
 #Replace in knn unique (unique barcodes function) if it's not working
