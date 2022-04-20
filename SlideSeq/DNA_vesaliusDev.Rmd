@@ -13,7 +13,6 @@ Load packages needed
 ```{r setup, include=FALSE}
 knitr::opts_knit$set(root.dir = "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/")
 knitr::opts_chunk$set(echo = TRUE)
-library(vesalius)
 library(imagerExtra)
 library(Seurat)
 library(ggplot2)
@@ -28,6 +27,12 @@ library(grid)
 library(Matrix)
 library(MatrixExtra)
 
+
+files <- list.files("~/Thesis_SpatialGenomics/Vesalius1Dev/Vesalius/R",pattern = ".R")
+files <- paste0("~/Thesis_SpatialGenomics/Vesalius1Dev/Vesalius/R/",files)
+for(i in seq_along(files)){
+  source(files[i])
+}
 
 # Standard libraries - just in case you are a command line fiend
 library(utils)
