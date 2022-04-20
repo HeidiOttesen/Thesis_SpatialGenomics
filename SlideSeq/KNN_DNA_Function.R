@@ -6,15 +6,10 @@ KNN.DNA.Unique <- function(bead, df, k){
   barcodes <- rownames(bead@coordinates)
   bead.coords <- bead@coordinates
   coords <- cbind(bead.coords$xcoord, bead.coords$ycoord)
-  l <- length(barcodes)
   
   #Perform KNN:
   cat( paste(Sys.time()," Running K-Nearest Neighbor with k =",k, "number of neighbors", "\n", "Number of input barcodes:", length(unique(barcodes)), "\n"))
   coords.knearneigh <- knearneigh(coords, k = k)
-  #coords.knearneigh <- kNN(coords, k=5)
-  #knn50 <- knn2nb(coords.knearneigh, row.names = barcodes)
-  #knn5 <- knn50[1:l]
-  #knnIx <- coords.knearneigh$id #Just the grouped indexes (to the barcodes) - not the other attributes
   knnIx <- coords.knearneigh$nn
   
 
@@ -27,30 +22,23 @@ KNN.DNA.Unique <- function(bead, df, k){
   #- There are also sometimes leftovers not placed in any group
     
   bc <- barcodes
-  knn5.bc <- vector(mode="list", length=l) #holds unique barcodes in groups of up to k
-  doubles <- vector(mode="list", length=l) #Probably don't need this..
-  knn5.bc1 <- vector(mode="list", length=l) #unique again but without NA elements (Still null groups)
+  knn.bc1 <- vector(mode="list", length=l) #holds unique barcodes in groups of up to k
+  #doubles <- vector(mode="list", length=l) #Probably don't need this..
+  knn.bc2 <- vector(mode="list", length=l) #unique again but without NA elements (Still null groups)
   
-  i <- 1
-  
+  #Simpler? Try next time for unique!:
   cat(paste(Sys.time()," Using only unique barcodes in KNN groups", "\n"))
-  while(i <= l){
-    j <- 1
-    while(j <= k){
-      ix <- knnIx[i,j]
-      b <- barcodes[ix]
-      if(b %in% bc){
-        knn5.bc[[i]][j] <- b
-      }else{
-        doubles[[i]][j] <- b
-      }
-      j <- j + 1
-      bc <- bc[!bc %in% b]
+  for(i in seq_along(barcodes)){
+    b <- barcodes[knnIx[i,j]]
+    if(b %in% bc){
+      knn.bc1[[i]] <- b
     }
-    x <- knn5.bc[[i]]
-    knn5.bc1[[i]] <- x[!is.na(x)]
-    i <- i + 1
+    bc <- bc[!bc %in% b]
+    knn.bc2[[i]] <- x[!is.na(knn.bc1[[i]])]
   }
+  
+  
+  
   cat(paste(Sys.time()," Number of barcodes not included: ", length(bc), "\n"))
   
   ## Find median coordinate within knn group
@@ -60,14 +48,14 @@ KNN.DNA.Unique <- function(bead, df, k){
   #- makes a new list of new barcode names, bc.g - the first barcode in each group
   
   i <- 1
-  l <- length(knn5.bc1)
+  l <- length(knn.bc2)
   comb <- matrix(0, nrow = l, ncol = ncol(bead.coords))
   bc.g <- vector(length=l)
   
   
   cat(paste(Sys.time()," Finding median coordinate for each knn group", "\n"))
   while(i <= l){
-    tmp <- knn5.bc1[[i]]
+    tmp <- knn.bc2[[i]]
     t <- bead.coords[tmp,]
     ltmp <- length(tmp)
     comb[i,] <- apply(t, 2, median)
@@ -87,7 +75,7 @@ KNN.DNA.Unique <- function(bead, df, k){
   
   row.has.na <- apply(comb, 1, function(x){any(is.na(x))})
   comb <- comb[!row.has.na,]
-  knn.bc <- knn5.bc1[!sapply(knn5.bc1,is.null)]
+  knn.bc <- knn.bc2[!sapply(knn.bc2,is.null)]
   
   ## Summing counts over knn-groups:
   #- Iterate over knn groups 
@@ -145,7 +133,6 @@ KNN.DNA.Unique <- function(bead, df, k){
 
 
 
-
 KNN.DNA <- function(bead, df, k){
   ## Start
   #- Make sure you have the count df and bead info from the DNA_vesalius markdown..
@@ -153,7 +140,6 @@ KNN.DNA <- function(bead, df, k){
   barcodes <- rownames(bead@coordinates)
   bead.coords <- bead@coordinates
   coords <- cbind(bead.coords$xcoord, bead.coords$ycoord)
-  #l <- length(barcodes)
   
   #Perform KNN:
   cat( paste(Sys.time()," Running K-Nearest Neighbor with k =",k, "number of neighbors", "\n"))
@@ -180,16 +166,38 @@ KNN.DNA <- function(bead, df, k){
   }
   
   # If creating slideseq bead info as object in list instead of exporting to :
-  comb <- as.data.frame(bead.coords)
-  ss <- new(Class = 'SlideSeq',assay = "Spatial",
-            coordinates = comb[,c("xcoord","ycoord")])
-  rownames(ss@coordinates) <- rownames(comb)
+ 
 
-  colnames(grMtrx) <- rownames(comb)
+
+  colnames(grMtrx) <- rownames(bead.coords)
   rownames(grMtrx) <- bins
   knnSpMtx <- Matrix(grMtrx, sparse = TRUE)
-  return(list(knnSpMtx, ss))
+  return(list(knnSpMtx, bead.coords))
 }
+
+#Replace in knn unique (unique barcodes function) if it's not working
+
+i <- 1
+
+cat(paste(Sys.time()," Using only unique barcodes in KNN groups", "\n"))
+while(i <= l){
+  j <- 1
+  while(j <= k){
+    ix <- knnIx[i,j]
+    b <- barcodes[ix]
+    if(b %in% bc){
+      knn5.bc[[i]][j] <- b
+    }else{
+      doubles[[i]][j] <- b
+    }
+    j <- j + 1
+    bc <- bc[!bc %in% b]
+  }
+  x <- knn5.bc[[i]]
+  knn5.bc1[[i]] <- x[!is.na(x)]
+  i <- i + 1
+}
+
 
 #knnIx <- knn2nb(coords.knearneigh, row.names = barcodes)
 #knnIdx <- knnIx[1:l] #Just the grouped indexes (to the barcodes) - not the other knn attributes
@@ -324,3 +332,15 @@ length(knn.sort)
 #fname <- paste0(in.path, "knn/", alias, "_knn", k)
 #write.csv(comb, file = paste0(fname, ".bead_locations.csv"), row.names = TRUE, quote = FALSE)
 #cat(paste(Sys.time()," New bead location file saved as ", paste0(fname, ".bead_locations.csv"), "\n"))
+
+# If creating slideseq bead info as object in list instead of exporting to :
+#comb <- as.data.frame(bead.coords)
+ss <- new(Class = 'SlideSeq',assay = "Spatial",
+          coordinates = bead.coords[,c("xcoord","ycoord")])
+rownames(ss@coordinates) <- rownames(comb)
+
+colnames(grMtrx) <- rownames(comb)
+rownames(grMtrx) <- bins
+knnSpMtx <- Matrix(grMtrx, sparse = TRUE)
+#return(list(knnSpMtx, ss)) #For old Vesalius
+return(list(knnSpMtx, bead.coords)) #For Dev version of Vesalius

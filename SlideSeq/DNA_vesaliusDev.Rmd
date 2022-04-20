@@ -1,12 +1,9 @@
 ---
-title: "SlideSeqDNA"
+title: "SlideSeqDNA_Vesalius_Dev"
 output: html_document
 ---
 
 ## Preface
-
-
-Set working directory for the entire markdown/notebook. - doesn't work - still need to specify path
 Load packages needed
 
 
@@ -28,8 +25,8 @@ library(Matrix)
 library(MatrixExtra)
 
 
-files <- list.files("~/Thesis_SpatialGenomics/Vesalius1Dev/Vesalius/R",pattern = ".R")
-files <- paste0("~/Thesis_SpatialGenomics/Vesalius1Dev/Vesalius/R/",files)
+files <- list.files("~/Thesis_SpatialGenomics/VesaliusDev_2022/Vesalius/R",pattern = ".R")
+files <- paste0("~/Thesis_SpatialGenomics/VesaliusDev_2022/Vesalius/R/",files)
 for(i in seq_along(files)){
   source(files[i])
 }
@@ -54,8 +51,8 @@ norm <- "SeuratNorm"
 #norm <- "SCTransform"
 #norm <- "NoNorm"
 
-dimred <- "1slice_PCA" #(3 PCs -> 1 slice as 3 colour channels, 3 slices = 9 top PCs)
-#dimred <- "10pcs_UMAP"
+dimred <- "PCA" 
+#dimred <- "UMAP"
 
 in.path <- "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/"
 out.path <- "~/Thesis_SpatialGenomics/R_Output/"
@@ -63,12 +60,12 @@ out.path <- "~/Thesis_SpatialGenomics/R_Output/"
 min.count <- 2
 max.count <- 6
 
-k <- 20
-knn.type <- "Unique"
-#knn.type <- "Duplicate"
+k <- 30
+#knn.type <- "Unique"
+knn.type <- "Duplicate"
 
 colD <- 3
-smIter <- 20
+smIter <- 10
 
 param <- paste(norm, dimred, sep = "_")
 
@@ -87,8 +84,6 @@ counts <- paste0(in.path, alias, ".sparse_counts_1Mb.txt")
 bead <- ReadSlideSeq(paste0(in.path, alias, ".bead_locations.csv"))
 
 
-
-
 #Collect the 1000s of barcode sequences from the bead locations file
 barcodes <- rownames(bead@coordinates)
 
@@ -104,10 +99,6 @@ max <- sort(sparse@x, decreasing = TRUE)
 # Set point size for plotting the UMIs - adjusted for knn later
 pt.sz <- 0.25
 
-
-
-# invert/transpose/switch between rows and columns
-#sparse <- t(sparse)
 
 ```
 
@@ -159,16 +150,6 @@ if(exists("max.count")){
 
 df <- as.matrix(sparse) 
 
-#if(exists("max.count")){
-#  hist(sparse@x)
-#  hist(df)
-#}
-
-#sparse <- filterSparse(sparse, function(x) x >= 3)
-#pct <- length(barcodes)*0.10
-
-# Keep only barcodes with more than 100 counts total?!
-#sparse.filt <- sparse[colSums(sparse > 0) >= 100, ]
 
 ```
 
@@ -193,56 +174,41 @@ param <- param1
 ## Run KNN
 - Decide between only using each barcode once in KNN.DNA.Unique 
   or having many duplicate groups of barcodes (each barcode gets a group of k nearest neighbors)
-  
-  
-length(unique(sparseDup@Dimnames[[2]])) - because I used bc.g (with duplicates) instead of bc.c (with .1 added) in the function script..
-[1] 26453
-length(unique(rownames(bead@coordinates)))
-[1] 38580
-bead rownames have been given numbers when not unique..
-  
+
 
 ```{r}
 if(exists("k")){
   if(knn.type == "Unique"){
     ls <- KNN.DNA.Unique(bead, df, k)
-    sparseUq <- ls[[1]] #15737 length(unique(sparseUq@Dimnames[[2]])): 15736
-    beadUq <- ls[[2]] #15736
   }else{
     ls <- KNN.DNA(bead, df, k)
-    sparseDup <- ls[[1]] #38581? + 38580 length(unique(sparseDup@Dimnames[[2]])): 14612
-    beadDup <- ls[[2]] #38580
   }
   param <- paste(param, paste0("knn", knn.type, k), sep="_")
   sparse <- ls[[1]] #Retrieve sparse matrix output from knn function
-  bead <- ls[[2]] #Retrieve Bead info (barcodes and coordinates) in SlideSeq assay format compatible with Seurat object
+  bead <- ls[[2]] #Retrieve Bead info (barcodes and coordinates) in SlideSeq assay format compatible with Seurat/Vesalius object
 
   pt.sz <- k/15 #Adjusting point size for plotting
   rm(ls)
 }
 
+bead.test <- cbind(rownames(bead.coords), bead.coords[[1]], bead.coords[[2]])
+colnames(bead.test) <- c("barcodes","xcoord","ycoord")
 
-
-
+sparse.test <- as.data.frame(grMtrx)
 ```
 
 
-sparse <- sparseDup
-bead <- beadDup
 
-plot(beadDup@coordinates)
+plot(bead@coordinates)
 
-Remove everything and use buildvesaliusembeddings instead from the embeddings file! 
 
-vesalius <- buildVesaliusObject(slideBeads,slideCounts)
-ves <- buildVesaliusEmbeddings(vesalius,
-  method ="PCA",pcs = 30,
-  tensorResolution = 0.1,cores =10)
+
+
   
-  Imageplot with 1-3 dimensions for the different PCs
+  
   
 
-## Create Seurat Object - Milestone
+## Create Vesalius Object - Milestone
 Based on the counts
 
 Cells - Takes the barcodes instead of cellID?
@@ -251,88 +217,23 @@ slice 1 - This is where the x+y coordinates are added from bead, identifier - ba
 
 ```{r}
 
-
-ctmp.SO <- CreateSeuratObject(sparse, assay ="Spatial")
-
-bead <- bead[Cells(x = ctmp.SO)]
-DefaultAssay(object = bead) <- "Spatial"
-ctmp.SO[["slice1"]] <- bead
+vesalius <- buildVesaliusObject(bead.test,grMtrx)
+ves <- buildVesaliusEmbeddings(vesalius,
+  method ="PCA",pcs = 12,
+  tensorResolution = 0.1,cores =10)
 
 ```
 
 length(unique(ctmp.SO@assays$Spatial@counts@Dimnames[[2]]))
 [1] 38580
 
+Imageplot with 1-3 dimensions for the different PCs
 
-## Normalize / Find Features / Scale
-Either by Seurats functions or using SCTransform or not at all
-Do this make sense to do on the DNA data? 
-
-```{r}
-
-if(norm == "SeuratNorm"){
-  ctmp <- NormalizeData(ctmp.SO)
-  ctmp <- FindVariableFeatures(ctmp, nfeatures = 200)
-  ctmp <- ScaleData(ctmp)
-} else if(norm == "SCTransform"){
-  ctmp <- SCTransform(ctmp.SO, assay = "Spatial", verbose = FALSE)
-}
-
-```
-
-## Create image plotting function - coloured and grayscale
-
-```{r}
-## This is equal to the existing function imagePlot except This can include Title
-
-cimg.plot <- function(image, step) {
-  ss <- subset(image, select=c(x, y, cc, value))
-  g <- as.cimg(ss) %>% plot(main=c(step, "Array (as.cimg)"))
-}
-
-```
 
 ## Dimensionality Reduction
 Latent space
 PCA / UMAP / tSNE (/Semantic Ves Dev?)
 
-```{r}
-
-if(grepl("UMAP",dimred)){
-  pc <- sub("pcs.*", "", dimred)
-  ctmp <- rgbUMAP(SO = ctmp, pcs = pc, conserveSparse=F)
-} else if(grepl("PCA",dimred)){
-  slice <- as.integer(substr(dimred, 1,1))
-  ctmp <- rgbPCA(ctmp, slices = slice, conserveSparse = FALSE)
-} else if(grepl("tSNE",dimred)){
-}
-
-```
-
-ctmp.coords <- cbind(ctmp[[2]], ctmp[[3]])
-plot(ctmp.coords)
-
-Still have all my many bead dots..
-
-#Image processing: - Milestone - Image array
-
-Time consuming! (10mins - 1Gb Seurat)
-Try reducing resolution to 10% - for the trial
-
-```{r}
-
-image <- buildImageArray(ctmp,filterThreshold=0.9975,resolution=20, cores=5)
-
-#Keep a copy for plotting later (maybe do a plot here instead and remove the large array, print the plot later?)
-image.array <- image
-#April14_imageArray <- image.array
-
-```
-
-
-2929734 observations of 6 variables
-
-What is the tile element in the image list representing? Is it the original count values? Do we still need them?
 
 ## Imsplit for grayscale
 gray.cimg.plot <- function(image, step){
@@ -341,48 +242,6 @@ gray.cimg.plot <- function(image, step){
   split.image <- imsplit(split.im, "cc", 3)
 }
 
-```{r}
-
-
-```
-
-summary(split.im)
-   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-0.00000 0.01209 0.20840 0.32910 0.62528 0.99613 
-
-> summary(split[[1]])
-   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-0.00000 0.01165 0.22071 0.34477 0.66823 0.99613 
-> summary(split[[2]])
-   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
- 0.0000  0.0125  0.1922  0.3140  0.6060  0.9807 
-> summary(split[[3]])
-   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-0.00000 0.01209 0.20939 0.32850 0.63726 0.99252 
-
-
-for(i in seq_along(split)){
-  image <- equalizeHistogram(split.image[[i]], sleft = 2.5, sright=2.5,invert =T)
-  image <- regulariseImage(split.image[[i]], lambda = 10, niter = 200, normalise=T)
-  image <- iterativeSegmentation.array(split.image[[i]], colDepth = colD,
-                                       smoothIter = smIter, method = c("iso","median"), sigma=1.5,box = 10, useCenter = T)
-  image <- isolateTerritories.array(split.image[[i]], captureRadius = 0.008, minBar = 40)
-  param <- paste(param, paste0("ItSegColDepth", colD), sep="_")
-}
-
-```{r}
-
-```
-
-
-
-```{r}
-image <- equalizeHistogram(image, sleft = 2.5, sright=2.5,invert =T)
-image <- regulariseImage(image, lambda = 10, niter = 200, normalise=T)
-image <- iterativeSegmentation.array(image, colDepth = colD, smoothIter = smIter, method = c("iso","median"), sigma=1.5,box = 10, useCenter = T)
-image <- isolateTerritories.array(image, captureRadius = 0.008, minBar = 40)
-param <- paste(param, paste0("ItSegColDepth", colD), sep="_")
-```
 
 ## Publish plots in pdf
 

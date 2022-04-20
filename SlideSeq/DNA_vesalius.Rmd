@@ -63,7 +63,7 @@ k <- 20
 knn.type <- "Duplicate"
 
 colD <- 3
-smIter <- 20
+smIter <- 10
 
 param <- paste(norm, dimred, sep = "_")
 
@@ -201,17 +201,20 @@ bead rownames have been given numbers when not unique..
 if(exists("k")){
   if(knn.type == "Unique"){
     ls <- KNN.DNA.Unique(bead, df, k)
-    sparseUq <- ls[[1]] #15737 length(unique(sparseUq@Dimnames[[2]])): 15736
-    beadUq <- ls[[2]] #15736
   }else{
     ls <- KNN.DNA(bead, df, k)
-    sparseDup <- ls[[1]] #38581? + 38580 length(unique(sparseDup@Dimnames[[2]])): 14612
-    beadDup <- ls[[2]] #38580
   }
   param <- paste(param, paste0("knn", knn.type, k), sep="_")
-  sparse <- ls[[1]] #Retrieve sparse matrix output from knn function
-  bead <- ls[[2]] #Retrieve Bead info (barcodes and coordinates) in SlideSeq assay format compatible with Seurat object
+  sparse <- ls[[1]] #Retrieve matrix output from knn function
+  bead <- ls[[2]] #Retrieve Bead info (barcodes and coordinates) 
 
+  sparse <- Matrix(sparse, sparse = TRUE)
+  #Convert bead info to SlideSeq assay format compatible with Seurat object
+  ss <- new(Class = 'SlideSeq',assay = "Spatial",
+            coordinates = bead[,c("xcoord","ycoord")]) 
+  rownames(ss@coordinates) <- rownames(bead)
+  bead <- ss
+  
   pt.sz <- k/15 #Adjusting point size for plotting
   rm(ls)
 }
