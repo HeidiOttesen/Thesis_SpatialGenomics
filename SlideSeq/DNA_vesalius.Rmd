@@ -58,11 +58,11 @@ out.path <- "~/Thesis_SpatialGenomics/R_Output/"
 #min.count <- 2
 #max.count <- 6
 
-k <- 5
+k <- 20
 #knn.type <- "Unique"
 knn.type <- "Duplicate"
 
-colD <- 6
+colD <- 3
 smIter <- 20
 
 param <- paste(norm, dimred, sep = "_")
@@ -234,7 +234,9 @@ Based on the counts
 
 Cells - Takes the barcodes instead of cellID?
 slice 1 - This is where the x+y coordinates are added from bead, identifier - barcode?
-- With knn non-unique I also have non-unique cell names in the input matrix..
+- With knn non-unique I also have non-unique cell names in the input matrix..?
+
+Double in size for duplicate KNN? - 1,9Gb ctmp.SO
 
 ```{r}
 
@@ -295,6 +297,9 @@ if(grepl("UMAP",dimred)){
 
 ```
 
+
+
+
 ctmp.coords <- cbind(ctmp[[2]], ctmp[[3]])
 plot(ctmp.coords)
 
@@ -311,9 +316,12 @@ image <- buildImageArray(ctmp,filterThreshold=0.9975,resolution=20, cores=5)
 
 #Keep a copy for plotting later (maybe do a plot here instead and remove the large array, print the plot later?)
 image.array <- image
-#April14_imageArray <- image.array
+
+imagePlot(image)
+cimg.plot(image, "After PCA")
 
 ```
+
 
 
 2929734 observations of 6 variables
