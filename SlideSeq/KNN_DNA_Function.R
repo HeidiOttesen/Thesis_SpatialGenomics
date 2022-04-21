@@ -141,7 +141,7 @@ KNN.DNA <- function(bead, df, k){
   coords <- cbind(bead.coords$xcoord, bead.coords$ycoord)
   
   #Perform KNN:
-  cat( paste(Sys.time()," Running K-Nearest Neighbor with k =",k, "number of neighbors", "\n"))
+  cat(paste(Sys.time()," Running K-Nearest Neighbor with k =",k, "number of neighbors, on", length(barcodes), "barcodes", "\n"))
   coords.knearneigh <- knearneigh(coords, k = k)
   knnIx <- coords.knearneigh$nn
   

@@ -47,15 +47,18 @@ Specify dataset + Normalisation + dimensionality reduction method and parameters
 #alias <- "human_colon_cancer_3_dna_191204_19"
 alias <- "mouse_liver_met_2_dna_200114_10"
 
-norm <- "SeuratNorm"
+#norm <- "SeuratNorm"
 #norm <- "SCTransform"
 #norm <- "NoNorm"
 
 dimred <- "PCA" 
 #dimred <- "UMAP"
+PCs <- 12
+plotPC <- 4
 
 in.path <- "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/"
 out.path <- "~/Thesis_SpatialGenomics/R_Output/"
+out.pathPC <- "~/Thesis_SpatialGenomics/R_Output/PC_images/"
 
 min.count <- 2
 max.count <- 6
@@ -63,6 +66,8 @@ max.count <- 6
 k <- 30
 #knn.type <- "Unique"
 knn.type <- "Duplicate"
+
+cores <- 5
 
 colD <- 3
 smIter <- 10
@@ -191,11 +196,14 @@ if(exists("k")){
   rm(ls)
 }
 
-bead.test <- cbind(rownames(bead.coords), bead.coords[[1]], bead.coords[[2]])
-colnames(bead.test) <- c("barcodes","xcoord","ycoord")
+bead <- cbind(rownames(bead), bead[[1]], bead[[2]])
+colnames(bead) <- c("barcodes","xcoord","ycoord")
+bead <- as.data.frame(bead)
+bead <- transform(bead, xcoord = as.numeric(xcoord), 
+               ycoord = as.numeric(ycoord))
 
-sparse.test <- as.data.frame(sparse)
-sparse.test <- Matrix(grMtrx, sparse = TRUE)
+sparse.df <- as.data.frame(sparse)
+sparse.spmx <- Matrix(sparse, sparse = TRUE)
 
 ```
 
@@ -211,25 +219,39 @@ plot(bead@coordinates)
   
 
 ## Create Vesalius Object - Milestone
-Based on the counts
+Based on the counts and bead coordinates
 
-Cells - Takes the barcodes instead of cellID?
-slice 1 - This is where the x+y coordinates are added from bead, identifier - barcode?
-- With knn non-unique I also have non-unique cell names in the input matrix..
+Beads in data.frame format - coordinates numerical
+Counts either dataframe or sparse matrix.
 
 ```{r}
+sparse <- sparse.df
+sparse <- sparse.spmx
 
-vesalius <- buildVesaliusObject(bead.test,sparse.test)
+vesalius <- buildVesaliusObject(bead,sparse)
 ves <- buildVesaliusEmbeddings(vesalius,
-  method ="PCA",pcs = 12,
-  tensorResolution = 0.1,cores =10)
+  method =dimred, pcs = PCs,
+  tensorResolution = 0.1,cores = cores)
 
 ```
 
-length(unique(ctmp.SO@assays$Spatial@counts@Dimnames[[2]]))
-[1] 38580
+## Plotting vesalius images
 
-Imageplot with 1-3 dimensions for the different PCs
+Imageplot with chosen number of dimensions for the different PCs
+
+```{r}
+cat( paste(Sys.time()," Plotting top", plotPC, "PCs and exporting to pdf.", "\n", "File located in:", out.pathPC))
+setwd(in.path)
+fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), alias, param, "VesDev_PCimages.pdf", sep="_")
+pdf(fname)
+layout(matrix(c(1,3,2,4), 2, 2))
+for(i in seq(plotPC)){
+  imagePlot(ves, dims = i)
+}
+dev.off()
+file.rename(from = paste0(in.path, fname), to = paste0(out.pathPC, fname))
+```
+
 
 
 ## Dimensionality Reduction
