@@ -43,32 +43,31 @@ set.seed(1)
 Specify dataset + Normalisation + dimensionality reduction method and parameters
 
 ```{r}
-#alias <- "human_colon_cancer_4_dna_200114_13"
+alias <- "human_colon_cancer_4_dna_200114_13"
 #alias <- "human_colon_cancer_3_dna_191204_19"
-alias <- "mouse_liver_met_2_dna_200114_10"
+#alias <- "mouse_liver_met_2_dna_200114_10"
 
-norm <- "Log"       # Normalization method: "log","SCT","TFIDF","raw"
+norm <- "log"       # Normalization method: "log","SCT","TFIDF","raw"
 meth <- "PCA"       # Dimensionality reduction method: "PCA","PCA_L","UMAP","LSI","LSI_UMAP"
 PCs <- 12           # Number of Principal Components
 plotPC <- 4         # Number of PC plots to export. 4 plots per pdf page
 
-in.path <- "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/"
-out.path <- "~/Thesis_SpatialGenomics/R_Output/"
-out.pathPC <- "~/Thesis_SpatialGenomics/R_Output/PC_images/"
-
 min.count <- 2
 max.count <- 6
 
-k <- 5
-#knn.type <- "Unique"
-knn.type <- "Duplicate"
+k <- 50
+knn.type <- "Duplicate"     # KNN method: "Unique", "Duplicate"
 
 cores <- 5
 
-colD <- 3
-smIter <- 10
+#colD <- 3            # Column Depth
+#smIter <- 10         # Smoothing Iterations
 
-param <- paste(norm, (paste0(meth, PCs)), sep = "_")
+param <- paste(paste0(norm, "Norm"), paste0(meth, PCs), sep = "_")
+
+in.path <- "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/"
+out.path <- "~/Thesis_SpatialGenomics/R_Output/"
+out.pathPC <- "~/Thesis_SpatialGenomics/R_Output/PC_images/"
 
 ```
 
@@ -223,9 +222,8 @@ sparse <- sparse.df
 sparse <- sparse.spmx
 
 vesalius <- buildVesaliusObject(bead,sparse)
-ves <- buildVesaliusEmbeddings(vesalius,
-  method =dimred, pcs = PCs,
-  tensorResolution = 0.1,cores = cores)
+ves <- buildVesaliusEmbeddings(vesalius, method = meth, 
+  norm = norm, pcs = PCs, tensorResolution = 0.1, cores = cores)
 
 ```
 

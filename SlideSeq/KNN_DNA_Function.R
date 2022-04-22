@@ -141,7 +141,7 @@ KNN.DNA <- function(bead, df, k){
   coords <- cbind(bead.coords$xcoord, bead.coords$ycoord)
   
   #Perform KNN:
-  cat(paste(Sys.time()," Running K-Nearest Neighbor with k =",k, "number of neighbors, on", length(barcodes), "barcodes", "\n"))
+  cat(paste(Sys.time()," Running K-Nearest Neighbor with k =",k, "number of neighbors \n on", length(barcodes), "barcoded bead locations", "\n"))
   coords.knearneigh <- knearneigh(coords, k = k)
   knnIx <- coords.knearneigh$nn
   
@@ -159,7 +159,7 @@ KNN.DNA <- function(bead, df, k){
   #- df - Sparse matrix vector from the DNA_vesalius markdown script - Barcodes as columns, bins as rows.
   #- Sum the counts for each group and each bin 
   grMtrx <- matrix(0, nrow = nrow(df), ncol = ncol(df))
-  cat( paste(Sys.time()," Summing the counts for each group and bin", "\n"))
+  cat( paste(Sys.time()," Summing the counts for each KNN group and genomic bin", "\n"))
   for(i in seq_along(knn.bc)){
     grMtrx[,i] <- rowSums(df[,knn.bc[[i]]])
   }
