@@ -3,9 +3,51 @@ title: "SlideSeqDNA_Vesalius_Dev"
 output: html_document
 ---
 
-## Preface
-Load packages needed
 
+## Settings - Parameters etc
+
+Specify dataset + Normalisation + dimensionality reduction method and other parameters
+
+For 
+
+```{r}
+# SlideSeq DNA datasets:
+#alias <- "human_colon_cancer_4_dna_200114_13"
+#alias <- "human_colon_cancer_3_dna_191204_19"
+alias <- "mouse_liver_met_2_dna_200114_10"
+
+
+
+norm <- "TFIDF"               # Normalization method: "log","SCT","TFIDF","raw"
+meth <- "LSI"               # Dimensionality reduction method: "PCA","PCA_L","UMAP","LSI","LSI_UMAP"
+PCs <- 12                   # Number of Principal Components
+plotPC <- 8                 # Number of PC plots to export. 4 plots per pdf page
+
+min.count <- 2
+max.count <- 6
+
+k <- 20
+knn.type <- "Duplicate"     # KNN method: "Unique", "Duplicate"
+
+cores <- 5
+
+colD <- 3                   # Column Depth
+smIter <- 10                # Smoothing Iterations
+imSegDims <- 4              # Image Segmentation Dimensions
+
+
+
+param <- paste(paste0(norm, "Norm"), paste0(meth, PCs), sep = "_")
+
+in.path <- "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/"
+out.path <- "~/Thesis_SpatialGenomics/R_Output/"
+out.pathPC <- "~/Thesis_SpatialGenomics/R_Output/PC_images/"
+
+```
+
+In paper they do k 50 for smoothing the beads before PCA (mouse liver)
+
+## Load packages needed
 
 ```{r setup, include=FALSE}
 knitr::opts_knit$set(root.dir = "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/")
@@ -18,6 +60,7 @@ library(viridis)
 library(RColorBrewer)
 library(dplyr)
 library(tvR)
+library(Signac)
 library(sp)
 library(spdep)
 library(grid)
@@ -40,76 +83,37 @@ library(grDevices)
 set.seed(1)
 ```
 
-Specify dataset + Normalisation + dimensionality reduction method and parameters
 
-```{r}
-alias <- "human_colon_cancer_4_dna_200114_13"
-#alias <- "human_colon_cancer_3_dna_191204_19"
-#alias <- "mouse_liver_met_2_dna_200114_10"
-
-norm <- "log"       # Normalization method: "log","SCT","TFIDF","raw"
-meth <- "PCA"       # Dimensionality reduction method: "PCA","PCA_L","UMAP","LSI","LSI_UMAP"
-PCs <- 12           # Number of Principal Components
-plotPC <- 4         # Number of PC plots to export. 4 plots per pdf page
-
-min.count <- 2
-max.count <- 6
-
-k <- 50
-knn.type <- "Duplicate"     # KNN method: "Unique", "Duplicate"
-
-cores <- 5
-
-#colD <- 3            # Column Depth
-#smIter <- 10         # Smoothing Iterations
-
-param <- paste(paste0(norm, "Norm"), paste0(meth, PCs), sep = "_")
-
-in.path <- "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/"
-out.path <- "~/Thesis_SpatialGenomics/R_Output/"
-out.pathPC <- "~/Thesis_SpatialGenomics/R_Output/PC_images/"
-
-```
-
-In paper they do k 50 for smoothing the beads before PCA
 
 ## Read data from files
-and create a sparse count matrix. (mostly 0's, bins as columns and barcodes as rows? )
-To access slots of an S4 object you use @, not $
-
+Vectors:
+barcodes    -     holds the barcode sequences
+sparse      -     Sparse count matrix, dgCMatrix
 
 ```{r}
-
 counts <- paste0(in.path, alias, ".sparse_counts_1Mb.txt")
 bead <- ReadSlideSeq(paste0(in.path, alias, ".bead_locations.csv"))
 
-
-#Collect the 1000s of barcode sequences from the bead locations file
 barcodes <- rownames(bead@coordinates)
 
-#separator used in this count matrix
-sep = "\t"
+sep = "\t" #separator used in this count matrix
 ctmp <- read.table(counts, header = TRUE, sep=sep ) %>% na.exclude()
-# Create DG matrix: i + j - row and column index - maybe a mix of row and columns - do as.counts instead
-sparse <- sparseMatrix(i= ctmp[,2],j=ctmp[,1],x=ctmp[,3]) 
 
-#Curious about the count distribution values
-#max <- sort(sparse@x, decreasing = TRUE)
+sparse <- sparseMatrix(i= ctmp[,2],j=ctmp[,1],x=ctmp[,3]) 
 
 # Set point size for plotting the UMIs - adjusted for knn later
 pt.sz <- 0.25
-
-
 ```
 
 
-## Bins Human/Mouse:
-Each bin index corresponds to 1million bases in a specific location on a chromosome.
+## Genomic Bins Human/Mouse:
+Each bin index corresponds to 1 million bases in a specific location on a chromosome.
 bin size: 1 million bases, index 1 = chromosome 1 from base 1 -> 1.000.000
 Keep only the bin index numbers (1-3114. ~3.1bn bases)
 
-Human: 3114 bins human bins. Chr2 starts at bin 251 :
+Human: 3114 bins human bins. Chr2 starts at bin 251
 Mouse: 2738 bins total 
+
 ```{r}
 
 if(grepl("human",alias)){
@@ -123,7 +127,6 @@ if(grepl("human",alias)){
 
 
 
-
 ## Name column/rows in sparse matrix
 Assign bin index numbers to identify the rows. 
 Assign the barcodes to identify the columns
@@ -133,7 +136,9 @@ colnames(sparse) <- barcodes
 rownames(sparse) <- bins
 ```
 
-#Remove outliers - keep only counts up to 6 (CNA = 6):
+#Remove outlier counts
+Expected CNA varies between 
+High outlier counts might represent mitochondrial DNA bins
 
 
 ```{r}
@@ -148,20 +153,13 @@ if(exists("max.count")){
 }
 
 
-df <- as.matrix(sparse) 
-
-
 ```
 
-filter out counts below 2 and above 6 
-Mouse liver before: Dimensions: 2,738(bins) x 38,580(barcodes). (8,771,833 entries, 8.30% full) - remove 15.017 values
 
-Don't know how to filter out columns (barcodes) with fewer than 100 non-zero values...?!?!?!
-
-## Vector holders for testing..
+## Vector holders - Checkpoint
 
 ```{r}
-df1 <- df
+df1 <- as.matrix(sparse) 
 bead1 <- bead
 param1 <- param
 
@@ -172,8 +170,8 @@ param <- param1
 
 
 ## Run KNN
-- Decide between only using each barcode once in KNN.DNA.Unique 
-  or having many duplicate groups of barcodes (each barcode gets a group of k nearest neighbors)
+- Decide between only using each barcode once (KNN.DNA.Unique function)
+  or having many duplicate groups of barcodes, each barcode gets a group of k nearest neighbors (KNN.DNA function)
 
 
 ```{r}
@@ -202,11 +200,6 @@ sparse.spmx <- Matrix(sparse, sparse = TRUE)
 
 ```
 
-
-
-plot(bead@coordinates)
-
-
 ## Create Vesalius Object - Milestone
 Based on the counts and bead coordinates
 
@@ -232,7 +225,7 @@ ves <- buildVesaliusEmbeddings(vesalius, method = meth,
 Imageplot with chosen number of dimensions for the different PCs
 
 ```{r}
-cat( paste(Sys.time()," Plotting top", plotPC, "PCs and exporting to pdf.", "\n", "File located in:", out.pathPC))
+cat( paste(Sys.time()," Plotting top", plotPC, "PCs and exporting to pdf.\n File located in:", out.pathPC))
 setwd(in.path)
 fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), alias, param, "VesDev_PCimages.pdf", sep="_")
 pdf(fname)
@@ -245,6 +238,25 @@ file.rename(from = paste0(in.path, fname), to = paste0(out.pathPC, fname))
 ```
 
 
+## Image processing:
+imageSegmentation - not sure about the dims here - is that PC dimensions?
+  - Embedding "last", last what?
+
+```{r}
+vesImSeg <- imageSegmentation(ves, dims = imSegDims, colDepth = colD, smoothIter = smIter, 
+                         smoothType = "iso", sigma = 2, embedding = "PCA")
+#ves <- imageSegmentation(ves,dims=1:30, colDepth = 5,smoothIter=5,smoothType="iso",sigma =2,embedding = "PCA")
+
+vesTerr <- isolateTerritories(vesImSeg, trial = "last")
+
+vesMark <- extractMarkers(vesTerr, seed = 7)
+
+vesMorph <- territoryMorphing(vesMark, c(5,6))
+
+vesTerrLay <- layerTerritory(vesMorph, c(28,34,32),morphologyFactor=0,layerDepth=5)
+
+#viewGeneExpression(ves, gene= "Cryba4", as.layer=T,norm=F)
+```
 
 
 
