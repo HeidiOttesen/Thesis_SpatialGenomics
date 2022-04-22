@@ -18,12 +18,12 @@ alias <- "mouse_liver_met_2_dna_200114_10"
 
 
 
-norm <- "TFIDF"               # Normalization method: "log","SCT","TFIDF","raw"
-meth <- "LSI"               # Dimensionality reduction method: "PCA","PCA_L","UMAP","LSI","LSI_UMAP"
+norm <- "log"               # Normalization method: "log","SCT","TFIDF","raw"
+meth <- "PCA"               # Dimensionality reduction method: "PCA","PCA_L","UMAP","LSI","LSI_UMAP"
 PCs <- 12                   # Number of Principal Components
 plotPC <- 8                 # Number of PC plots to export. 4 plots per pdf page
 
-min.count <- 2
+min.count <- 1
 max.count <- 6
 
 k <- 20
@@ -243,9 +243,8 @@ imageSegmentation - not sure about the dims here - is that PC dimensions?
   - Embedding "last", last what?
 
 ```{r}
-vesImSeg <- imageSegmentation(ves, dims = imSegDims, colDepth = colD, smoothIter = smIter, 
-                         smoothType = "iso", sigma = 2, embedding = "PCA")
-#ves <- imageSegmentation(ves,dims=1:30, colDepth = 5,smoothIter=5,smoothType="iso",sigma =2,embedding = "PCA")
+#vesImSeg <- imageSegmentation(ves, dims = imSegDims, colDepth = colD, smoothIter = smIter, smoothType = "iso", sigma = 2, embedding = "PCA")
+vesImSeg <- imageSegmentation(ves,dims=1:30, colDepth = 5,smoothIter=5,smoothType="iso",sigma =2,embedding = "PCA")
 
 vesTerr <- isolateTerritories(vesImSeg, trial = "last")
 
@@ -270,8 +269,6 @@ gray.cimg.plot <- function(image, step){
 
 
 ## Publish plots in pdf
-
-```{r}
 setwd(in.path)
 fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), alias, param, "images_VesDev.pdf", sep="_")
 pdf(fname)
@@ -287,5 +284,8 @@ territoryPlot(image,cex=10,cex.pt=pt.sz)
 dev.off()
 
 file.rename(from = paste0(in.path, fname), to = paste0(out.path, fname))
+
+```{r}
+
 ```
 
