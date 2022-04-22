@@ -47,15 +47,10 @@ Specify dataset + Normalisation + dimensionality reduction method and parameters
 #alias <- "human_colon_cancer_3_dna_191204_19"
 alias <- "mouse_liver_met_2_dna_200114_10"
 
-norm <- "Default"
-#norm <- "SeuratNorm"
-#norm <- "SCTransform"
-#norm <- "NoNorm"
-
-dimred <- "PCA" 
-#dimred <- "UMAP"
-PCs <- 12
-plotPC <- 4 #4 per pdf page
+norm <- "Log"       # Normalization method: "log","SCT","TFIDF","raw"
+meth <- "PCA"       # Dimensionality reduction method: "PCA","PCA_L","UMAP","LSI","LSI_UMAP"
+PCs <- 12           # Number of Principal Components
+plotPC <- 4         # Number of PC plots to export. 4 plots per pdf page
 
 in.path <- "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/"
 out.path <- "~/Thesis_SpatialGenomics/R_Output/"
@@ -73,7 +68,7 @@ cores <- 5
 colD <- 3
 smIter <- 10
 
-param <- paste(norm, (paste0(dimred, PCs)), sep = "_")
+param <- paste(norm, (paste0(meth, PCs)), sep = "_")
 
 ```
 
