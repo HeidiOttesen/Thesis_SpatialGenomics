@@ -33,8 +33,8 @@ cores <- 5
 
 colD <- 3                   # Column Depth
 smIter <- 10                # Smoothing Iterations
-imSegDims <- 4              # Image Segmentation Dimensions
-
+#imSegDims <- 4             # Image Segmentation Dimensions
+st.meth <- "wilcox"          #Statistical method for extracting markers/bins, "wilcox", "t.test", "chisq"
 
 
 param <- paste(paste0(norm, "Norm"), paste0(meth, PCs), sep = "_")
@@ -42,6 +42,7 @@ param <- paste(paste0(norm, "Norm"), paste0(meth, PCs), sep = "_")
 in.path <- "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/"
 out.path <- "~/Thesis_SpatialGenomics/R_Output/"
 out.pathPC <- "~/Thesis_SpatialGenomics/R_Output/PC_images/"
+
 
 ```
 
@@ -210,13 +211,14 @@ Counts either dataframe or sparse matrix.
 Latent space
 PCA / UMAP / tSNE (/LSI)
 
+set filterThreshold to remove outlier beads (0.99)
 ```{r}
 #sparse <- sparse.df
 sparse <- sparse.spmx
 
 vesalius <- buildVesaliusObject(bead,sparse)
 ves <- buildVesaliusEmbeddings(vesalius, method = meth, 
-  norm = norm, pcs = PCs, tensorResolution = 0.1, cores = cores)
+  norm = norm, pcs = PCs, tensorResolution = 0.1, cores = cores, filterThreshold =0.99)
 
 ```
 
@@ -229,10 +231,10 @@ cat( paste(Sys.time()," Plotting top", plotPC, "PCs and exporting to pdf.\n File
 setwd(in.path)
 fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), alias, param, "VesDev_PCimages.pdf", sep="_")
 pdf(fname)
-layout(matrix(c(1,3,2,4), 2, 2))
+#layout(matrix(c(1,3,2,4), 2, 2))
 for(i in seq(plotPC)){
   cat(" Hi ", i, "\n")
-  imagePlot(ves, dims = i)
+  print(imagePlot(ves, dims = i))
 }
 dev.off()
 file.rename(from = paste0(in.path, fname), to = paste0(out.pathPC, fname))
@@ -240,25 +242,63 @@ file.rename(from = paste0(in.path, fname), to = paste0(out.pathPC, fname))
 
 
 ## Image processing:
-imageSegmentation - not sure about the dims here - is that PC dimensions?
-  - Embedding "last", last what?
+imageSegmentation - dims: number of dimred embeddings
+  - Embedding "last": last dimred method used (if you have multiple dimred obejcts stored in your ves object)
 
 ```{r}
 #vesImSeg <- imageSegmentation(ves, dims = imSegDims, colDepth = colD, smoothIter = smIter, smoothType = "iso", sigma = 2, embedding = "PCA")
-vesImSeg <- imageSegmentation(ves,dims=1:30, colDepth = 5,smoothIter=5,smoothType="iso",sigma =2,embedding = "PCA")
+vesImSeg <- imageSegmentation(ves,dims=1:PCs, colDepth = colD, smoothIter=smIter,smoothType="iso",sigma=2,embedding=meth)
 
 vesTerr <- isolateTerritories(vesImSeg, trial = "last")
 
-vesMark <- extractMarkers(vesTerr, seed = 7)
+vesMark <- extractMarkers(vesTerr, seed = 3, method=st.meth)
 
 vesMorph <- territoryMorphing(vesMark, c(5,6))
 
-vesTerrLay <- layerTerritory(vesMorph, c(28,34,32),morphologyFactor=0,layerDepth=5)
+#vesTerrLay <- layerTerritory(vesMorph, c(28,34,32),morphologyFactor=0,layerDepth=5)
 
-#viewGeneExpression(ves, gene= "Cryba4", as.layer=T,norm=F)
+param <- paste(param, paste0("dims1-", PCs), paste0("colD", colD), paste0("Iter", smIter), "markerMethod", st.meth, sep="_")
 ```
 
 
+
+# Export territory plots to pdf
+
+```{r}
+setwd(in.path)
+fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), alias, param, "VesDev_imageprocessing.pdf", sep="_")
+pdf(fname)
+layout(matrix(c(1,3,2,4), 2, 2))
+print(imagePlot(vesImSeg))
+territoryPlot(vesTerr,cex=10,cex.pt=pt.sz)
+territoryPlot(vesMorph,cex=10,cex.pt=pt.sz)
+dev.off()
+file.rename(from = paste0(in.path, fname), to = paste0(out.pathPC, fname))
+```
+```{r}
+mark <- vesMark@DEG$DEG_Territory_Trial_1
+m.df <- as.data.frame(mark)
+#padj <- m.df[order(m.df$p.value.adj),]
+padj <- slice_min(m.df, order_by=m.df$p.value.adj, prop=0.1)
+#logfc.min <- slice_min(m.df, order_by=m.df$logFC, prop=0.1)
+#logfc.max <- slice_max(m.df, order_by=m.df$logFC, prop=0.1)
+logfc.min <- slice_min(padj, order_by=padj$logFC, prop=0.03)
+logfc.max <- slice_max(padj, order_by=padj$logFC, prop=0.03)
+logfc <- bind_rows(list(logfc.min, logfc.max))
+
+
+```
+
+
+
+
+```{r}
+layout(matrix(c(1,3,2,4), 2, 2))
+for(i in seq_along(logfc)){
+  print(viewGeneExpression(vesMorph, gene=i, as.layer=F,norm=F))
+}
+
+```
 
 
 ## Imsplit for grayscale

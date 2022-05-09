@@ -96,7 +96,7 @@ sparse <- sparseMatrix(i= ctmp[,2],j=ctmp[,1],x=ctmp[,3])
 #Curious about the count distribution values
 max <- sort(sparse@x, decreasing = TRUE)
 
-# Set point size for plotting the UMIs - adjusted for knn later
+# Set point size for plotting the beads/UMIs - adjusted for knn later
 pt.sz <- 0.25
 
 
