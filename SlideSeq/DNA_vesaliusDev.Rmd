@@ -18,7 +18,7 @@ alias <- "mouse_liver_met_2_dna_200114_10"
 
 
 
-norm <- "TFIDF"               # Normalization method: "log","SCT","TFIDF","raw"
+norm <- "TFIDF"             # Normalization method: "log","SCT","TFIDF","raw"
 meth <- "LSI"               # Dimensionality reduction method: "PCA","PCA_L","UMAP","LSI","LSI_UMAP"
 PCs <- 12                   # Number of Principal Components
 plotPC <- 8                 # Number of PC plots to export. 4 plots per pdf page
@@ -208,10 +208,10 @@ Counts either dataframe or sparse matrix.
 
 # Dimensionality Reduction
 Latent space
-PCA / UMAP / tSNE (/Semantic Ves Dev?)
+PCA / UMAP / tSNE (/LSI)
 
 ```{r}
-sparse <- sparse.df
+#sparse <- sparse.df
 sparse <- sparse.spmx
 
 vesalius <- buildVesaliusObject(bead,sparse)
@@ -220,17 +220,18 @@ ves <- buildVesaliusEmbeddings(vesalius, method = meth,
 
 ```
 
-## Plotting vesalius images
+## Plotting vesalius images of the PC or LSI embeddings
 
 Imageplot with chosen number of dimensions for the different PCs
 
 ```{r}
-cat( paste(Sys.time()," Plotting top", plotPC, "PCs and exporting to pdf.\n File located in:", out.pathPC))
+cat( paste(Sys.time()," Plotting top", plotPC, "PCs and exporting to pdf.\n File located in:", out.pathPC, "\n"))
 setwd(in.path)
 fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), alias, param, "VesDev_PCimages.pdf", sep="_")
 pdf(fname)
 layout(matrix(c(1,3,2,4), 2, 2))
 for(i in seq(plotPC)){
+  cat(" Hi ", i, "\n")
   imagePlot(ves, dims = i)
 }
 dev.off()
