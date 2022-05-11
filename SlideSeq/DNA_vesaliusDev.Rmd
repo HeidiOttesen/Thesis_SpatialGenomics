@@ -11,6 +11,7 @@ Specify dataset + Normalisation + dimensionality reduction method and other para
 For 
 
 ```{r}
+start.time <- Sys.time()
 # SlideSeq DNA datasets:
 #alias <- "human_colon_cancer_4_dna_200114_13"
 #alias <- "human_colon_cancer_3_dna_191204_19"
@@ -20,7 +21,7 @@ alias <- "mouse_liver_met_2_dna_200114_10"
 
 norm <- "TFIDF"             # Normalization method: "log","SCT","TFIDF","raw"
 meth <- "LSI"               # Dimensionality reduction method: "PCA","PCA_L","UMAP","LSI","LSI_UMAP"
-PCs <- 12                   # Number of Principal Components
+PCs <- 12                   # Number of Embeddings / dimensions / Principal Components / "LSI topics"
 plotPC <- 8                 # Number of PC plots to export. 4 plots per pdf page
 
 min.count <- 1
@@ -41,7 +42,7 @@ param <- paste(paste0(norm, "Norm"), paste0(meth, PCs), sep = "_")
 
 in.path <- "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/"
 out.path <- "~/Thesis_SpatialGenomics/R_Output/"
-out.pathPC <- "~/Thesis_SpatialGenomics/R_Output/PC_images/"
+out.pathDev <- "~/Thesis_SpatialGenomics/R_Output/VesaliusDev/"
 
 
 ```
@@ -227,26 +228,27 @@ ves <- buildVesaliusEmbeddings(vesalius, method = meth,
 Imageplot with chosen number of dimensions for the different PCs
 
 ```{r}
-cat( paste(Sys.time()," Plotting top", plotPC, "PCs and exporting to pdf.\n File located in:", out.pathPC, "\n"))
+cat( paste(Sys.time()," Plotting top", plotPC, "PCs and exporting to pdf.\n File located in:", out.pathDev, "\n"))
 setwd(in.path)
-fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), alias, param, "VesDev_PCimages.pdf", sep="_")
+fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "Embeddings" alias, param, "VesDev.pdf", sep="_")
 pdf(fname)
 #layout(matrix(c(1,3,2,4), 2, 2))
 for(i in seq(plotPC)){
-  cat(" Hi ", i, "\n")
   print(imagePlot(ves, dims = i))
 }
 dev.off()
-file.rename(from = paste0(in.path, fname), to = paste0(out.pathPC, fname))
+file.rename(from = paste0(in.path, fname), to = paste0(out.pathDev, fname))
+
+print(paste("Runtime so far: ", difftime(Sys.time(), start.time, units="mins"), "min"))
 ```
 
 
 ## Image processing:
 imageSegmentation - dims: number of dimred embeddings
   - Embedding "last": last dimred method used (if you have multiple dimred obejcts stored in your ves object)
+LayerTerritory - not relevant for DNA data?
 
 ```{r}
-#vesImSeg <- imageSegmentation(ves, dims = imSegDims, colDepth = colD, smoothIter = smIter, smoothType = "iso", sigma = 2, embedding = "PCA")
 vesImSeg <- imageSegmentation(ves,dims=1:PCs, colDepth = colD, smoothIter=smIter,smoothType="iso",sigma=2,embedding=meth)
 
 vesTerr <- isolateTerritories(vesImSeg, trial = "last")
@@ -266,14 +268,14 @@ param <- paste(param, paste0("dims1-", PCs), paste0("colD", colD), paste0("Iter"
 
 ```{r}
 setwd(in.path)
-fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), alias, param, "VesDev_imageprocessing.pdf", sep="_")
+fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "ImageProcessing", alias, param, "VesDev.pdf", sep="_")
 pdf(fname)
 layout(matrix(c(1,3,2,4), 2, 2))
 print(imagePlot(vesImSeg))
 territoryPlot(vesTerr,cex=10,cex.pt=pt.sz)
 territoryPlot(vesMorph,cex=10,cex.pt=pt.sz)
 dev.off()
-file.rename(from = paste0(in.path, fname), to = paste0(out.pathPC, fname))
+file.rename(from = paste0(in.path, fname), to = paste0(out.pathDev, fname))
 ```
 ```{r}
 mark <- vesMark@DEG$DEG_Territory_Trial_1
@@ -282,9 +284,9 @@ m.df <- as.data.frame(mark)
 padj <- slice_min(m.df, order_by=m.df$p.value.adj, prop=0.1)
 #logfc.min <- slice_min(m.df, order_by=m.df$logFC, prop=0.1)
 #logfc.max <- slice_max(m.df, order_by=m.df$logFC, prop=0.1)
-logfc.min <- slice_min(padj, order_by=padj$logFC, prop=0.03)
-logfc.max <- slice_max(padj, order_by=padj$logFC, prop=0.03)
-logfc <- bind_rows(list(logfc.min, logfc.max))
+logfc.min <- slice_min(padj, order_by=padj$logFC, prop=0.08)
+logfc.max <- slice_max(padj, order_by=padj$logFC, prop=0.08)
+int.bins <- bind_rows(list(logfc.min, logfc.max))
 
 
 ```
@@ -294,10 +296,24 @@ logfc <- bind_rows(list(logfc.min, logfc.max))
 
 ```{r}
 layout(matrix(c(1,3,2,4), 2, 2))
-for(i in seq_along(logfc)){
-  print(viewGeneExpression(vesMorph, gene=i, as.layer=F,norm=F))
+for(i in seq_along(int.bins$genes)){
+  print(viewGeneExpression(vesMorph, gene=int.bins$genes[[i]], as.layer=F,norm=F))
 }
 
+```
+```{r}
+
+bin.file <- read.table("~/Thesis_SpatialGenomics/SlideSeq/GroupSlideSeq/hg19_1Mb_bins.txt", header = T)
+chr <- data_frame()
+for(i in seq_along(logfc$genes)){
+  x <- as.list(subset(bin.file, bin_ind==int.bins$genes[[i]]))
+  chr <- bind_rows(chr, x)
+}
+
+chr <- chr[order(chr$chr_ind),]
+
+print(int.bins)
+print(chr)
 ```
 
 
