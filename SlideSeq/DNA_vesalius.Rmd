@@ -55,8 +55,8 @@ dimred <- "3slice_PCA" #(3 PCs -> 1 slice as 3 colour channels, 3 slices = 9 top
 in.path <- "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/"
 out.path <- "~/Thesis_SpatialGenomics/R_Output/Vesalius1.0/"
 
-#min.count <- 2
-#max.count <- 6
+min.count <- 1
+max.count <- 6
 
 k <- 20
 #knn.type <- "Unique"
@@ -297,9 +297,16 @@ if(grepl("UMAP",dimred)){
   ctmp <- rgbPCA(ctmp, slices = slice, conserveSparse = FALSE)
 } else if(grepl("tSNE",dimred)){
 }
+#ctmp1 <- ctmp
+#ctmp <- ctmp1
+#colnames(ctmp) <- c("barcodes", "x.y", "y.y", "cc", "value", "slice")
 
 ```
 
+Did Patrick change the column names needed here in rasterising tiles?
+2022-05-12 00:17:32  Rasterising Tiles 
+Error in `[.data.frame`(coordinates, , c("barcodes", "x.y", "y.y", "cc",  : 
+  undefined columns selected
 
 
 

@@ -1,0 +1,316 @@
+---
+title: "SlideSeqRNA_Vesalius_Dev"
+output: html_document
+---
+
+
+## Settings - Parameters etc
+
+Specify dataset + Normalisation + dimensionality reduction method and other parameters
+
+For 
+
+```{r}
+start.time <- Sys.time()
+# SlideSeq RNA datasets:
+
+alias <- "mouse_liver_met_2_rna_201002_04"
+
+#alias <- "human_colon_cancer_4_rna_200102_06"
+
+
+
+
+norm <- "SCT"             # Normalization method: "log","SCT","TFIDF","raw"
+meth <- "UMAP"               # Dimensionality reduction method: "PCA","PCA_L","UMAP","LSI","LSI_UMAP"
+PCs <- 12                   # Number of Embeddings / dimensions / Principal Components / "LSI topics"
+plotPC <- 8                 # Number of PC plots to export. 4 plots per pdf page
+
+
+cores <- 5
+
+colD <- 6                   # Column Depth (3-6)
+smIter <- 10                # Smoothing Iterations
+#imSegDims <- 4             # Image Segmentation Dimensions
+st.meth <- "t.test"          #Statistical method for extracting markers/bins, "wilcox", "t.test", "chisq"
+
+
+param <- paste(paste0(norm, "Norm"), paste0(meth, PCs), sep = "_")
+
+in.path <- "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/"
+out.path <- "~/Thesis_SpatialGenomics/R_Output/"
+out.pathDev <- "~/Thesis_SpatialGenomics/R_Output/VesaliusDev/"
+
+
+```
+
+In paper they do k 50 for smoothing the beads before PCA (mouse liver)
+
+## Load packages needed
+
+```{r setup, include=FALSE}
+knitr::opts_knit$set(root.dir = "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/")
+knitr::opts_chunk$set(echo = TRUE)
+library(imagerExtra)
+library(Seurat)
+library(ggplot2)
+library(patchwork)
+library(viridis)
+library(RColorBrewer)
+library(dplyr)
+library(tvR)
+library(Signac)
+library(sp)
+library(spdep)
+library(grid)
+library(gridExtra)
+library(Matrix)
+library(MatrixExtra)
+
+
+files <- list.files("~/Thesis_SpatialGenomics/VesaliusDev_2022/Vesalius/R",pattern = ".R")
+files <- paste0("~/Thesis_SpatialGenomics/VesaliusDev_2022/Vesalius/R/",files)
+for(i in seq_along(files)){
+  source(files[i])
+}
+
+# Standard libraries - just in case you are a command line fiend
+library(utils)
+library(stats)
+library(graphics)
+library(grDevices)
+### Set seed
+set.seed(1)
+```
+
+
+
+## Read data from files
+Vectors:
+barcodes    -     holds the barcode sequences
+sparse      -     Sparse count matrix, dgCMatrix
+
+```{r}
+counts <- paste0(in.path, alias, ".sparse_expression.txt")
+bead <- ReadSlideSeq(paste0(in.path, alias, ".bead_locations.csv"))
+
+barcodes <- rownames(bead@coordinates)
+
+sep = "," #separator used in this count matrix
+ctmp <- read.table(counts, header = TRUE, sep=sep ) %>% na.exclude()
+rownames(ctmp) <- ctmp[,1] #Non-Unique values - are these the genes/features?
+ctmp <- ctmp[,-1]
+
+sparse <- sparseMatrix(i= ctmp[,2],j=ctmp[,1],x=ctmp[,3]) 
+
+# Set point size for plotting the UMIs - adjusted for knn later
+pt.sz <- 0.25
+```
+
+
+
+## Name column/rows in sparse matrix
+Assign bin index numbers to identify the rows. 
+Assign the barcodes to identify the columns
+
+```{r}
+colnames(sparse) <- barcodes
+rownames(sparse) <- bins
+```
+
+#Remove outlier counts
+Expected CNA varies between 
+High outlier counts might represent mitochondrial DNA bins
+
+
+```{r}
+
+if(exists("min.count")){
+  sparse <- filterSparse(sparse, function(x) x >= min.count)
+}
+if(exists("max.count")){
+  sparse <- filterSparse(sparse, function(x) x <= max.count)
+  miax <- paste0("counts", min.count, "-", max.count)
+  param <- paste(miax, param, sep="_")
+}
+
+
+```
+
+
+## Vector holders - Checkpoint
+
+```{r}
+df1 <- as.matrix(sparse) 
+bead1 <- bead
+param1 <- param
+
+df <- df1
+bead <- bead1
+param <- param1
+```
+
+
+## Run KNN
+- Decide between only using each barcode once (KNN.DNA.Unique function)
+  or having many duplicate groups of barcodes, each barcode gets a group of k nearest neighbors (KNN.DNA function)
+
+
+```{r}
+if(exists("k")){
+  if(knn.type == "Unique"){
+    ls <- KNN.DNA.Unique(bead, df, k)
+  }else{
+    ls <- KNN.DNA(bead, df, k)
+  }
+  param <- paste(param, paste0("knn", knn.type, k), sep="_")
+  sparse <- ls[[1]] #Retrieve sparse matrix output from knn function
+  bead <- ls[[2]] #Retrieve Bead info (barcodes and coordinates) in SlideSeq assay format compatible with Seurat/Vesalius object
+
+  pt.sz <- k/15 #Adjusting point size for plotting
+  rm(ls)
+}
+
+bead <- cbind(rownames(bead), bead[[1]], bead[[2]])
+colnames(bead) <- c("barcodes","xcoord","ycoord")
+bead <- as.data.frame(bead)
+bead <- transform(bead, xcoord = as.numeric(xcoord), 
+               ycoord = as.numeric(ycoord))
+
+sparse.df <- as.data.frame(sparse)
+sparse.spmx <- Matrix(sparse, sparse = TRUE)
+
+```
+
+## Create Vesalius Object - Milestone
+Based on the counts and bead coordinates
+
+Beads in data.frame format - coordinates numerical
+Counts either dataframe or sparse matrix.
+
+# Dimensionality Reduction
+Latent space
+PCA / UMAP / tSNE (/LSI)
+
+set filterThreshold to remove outlier beads (0.99)
+```{r}
+#sparse <- sparse.df
+sparse <- sparse.spmx
+
+vesalius <- buildVesaliusObject(bead,sparse)
+ves <- buildVesaliusEmbeddings(vesalius, method = meth, 
+  norm = norm, pcs = PCs, tensorResolution = 0.1, cores = cores, filterThreshold =0.99)
+
+```
+
+## Plotting vesalius images of the PC or LSI embeddings
+
+Imageplot with chosen number of dimensions for the different PCs
+
+```{r}
+cat( paste(Sys.time()," Plotting top", plotPC, "PCs and exporting to pdf.\n File located in:", out.pathDev, "\n"))
+setwd(in.path)
+fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "Embeddings", alias, param, "VesDev.pdf", sep="_")
+pdf(fname)
+#layout(matrix(c(1,3,2,4), 2, 2))
+for(i in seq(plotPC)){
+  print(imagePlot(ves, dims = i))
+}
+dev.off()
+file.rename(from = paste0(in.path, fname), to = paste0(out.pathDev, fname))
+
+print(paste("Runtime so far: ", difftime(Sys.time(), start.time, units="mins"), "min"))
+```
+
+
+## Image processing:
+imageSegmentation - dims: number of dimred embeddings
+  - Embedding "last": last dimred method used (if you have multiple dimred obejcts stored in your ves object)
+LayerTerritory - not relevant for DNA data?
+
+```{r}
+vesImSeg <- imageSegmentation(ves,dims=1:PCs, colDepth = colD, smoothIter=smIter,smoothType="iso",sigma=2,embedding=meth)
+
+vesTerr <- isolateTerritories(vesImSeg, trial = "last")
+
+vesMark <- extractMarkers(vesTerr, seed = 3, method=st.meth)
+
+vesMorph <- territoryMorphing(vesMark, c(5,6))
+
+#vesTerrLay <- layerTerritory(vesMorph, c(28,34,32),morphologyFactor=0,layerDepth=5)
+
+param <- paste(param, paste0("dims1-", PCs), paste0("colD", colD), paste0("Iter", smIter), "markerMethod", st.meth, sep="_")
+```
+
+
+
+# Export territory plots to pdf
+
+```{r}
+setwd(in.path)
+fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "ImageProcessing", alias, param, "VesDev.pdf", sep="_")
+pdf(fname)
+layout(matrix(c(1,3,2,4), 2, 2))
+print(imagePlot(vesImSeg))
+territoryPlot(vesTerr,cex=10,cex.pt=pt.sz)
+territoryPlot(vesMorph,cex=10,cex.pt=pt.sz)
+dev.off()
+file.rename(from = paste0(in.path, fname), to = paste0(out.pathDev, fname))
+```
+```{r}
+mark <- vesMark@DEG$DEG_Territory_Trial_1
+m.df <- as.data.frame(mark)
+#padj <- m.df[order(m.df$p.value.adj),]
+padj <- slice_min(m.df, order_by=m.df$p.value.adj, prop=0.5)
+#logfc.min <- slice_min(m.df, order_by=m.df$logFC, prop=0.1)
+#logfc.max <- slice_max(m.df, order_by=m.df$logFC, prop=0.1)
+logfc.min <- slice_min(padj, order_by=padj$logFC, prop=0.1)
+logfc.max <- slice_max(padj, order_by=padj$logFC, prop=0.1)
+int.bins <- bind_rows(list(logfc.min, logfc.max))
+
+
+```
+
+
+
+
+```{r}
+setwd(in.path)
+fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "MarkerBins", alias, param, "VesDev.pdf", sep="_")
+pdf(fname)
+layout(matrix(c(1,3,2,4), 2, 2))
+for(i in seq_along(int.bins$genes)){
+  print(viewGeneExpression(vesMorph, gene=int.bins$genes[[i]], as.layer=F,norm=F))
+}
+dev.off()
+file.rename(from = paste0(in.path, fname), to = paste0(out.pathDev, fname))
+
+
+
+
+```
+```{r}
+p <- list()
+for(i in seq(4)){
+  p[[i]] <- viewGeneExpression(vesMorph, gene=int.bins$genes[[i]], as.layer=F,norm=F)
+}
+grid.arrange(p[[1]], p[[2]], nrow = 2)
+```
+
+
+```{r}
+
+bin.file <- read.table("~/Thesis_SpatialGenomics/SlideSeq/GroupSlideSeq/mm10_1Mb_bins.txt", header = T)
+chr <- data_frame()
+for(i in seq_along(int.bins$genes)){
+  x <- as.list(subset(bin.file, bin_ind==int.bins$genes[[i]]))
+  chr <- bind_rows(chr, x)
+}
+
+chr <- chr[order(chr$chr_ind),]
+
+print(int.bins)
+print(chr)
+```
+
+
