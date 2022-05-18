@@ -101,12 +101,16 @@ ctmp <- read.table(counts, header = TRUE, sep=sep ) %>% na.exclude()
 #rownames(ctmp) <- ctmp[,1] #Non-Unique values - are these the genes/features?
 #ctmp <- ctmp[,-1]
 
-sparse <- sparseMatrix(i= ctmp[,2],j=ctmp[,1],x=ctmp[,3]) 
+sparse <- sparseMatrix(i= ctmp[,2],j=ctmp[,1],x=ctmp[,3]) ##change this to get the same column vs row (barcode and feature) as with DNA
 
 # Set point size for plotting the UMIs - adjusted for knn later
 pt.sz <- 0.25
 ```
 
+
+Mouse liver metastasis 2:
+Barcodes: 31290
+Features: 21902
 
 
 ## Name column/rows in sparse matrix

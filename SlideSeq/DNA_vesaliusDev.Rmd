@@ -8,7 +8,7 @@ output: html_document
 
 Specify dataset + Normalisation + dimensionality reduction method and other parameters
 
-For 
+For DNA use log and PCA, or use TFIDF and LSI?
 
 ```{r}
 start.time <- Sys.time()
@@ -19,10 +19,10 @@ alias <- "mouse_liver_met_2_dna_200114_10"
 
 
 
-norm <- "TFIDF"             # Normalization method: "log","SCT","TFIDF","raw"
-meth <- "LSI"               # Dimensionality reduction method: "PCA","PCA_L","UMAP","LSI","LSI_UMAP"
+norm <- "log"             # Normalization method: "log","SCT","TFIDF","raw"
+meth <- "PCA"               # Dimensionality reduction method: "PCA","PCA_L","UMAP","LSI","LSI_UMAP"
 PCs <- 12                   # Number of Embeddings / dimensions / Principal Components / "LSI topics"
-plotPC <- 8                 # Number of PC plots to export. 4 plots per pdf page
+plotPC <- 8                 # Number of PC plots to export.
 
 min.count <- 1
 max.count <- 6
@@ -140,8 +140,8 @@ rownames(sparse) <- bins
 ```
 
 #Remove outlier counts
-Expected CNA varies between 
-High outlier counts might represent mitochondrial DNA bins
+Expected CNA varies between 0-6? (Total deletion and double duplication?)
+High outlier counts might represent mitochondrial DNA bins (probably not since I only have chromosomes in my bins list?) or repeated elements or other errors?
 
 
 ```{r}
@@ -231,7 +231,7 @@ Imageplot with chosen number of dimensions for the different PCs
 ```{r}
 cat( paste(Sys.time()," Plotting top", plotPC, "PCs and exporting to pdf.\n File located in:", out.pathDev, "\n"))
 setwd(in.path)
-fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "Embeddings", alias, param, "VesDev.pdf", sep="_")
+fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "Embeddings", alias, param, sep="_")
 pdf(fname)
 #layout(matrix(c(1,3,2,4), 2, 2))
 for(i in seq(plotPC)){
@@ -249,12 +249,19 @@ imageSegmentation - dims: number of dimred embeddings
   - Embedding "last": last dimred method used (if you have multiple dimred obejcts stored in your ves object)
 LayerTerritory - not relevant for DNA data?
 
+ExtractMarkers - DGE between selected territories
+  Takes like 15mins - if not specifying seed and query..
+  Seed - set to 3 because? - Territories to be included in group 1 for DiffGeneExp
+    If I say 3 - does it only use territory 3 for comparison or does it compare 3 different territories?
+  Query - Territories to be included in group 2 of DGE.
+  
+
 ```{r}
 vesImSeg <- imageSegmentation(ves,dims=1:PCs, colDepth = colD, smoothIter=smIter,smoothType="iso",sigma=2,embedding=meth)
 
 vesTerr <- isolateTerritories(vesImSeg, trial = "last")
 
-vesMark <- extractMarkers(vesTerr, seed = 3, method=st.meth)
+vesMark <- extractMarkers(vesTerr, method=st.meth, pval=0.005)
 
 vesMorph <- territoryMorphing(vesMark, c(5,6))
 
@@ -266,18 +273,22 @@ param <- paste(param, paste0("dims1-", PCs), paste0("colD", colD), paste0("Iter"
 
 
 # Export territory plots to pdf
+Is there a difference between the territory isolation and the territory morphing?
+Also plot the first imagesegmentation
 
 ```{r}
 setwd(in.path)
-fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "ImageProcessing", alias, param, "VesDev.pdf", sep="_")
+fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "Territories", alias, param, sep="_")
 pdf(fname)
 layout(matrix(c(1,3,2,4), 2, 2))
-print(imagePlot(vesImSeg))
 territoryPlot(vesTerr,cex=10,cex.pt=pt.sz)
 territoryPlot(vesMorph,cex=10,cex.pt=pt.sz)
+print(imagePlot(vesImSeg))
 dev.off()
 file.rename(from = paste0(in.path, fname), to = paste0(out.pathDev, fname))
 ```
+## Pick top marker bins
+
 ```{r}
 mark <- vesMark@DEG$DEG_Territory_Trial_1
 m.df <- as.data.frame(mark)
@@ -293,15 +304,19 @@ int.bins <- bind_rows(list(logfc.min, logfc.max))
 ```
 
 
+## Plot marker bins
+Investigate individual marker bins over the whole tissue slice.
+Are some bin patterns correlating with the territory regions?
 
+The beads are overlapping - change cex size from default 10 to less - or change alpha to change opacity/transparency
 
 ```{r}
 setwd(in.path)
-fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "MarkerBins", alias, param, "VesDev.pdf", sep="_")
+fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "MarkerBins", alias, param, sep="_")
 pdf(fname)
 layout(matrix(c(1,3,2,4), 2, 2))
 for(i in seq_along(int.bins$genes)){
-  print(viewGeneExpression(vesMorph, gene=int.bins$genes[[i]], as.layer=F,norm=F))
+  print(viewGeneExpression(vesMorph, gene=int.bins$genes[[i]], as.layer=F,norm=F,cex=2))
 }
 dev.off()
 file.rename(from = paste0(in.path, fname), to = paste0(out.pathDev, fname))
@@ -334,4 +349,19 @@ print(int.bins)
 print(chr)
 ```
 
+
+
+
+
+
+Comparing territories
+Finding marker bins between chosen territories
+
+seed against query
+
+```{r}
+seed <- vector()
+
+ves <- extractMarkers(ves,seed=7)
+```
 

@@ -64,19 +64,19 @@ and create a sparse count matrix. (mostly 0's, bins as columns and barcodes as r
 
 ```{r}
 
-counts <- paste0(in.path, alias, ".sparse_expression.txt")
-bead <- ReadSlideSeq(paste0(in.path, alias, ".bead_locations.csv"))
+counts1 <- paste0(in.path, alias, ".sparse_expression.txt")
+bead1 <- ReadSlideSeq(paste0(in.path, alias, ".bead_locations.csv"))
 
 
 
 #Collect the 1000s of barcode sequences from the bead locations file
-barcodes <- rownames(bead@coordinates)
+barcodes1 <- rownames(bead@coordinates)
 
 #separator used in this count matrix
 sep = ","
-ctmp <- read.table(counts, header = TRUE, sep=sep ) %>% na.exclude()
+ctmp1 <- read.table(counts, header = TRUE, sep=sep ) %>% na.exclude()
 # Create DG matrix: i + j - row and column index - maybe a mix of row and columns - do as.counts instead
-sparse <- sparseMatrix(i= ctmp[,2],j=ctmp[,1],x=ctmp[,3]) 
+sparse1 <- sparseMatrix(i= ctmp[,2],j=ctmp[,1],x=ctmp[,3]) 
 
 #Curious about the count distribution values
 max <- sort(sparse@x, decreasing = TRUE)
