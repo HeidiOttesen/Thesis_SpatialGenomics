@@ -98,8 +98,8 @@ barcodes <- rownames(bead@coordinates)
 
 sep = "," #separator used in this count matrix
 ctmp <- read.table(counts, header = TRUE, sep=sep ) %>% na.exclude()
-rownames(ctmp) <- ctmp[,1] #Non-Unique values - are these the genes/features?
-ctmp <- ctmp[,-1]
+#rownames(ctmp) <- ctmp[,1] #Non-Unique values - are these the genes/features?
+#ctmp <- ctmp[,-1]
 
 sparse <- sparseMatrix(i= ctmp[,2],j=ctmp[,1],x=ctmp[,3]) 
 
