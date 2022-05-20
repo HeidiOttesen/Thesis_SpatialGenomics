@@ -250,11 +250,6 @@ imageSegmentation - iterative k-means clustering
   - Embedding "last": last dimred method used (if you have multiple dimred obejcts stored in your ves object)
 LayerTerritory - not relevant for DNA data?
 
-ExtractMarkers - DGE between selected territories
-  Takes like 20 mins - if not specifying seed and query..
-  Seed - set to 3 because? - Territories to be included in group 1 for DiffGeneExp
-    If I say 3 - does it only use territory 3 for comparison or does it compare 3 different territories?
-  Query - Territories to be included in group 2 of DGE.
   
 
 ```{r}
@@ -262,13 +257,7 @@ vesImSeg <- imageSegmentation(ves,dims=1:PCs, colDepth = colD, smoothIter=smIter
 
 vesTerr <- isolateTerritories(vesImSeg, trial = "last")
 
-vesMark <- extractMarkers(vesTerr, method=st.meth, pval=0.05)
-
-vesMorph <- territoryMorphing(vesMark, c(5,6))
-
-#vesTerrLay <- layerTerritory(vesMorph, c(28,34,32),morphologyFactor=0,layerDepth=5)
-
-param <- paste(param, paste0("dims1-", PCs), paste0("colD", colD), paste0("Iter", smIter), paste0("markerMethod", st.meth), sep="_")
+param <- paste(param, paste0("dims1-", PCs), paste0("colD", colD), paste0("Iter", smIter), sep="_")
 print(paste("Runtime so far: ", difftime(Sys.time(), start.time, units="mins"), "min"))
 ```
 
@@ -288,17 +277,64 @@ print(imagePlot(vesImSeg))
 dev.off()
 file.rename(from = paste0(in.path, fname), to = paste0(out.pathDev, fname))
 ```
+
+## Extract marker bins and morph territories
+ExtractMarkers - DGE between selected territories - identify marker bins
+  - Takes like 20 mins - if not specifying seed and query..
+  - Seed - set to 3 because? - Territories to be included in group 1 for DiffGeneExp
+    - If I say 3 - does it only use territory 3 for comparison or does it compare 3 different territories?
+  - Query - Territories to be included in group 2 of DGE.
+
+
+seed against query - pick territories manually!! based on the territory plot
+  - eg inner vs outer part of metastasis
+  - outer part vs normal
+  - outer part vs other metastasis
+  
+Output:
+ - p.value,
+ - logFC,
+ - seedPct (percentage of cells containing gene in first group),
+ - queryPct (percentage of cells containing gene in second group),
+ - seedTerritory (territory used as group 1)
+ - queryTerritory (territory used as group 2)
+  
+TerritoryMorphing
+ - 
+
+```{r}
+territoryPlot(vesMorph,cex=10,cex.pt=pt.sz)
+
+# Specify territories for comparison, seed vs query
+vs <- "MetVsMetastasis"
+s <- c(8,7)
+q <- c(2,3)
+
+vesMark <- extractMarkers(vesTerr,method=st.meth, seed=s, query=q, pval=0.05)
+
+vesMorph <- territoryMorphing(vesMark, c(5,6))
+
+#vesTerrLay <- layerTerritory(vesMorph, c(28,34,32),morphologyFactor=0,layerDepth=5)
+
+param <- paste(param, paste0("markerMethod", st.meth), sep="_")
+print(paste("Runtime so far: ", difftime(Sys.time(), start.time, units="mins"), "min"))
+```
+
+
+
+
+
 ## Pick top marker bins
 
 ```{r}
 mark <- vesMark@DEG$DEG_Territory_Trial_1
 m.df <- as.data.frame(mark)
 #padj <- m.df[order(m.df$p.value.adj),]
-padj <- slice_min(m.df, order_by=m.df$p.value.adj, prop=0.05)
+padj <- slice_min(m.df, order_by=m.df$p.value.adj, n=50)
 #logfc.min <- slice_min(m.df, order_by=m.df$logFC, prop=0.1)
 #logfc.max <- slice_max(m.df, order_by=m.df$logFC, prop=0.1)
-logfc.min <- slice_min(padj, order_by=padj$logFC, prop=0.05)
-logfc.max <- slice_max(padj, order_by=padj$logFC, prop=0.05)
+logfc.min <- slice_min(padj, order_by=padj$logFC, n=5)
+logfc.max <- slice_max(padj, order_by=padj$logFC, n=5)
 int.bins <- bind_rows(list(logfc.min, logfc.max))
 
 
@@ -312,15 +348,17 @@ Are some bin patterns correlating with the territory regions?
 The beads are overlapping - change cex size from default 10 to less - or change alpha to change opacity/transparency
 
 ```{r}
-#setwd(in.path)
-#fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "MarkerBins", alias, param, ".pdf", sep="_")
-#pdf(fname)
-#layout(matrix(c(1,3,2,4), 2, 2))
+setwd(in.path)
+fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "MarkerBins", vs, alias, param, "layer-TRUE", ".pdf", sep="_")
+pdf(fname)
+layout(matrix(c(1,3,2,4), 2, 2))
 for(i in seq_along(int.bins$genes)){
-  print(viewGeneExpression(vesMorph, gene=int.bins$genes[[i]], as.layer=F,norm=F,cex=2))
+  print(viewGeneExpression(vesMorph, gene=int.bins$genes[[i]], as.layer=TRUE,norm=F,cex=0.5))
+  #p <- as.cimg(viewGeneExpression(vesMorph, gene=int.bins$genes[[i]], as.layer=F,norm=F,cex=2))
+  #print(p)
 }
-#dev.off()
-#file.rename(from = paste0(in.path, fname), to = paste0(out.pathDev, fname))
+dev.off()
+file.rename(from = paste0(in.path, fname), to = paste0(out.pathDev, fname))
 
 
 
@@ -331,21 +369,10 @@ for(i in seq_along(int.bins$genes)){
 
 
 
-## Comparing territories
-Finding marker bins between chosen territories
-seed against query - pick territories manually!! based on the territory plot
-  - eg inner vs outer part of metastasis
-  - outer part vs normal
-  - outer part vs other metastasis
+
 
 ```{r}
-territoryPlot(vesMorph,cex=10,cex.pt=pt.sz)
 
-# Specify territories for comparison, seed vs query
-s <- 12
-q <- 11
-
-ves <- extractMarkers(vesTerr,seed=s, query=q)
 
 mark <- ves@DEG$DEG_Territory_Trial_1
 m.df <- as.data.frame(mark)
