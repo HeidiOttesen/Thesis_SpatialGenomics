@@ -19,15 +19,15 @@ alias <- "mouse_liver_met_2_dna_200114_10"
 
 
 
-norm <- "log"             # Normalization method: "log","SCT","TFIDF","raw"
-meth <- "PCA"               # Dimensionality reduction method: "PCA","PCA_L","UMAP","LSI","LSI_UMAP"
-PCs <- 12                   # Number of Embeddings / dimensions / Principal Components / "LSI topics"
-plotPC <- 8                 # Number of PC plots to export.
+norm <- "TFIDF"             # Normalization method: "log","SCT","TFIDF","raw"
+meth <- "LSI"               # Dimensionality reduction method: "PCA","PCA_L","UMAP","LSI","LSI_UMAP"
+PCs <- 6                    # Number of Embeddings / dimensions / Principal Components / "LSI topics"
+plotPC <- 6                 # Number of PC plots to export.
 
-min.count <- 1
+min.count <- 0
 max.count <- 6
 
-k <- 10
+k <- 5
 knn.type <- "Duplicate"     # KNN method: "Unique", "Duplicate"
 
 cores <- 5
@@ -231,7 +231,7 @@ Imageplot with chosen number of dimensions for the different PCs
 ```{r}
 cat( paste(Sys.time()," Plotting top", plotPC, "PCs and exporting to pdf.\n File located in:", out.pathDev, "\n"))
 setwd(in.path)
-fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "Embeddings", alias, param, sep="_")
+fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "Embeddings", alias, paste0(param, ".pdf"), sep="_")
 pdf(fname)
 #layout(matrix(c(1,3,2,4), 2, 2))
 for(i in seq(plotPC)){
@@ -245,12 +245,13 @@ print(paste("Runtime so far: ", difftime(Sys.time(), start.time, units="mins"), 
 
 
 ## Image processing:
-imageSegmentation - dims: number of dimred embeddings
+imageSegmentation - iterative k-means clustering
+  - dims: number of dimred embeddings
   - Embedding "last": last dimred method used (if you have multiple dimred obejcts stored in your ves object)
 LayerTerritory - not relevant for DNA data?
 
 ExtractMarkers - DGE between selected territories
-  Takes like 15mins - if not specifying seed and query..
+  Takes like 20 mins - if not specifying seed and query..
   Seed - set to 3 because? - Territories to be included in group 1 for DiffGeneExp
     If I say 3 - does it only use territory 3 for comparison or does it compare 3 different territories?
   Query - Territories to be included in group 2 of DGE.
@@ -261,13 +262,14 @@ vesImSeg <- imageSegmentation(ves,dims=1:PCs, colDepth = colD, smoothIter=smIter
 
 vesTerr <- isolateTerritories(vesImSeg, trial = "last")
 
-vesMark <- extractMarkers(vesTerr, method=st.meth, pval=0.005)
+vesMark <- extractMarkers(vesTerr, method=st.meth, pval=0.05)
 
 vesMorph <- territoryMorphing(vesMark, c(5,6))
 
 #vesTerrLay <- layerTerritory(vesMorph, c(28,34,32),morphologyFactor=0,layerDepth=5)
 
-param <- paste(param, paste0("dims1-", PCs), paste0("colD", colD), paste0("Iter", smIter), "markerMethod", st.meth, sep="_")
+param <- paste(param, paste0("dims1-", PCs), paste0("colD", colD), paste0("Iter", smIter), paste0("markerMethod", st.meth), sep="_")
+print(paste("Runtime so far: ", difftime(Sys.time(), start.time, units="mins"), "min"))
 ```
 
 
@@ -278,11 +280,10 @@ Also plot the first imagesegmentation
 
 ```{r}
 setwd(in.path)
-fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "Territories", alias, param, sep="_")
+fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "Territories", alias, paste0(param, ".pdf"), sep="_")
 pdf(fname)
 layout(matrix(c(1,3,2,4), 2, 2))
 territoryPlot(vesTerr,cex=10,cex.pt=pt.sz)
-territoryPlot(vesMorph,cex=10,cex.pt=pt.sz)
 print(imagePlot(vesImSeg))
 dev.off()
 file.rename(from = paste0(in.path, fname), to = paste0(out.pathDev, fname))
@@ -293,11 +294,11 @@ file.rename(from = paste0(in.path, fname), to = paste0(out.pathDev, fname))
 mark <- vesMark@DEG$DEG_Territory_Trial_1
 m.df <- as.data.frame(mark)
 #padj <- m.df[order(m.df$p.value.adj),]
-padj <- slice_min(m.df, order_by=m.df$p.value.adj, prop=0.5)
+padj <- slice_min(m.df, order_by=m.df$p.value.adj, prop=0.05)
 #logfc.min <- slice_min(m.df, order_by=m.df$logFC, prop=0.1)
 #logfc.max <- slice_max(m.df, order_by=m.df$logFC, prop=0.1)
-logfc.min <- slice_min(padj, order_by=padj$logFC, prop=0.1)
-logfc.max <- slice_max(padj, order_by=padj$logFC, prop=0.1)
+logfc.min <- slice_min(padj, order_by=padj$logFC, prop=0.05)
+logfc.max <- slice_max(padj, order_by=padj$logFC, prop=0.05)
 int.bins <- bind_rows(list(logfc.min, logfc.max))
 
 
@@ -311,20 +312,67 @@ Are some bin patterns correlating with the territory regions?
 The beads are overlapping - change cex size from default 10 to less - or change alpha to change opacity/transparency
 
 ```{r}
-setwd(in.path)
-fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "MarkerBins", alias, param, sep="_")
-pdf(fname)
-layout(matrix(c(1,3,2,4), 2, 2))
+#setwd(in.path)
+#fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "MarkerBins", alias, param, ".pdf", sep="_")
+#pdf(fname)
+#layout(matrix(c(1,3,2,4), 2, 2))
 for(i in seq_along(int.bins$genes)){
   print(viewGeneExpression(vesMorph, gene=int.bins$genes[[i]], as.layer=F,norm=F,cex=2))
 }
-dev.off()
-file.rename(from = paste0(in.path, fname), to = paste0(out.pathDev, fname))
+#dev.off()
+#file.rename(from = paste0(in.path, fname), to = paste0(out.pathDev, fname))
 
 
 
 
 ```
+
+
+
+
+
+## Comparing territories
+Finding marker bins between chosen territories
+seed against query - pick territories manually!! based on the territory plot
+  - eg inner vs outer part of metastasis
+  - outer part vs normal
+  - outer part vs other metastasis
+
+```{r}
+territoryPlot(vesMorph,cex=10,cex.pt=pt.sz)
+
+# Specify territories for comparison, seed vs query
+s <- 12
+q <- 11
+
+ves <- extractMarkers(vesTerr,seed=s, query=q)
+
+mark <- ves@DEG$DEG_Territory_Trial_1
+m.df <- as.data.frame(mark)
+#padj <- m.df[order(m.df$p.value.adj),]
+padj <- slice_min(m.df, order_by=m.df$p.value.adj, prop=0.1)
+#logfc.min <- slice_min(m.df, order_by=m.df$logFC, prop=0.1)
+#logfc.max <- slice_max(m.df, order_by=m.df$logFC, prop=0.1)
+logfc.min <- slice_min(padj, order_by=padj$logFC, prop=0.3)
+logfc.max <- slice_max(padj, order_by=padj$logFC, prop=0.3)
+int.bins <- bind_rows(list(logfc.min, logfc.max))
+
+for(i in seq_along(int.bins$genes)){
+  print(viewGeneExpression(vesMorph, gene=int.bins$genes[[i]], as.layer=F,norm=F,cex=2))
+}
+
+```
+
+
+
+
+
+
+
+
+
+
+
 ```{r}
 p <- list()
 for(i in seq(4)){
@@ -332,6 +380,9 @@ for(i in seq(4)){
 }
 grid.arrange(p[[1]], p[[2]], nrow = 2)
 ```
+
+## Where are the bins?
+In which chromosomes and where can we find the marker bins of interest. 
 
 
 ```{r}
@@ -343,6 +394,7 @@ for(i in seq_along(int.bins$genes)){
   chr <- bind_rows(chr, x)
 }
 
+chr <- chr[order(chr$bin_start),]
 chr <- chr[order(chr$chr_ind),]
 
 print(int.bins)
@@ -350,18 +402,4 @@ print(chr)
 ```
 
 
-
-
-
-
-Comparing territories
-Finding marker bins between chosen territories
-
-seed against query
-
-```{r}
-seed <- vector()
-
-ves <- extractMarkers(ves,seed=7)
-```
 
