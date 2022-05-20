@@ -15,7 +15,9 @@ start.time <- Sys.time()
 # SlideSeq DNA datasets:
 #alias <- "human_colon_cancer_4_dna_200114_13"
 #alias <- "human_colon_cancer_3_dna_191204_19"
-alias <- "mouse_liver_met_2_dna_200114_10"
+#alias <- "mouse_liver_met_2_dna_200114_10"
+#alias <- "mouse_liver_met_1_dna_191114_05"
+alias <- "mouse_liver_met_1_dna_191114_06"
 
 
 
@@ -42,7 +44,7 @@ param <- paste(paste0(norm, "Norm"), paste0(meth, PCs), sep = "_")
 
 in.path <- "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/"
 out.path <- "~/Thesis_SpatialGenomics/R_Output/"
-out.pathDev <- "~/Thesis_SpatialGenomics/R_Output/VesaliusDev/"
+out.pathDev <- "~/Thesis_SpatialGenomics/R_Output/VesaliusDev/mouse_liver_1/"
 
 
 ```
@@ -300,7 +302,11 @@ Output:
  - queryTerritory (territory used as group 2)
   
 TerritoryMorphing
- - 
+ - Territory morphing can manipulate territories by growing, shrinking, filling, and cleaning territories.
+ - Growing = Positive integers - Territory will be dilated by x number of pixels
+ - Shrinking = Negative integers - Territory will be contracted by x number of pixels
+ - Filling = grow followed by shrink.
+ - Cleaning = shrink followed by grow.
 
 ```{r}
 territoryPlot(vesMorph,cex=10,cex.pt=pt.sz)
@@ -309,6 +315,7 @@ territoryPlot(vesMorph,cex=10,cex.pt=pt.sz)
 vs <- "MetVsMetastasis"
 s <- c(8,7)
 q <- c(2,3)
+layer <- "FALSE"           # Set TRUE or FALSE whether you want to show the marker bin distribution per territory or per cell?
 
 vesMark <- extractMarkers(vesTerr,method=st.meth, seed=s, query=q, pval=0.05)
 
@@ -332,16 +339,21 @@ m.df <- as.data.frame(mark)
 #padj <- m.df[order(m.df$p.value.adj),]
 padj <- slice_min(m.df, order_by=m.df$p.value.adj, n=50)
 #logfc.min <- slice_min(m.df, order_by=m.df$logFC, prop=0.1)
-#logfc.max <- slice_max(m.df, order_by=m.df$logFC, prop=0.1)
 logfc.min <- slice_min(padj, order_by=padj$logFC, n=5)
 logfc.max <- slice_max(padj, order_by=padj$logFC, n=5)
 int.bins <- bind_rows(list(logfc.min, logfc.max))
 
 
+## Plot bins here in markdown:
+#for(i in seq_along(int.bins$genes)){
+#  print(viewGeneExpression(vesMorph, gene=int.bins$genes[[i]], as.layer=F,norm=F,cex=2))
+#}
+
+
 ```
 
 
-## Plot marker bins
+## Plot marker bins - export to pdf
 Investigate individual marker bins over the whole tissue slice.
 Are some bin patterns correlating with the territory regions?
 
@@ -349,45 +361,14 @@ The beads are overlapping - change cex size from default 10 to less - or change 
 
 ```{r}
 setwd(in.path)
-fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "MarkerBins", vs, alias, param, "layer-TRUE", ".pdf", sep="_")
+fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "MarkerBins", vs, alias, param, paste0("layer-", layer), ".pdf", sep="_")
 pdf(fname)
-layout(matrix(c(1,3,2,4), 2, 2))
 for(i in seq_along(int.bins$genes)){
-  print(viewGeneExpression(vesMorph, gene=int.bins$genes[[i]], as.layer=TRUE,norm=F,cex=0.5))
-  #p <- as.cimg(viewGeneExpression(vesMorph, gene=int.bins$genes[[i]], as.layer=F,norm=F,cex=2))
-  #print(p)
+  print(viewGeneExpression(vesMorph, gene=int.bins$genes[[i]], as.layer=layer,norm=F,cex=0.5))
 }
 dev.off()
 file.rename(from = paste0(in.path, fname), to = paste0(out.pathDev, fname))
 
-
-
-
-```
-
-
-
-
-
-
-
-```{r}
-
-
-mark <- ves@DEG$DEG_Territory_Trial_1
-m.df <- as.data.frame(mark)
-#padj <- m.df[order(m.df$p.value.adj),]
-padj <- slice_min(m.df, order_by=m.df$p.value.adj, prop=0.1)
-#logfc.min <- slice_min(m.df, order_by=m.df$logFC, prop=0.1)
-#logfc.max <- slice_max(m.df, order_by=m.df$logFC, prop=0.1)
-logfc.min <- slice_min(padj, order_by=padj$logFC, prop=0.3)
-logfc.max <- slice_max(padj, order_by=padj$logFC, prop=0.3)
-int.bins <- bind_rows(list(logfc.min, logfc.max))
-
-for(i in seq_along(int.bins$genes)){
-  print(viewGeneExpression(vesMorph, gene=int.bins$genes[[i]], as.layer=F,norm=F,cex=2))
-}
-
 ```
 
 
@@ -400,12 +381,21 @@ for(i in seq_along(int.bins$genes)){
 
 
 
+
 ```{r}
+
 p <- list()
-for(i in seq(4)){
-  p[[i]] <- viewGeneExpression(vesMorph, gene=int.bins$genes[[i]], as.layer=F,norm=F)
+for(i in seq(int.bins$genes)){
+  p[[i]] <- viewGeneExpression(vesMorph, gene=int.bins$genes[[i]], as.layer=layer,norm=F, cex=0.1, territory1=s, territory2=q)
 }
-grid.arrange(p[[1]], p[[2]], nrow = 2)
+
+setwd(in.path)
+fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "MarkerBins", vs, alias, param, paste0("layer-", layer), ".pdf", sep="_")
+pdf(fname)
+grid.arrange(p[[1]], p[[2]], p[[3]], p[[4]], p[[5]], p[[6]], nrow = 3)
+grid.arrange(p[[7]], p[[8]], p[[9]], p[[10]], nrow = 2)
+dev.off()
+file.rename(from = paste0(in.path, fname), to = paste0(out.pathDev, fname))
 ```
 
 ## Where are the bins?
