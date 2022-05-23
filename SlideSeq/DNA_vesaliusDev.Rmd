@@ -187,14 +187,13 @@ param <- param1
 if(exists("k")){
   if(knn.type == "Unique"){
     ls <- KNN.DNA.Unique(bead, df, k)
+    pt.sz <- k/15 #Adjusting point size for plotting
   }else{
     ls <- KNN.DNA(bead, df, k)
   }
   param <- paste(param, paste0("knn", knn.type, k), sep="_")
   sparse <- ls[[1]] #Retrieve sparse matrix output from knn function
   bead <- ls[[2]] #Retrieve Bead info (barcodes and coordinates) in SlideSeq assay format compatible with Seurat/Vesalius object
-
-  pt.sz <- k/15 #Adjusting point size for plotting
   rm(ls)
 }
 
@@ -270,6 +269,9 @@ vesTerr <- isolateTerritories(vesImSeg, trial = "last")
 
 param <- paste(param, paste0("dims1-", PCs), paste0("colD", colD), paste0("Iter", smIter), sep="_")
 print(paste("Runtime so far: ", difftime(Sys.time(), start.time, units="mins"), "min"))
+
+
+stopp
 ```
 
 
@@ -293,6 +295,7 @@ file.rename(from = paste0(in.path, fname), to = paste0(out.path, fname))
 
 ```{r}
 territoryPlot(vesTerr,cex=10,cex.pt=pt.sz)
+param2 <- param
 change territories and info in the next chunk!!
 ```
 
@@ -331,9 +334,9 @@ TerritoryMorphing
 
 
 # Specify territories for comparison, seed vs query
-vs <- "CloneBVsAll"
-s <- c(6,7)           #c(8,7) or NULL
-q <- NULL             #c(2,3) or NULL
+vs <- "CloneBInnerVsOuter"
+s <- 7           #c(8,7) or NULL
+q <- 6             #c(2,3) or NULL
 pval <- 0.05
 
 vesMark <- extractMarkers(vesTerr,method=st.meth, seed=s, query=q, pval=pval)
@@ -342,7 +345,7 @@ vesMorph <- territoryMorphing(vesMark, c(1,10))
 
 #vesTerrLay <- layerTerritory(vesMorph, c(28,34,32),morphologyFactor=0,layerDepth=5)
 
-param <- paste(param, paste0("markerMethod", st.meth), sep="_")
+param <- paste(param2, paste0("markerMethod", st.meth), sep="_")
 print(paste("Runtime so far: ", difftime(Sys.time(), start.time, units="mins"), "min"))
 ```
 
@@ -351,25 +354,23 @@ print(paste("Runtime so far: ", difftime(Sys.time(), start.time, units="mins"), 
 
 
 ## Pick top marker bins
+ - Based on lowest adjusted p value and highest, furthest from 0, Log fold change
 
 ```{r}
 mark <- vesMark@DEG$DEG_Territory_Trial_1
 m.df <- as.data.frame(mark)
-#padj <- m.df[order(m.df$p.value.adj),]
 padj <- slice_min(m.df, order_by=m.df$p.value.adj, n=100)
-#logfc.min <- slice_min(m.df, order_by=m.df$logFC, prop=0.1)
 logfc.min <- slice_min(padj, order_by=padj$logFC, n=5)
 logfc.max <- slice_max(padj, order_by=padj$logFC, n=5)
 int.bins <- bind_rows(list(logfc.min, logfc.max))
 
 
-## Plot bins here in markdown:
-#for(i in seq_along(int.bins$genes)){
-#  print(viewGeneExpression(vesMorph, gene=int.bins$genes[[i]], as.layer=F,norm=F,cex=2))
-#}
+
 
 
 ```
+
+
 
 
 ## Plot marker bins - export to pdf
@@ -409,7 +410,7 @@ dev.off()
 file.rename(from = paste0(in.path, fname), to = paste0(out.path, fname))
 ```
 
-One bin plotting version:
+## Another bin plotting version: (One plot per pdf page)
 setwd(in.path)
 fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "MarkerBins", vs, alias, param, paste0("layer-", layer), ".pdf", sep="_")
 pdf(fname)
@@ -419,7 +420,10 @@ for(i in seq_along(int.bins$genes)){
 dev.off()
 file.rename(from = paste0(in.path, fname), to = paste0(out.path, fname))
 
-
+## Plot bins here in markdown:
+for(i in seq_along(int.bins$genes)){
+  print(viewGeneExpression(vesMorph, gene=int.bins$genes[[i]], as.layer=F,norm=F,cex=2))
+}
 
 
 
