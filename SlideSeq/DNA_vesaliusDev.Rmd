@@ -30,12 +30,12 @@ al.num <- "_dna_200114_10"
 norm <- "log"             # Normalization method: "log","SCT","TFIDF","raw"
 meth <- "PCA"               # Dimensionality reduction method: "PCA","PCA_L","UMAP","LSI","LSI_UMAP"
 PCs <- 6                    # Number of Embeddings / dimensions / Principal Components / "LSI topics"
-plotPC <- 6                 # Number of PC plots to export.
+plotPC <- 4                 # Number of PC plots to export.
 
 min.count <- 0
 max.count <- 6
 
-k <- 20
+k <- 50
 knn.type <- "Duplicate"     # KNN method: "Unique", "Duplicate"
 
 cores <- 5
@@ -105,7 +105,7 @@ bead <- ReadSlideSeq(paste0(in.path, alias, al.num, ".bead_locations.csv"))
 
 barcodes <- rownames(bead@coordinates)
 
-sep = "\t" #separator used in this count matrix
+sep = "\t" 
 ctmp <- read.table(counts, header = TRUE, sep=sep ) %>% na.exclude()
 
 sparse <- sparseMatrix(i= ctmp[,2],j=ctmp[,1],x=ctmp[,3]) 
@@ -126,11 +126,11 @@ Mouse: 2738 bins total
 ```{r}
 
 if(grepl("human",alias)){
-  bins <- read.table("~/Thesis_SpatialGenomics/SlideSeq/GroupSlideSeq/hg19_1Mb_bins.txt", header = T)
-  bins <- bins$bin_ind
+  bin.all <- read.table("~/Thesis_SpatialGenomics/SlideSeq/GroupSlideSeq/hg19_1Mb_bins.txt", header = T)
+  bins <- bin.all$bin_ind
 } else if(grepl("mouse",alias)){
-  bins <- read.table("~/Thesis_SpatialGenomics/SlideSeq/GroupSlideSeq/mm10_1Mb_bins.txt", header = T)
-  bins <- bins$bin_ind
+  bin.all <- read.table("~/Thesis_SpatialGenomics/SlideSeq/GroupSlideSeq/mm10_1Mb_bins.txt", header = T)
+  bins <- bin.all$bin_ind
 }
 ```
 
@@ -331,9 +331,9 @@ TerritoryMorphing
 
 
 # Specify territories for comparison, seed vs query
-vs <- "CloneAVsCloneB"
-s <- c(10,11)     #c(8,7)
-q <- 2            #c(2,3) or NULL
+vs <- "CloneBVsAll"
+s <- c(6,7)           #c(8,7) or NULL
+q <- NULL             #c(2,3) or NULL
 pval <- 0.05
 
 vesMark <- extractMarkers(vesTerr,method=st.meth, seed=s, query=q, pval=pval)
@@ -378,20 +378,7 @@ Are some bin patterns correlating with the territory regions?
 
 The beads are overlapping - change cex size from default 10 to less - or change alpha to change opacity/transparency
 
-```{r}
 
-
-```
-
-One bin plotting version:
-setwd(in.path)
-fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "MarkerBins", vs, alias, param, paste0("layer-", layer), ".pdf", sep="_")
-pdf(fname)
-for(i in seq_along(int.bins$genes)){
-  print(viewGeneExpression(vesMorph, gene=int.bins$genes[[i]], as.layer=layer,norm=F,cex=0.5))
-}
-dev.off()
-file.rename(from = paste0(in.path, fname), to = paste0(out.path, fname))
 
 
 
@@ -422,37 +409,47 @@ dev.off()
 file.rename(from = paste0(in.path, fname), to = paste0(out.path, fname))
 ```
 
+One bin plotting version:
+setwd(in.path)
+fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "MarkerBins", vs, alias, param, paste0("layer-", layer), ".pdf", sep="_")
+pdf(fname)
+for(i in seq_along(int.bins$genes)){
+  print(viewGeneExpression(vesMorph, gene=int.bins$genes[[i]], as.layer=layer,norm=F,cex=0.5))
+}
+dev.off()
+file.rename(from = paste0(in.path, fname), to = paste0(out.path, fname))
+
+
+
+
+
 ## Chromosomal location
 In which chromosomes and where can we find the marker bins? 
+ - bin.all (vector with table from either human or mouse chromosomes and the bin indexes)
+ - find chromosome location for each bin index
+ - keep only bin index, start, stop, and chromosome number 
+ - merge the location information with the statistical output for each bin
+ - export table to csv
+ 
 
 
 ```{r}
-
-bin.file <- read.table("~/Thesis_SpatialGenomics/SlideSeq/GroupSlideSeq/mm10_1Mb_bins.txt", header = T)
 chr <- data_frame()
 for(i in seq_along(padj$genes)){
-  x <- as.list(subset(bin.file, bin_ind==padj$genes[[i]]))
+  x <- as.list(subset(bin.all, bin_ind==padj$genes[[i]]))
   chr <- bind_rows(chr, x)
 }
 chr <- chr[c("bin_start", "bin_end", "chr_ind", "bin_ind")]
-chr <- chr[order(chr$bin_start),]
-chr <- chr[order(chr$chr_ind),]
-
-print(padj)
-print(chr)
-```
-
-```{r}
-
 
 names(padj)[names(padj) == 'genes'] <- 'bin_ind'
 bin.chr <- merge(chr, padj)
+bin.chr <- bin.chr[order(bin.chr$bin_start),]
+bin.chr <- bin.chr[order(bin.chr$chr_ind),]
 
-x <- data.frame(k1 = c(NA,NA,3,4,5), k2 = c(1,NA,NA,4,5), data = 1:5)
-y <- data.frame(k1 = c(NA,2,NA,4,5), k2 = c(NA,NA,3,4,5), data = 1:5)
-merge(x, y, by = c("k1","k2")) # NA's match
-merge(x, y, by = "k1") # NA's match, so 6 rows
-merge(x, y, by = "k2", incomparables = NA) # 2 rows
+fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "MarkerBins", vs, alias, param, "table.csv", sep="_")
+write.csv(bin.chr, file=paste0(out.path,fname))
+
 ```
+
 
 
