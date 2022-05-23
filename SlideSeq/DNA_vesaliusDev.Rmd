@@ -35,7 +35,7 @@ plotPC <- 6                 # Number of PC plots to export.
 min.count <- 0
 max.count <- 6
 
-k <- 10
+k <- 20
 knn.type <- "Duplicate"     # KNN method: "Unique", "Duplicate"
 
 cores <- 5
@@ -332,7 +332,7 @@ TerritoryMorphing
 
 # Specify territories for comparison, seed vs query
 vs <- "CloneAVsCloneB"
-s <- c(12,13)     #c(8,7)
+s <- c(10,11)     #c(8,7)
 q <- 2            #c(2,3) or NULL
 pval <- 0.05
 
@@ -356,7 +356,7 @@ print(paste("Runtime so far: ", difftime(Sys.time(), start.time, units="mins"), 
 mark <- vesMark@DEG$DEG_Territory_Trial_1
 m.df <- as.data.frame(mark)
 #padj <- m.df[order(m.df$p.value.adj),]
-padj <- slice_min(m.df, order_by=m.df$p.value.adj, n=50)
+padj <- slice_min(m.df, order_by=m.df$p.value.adj, n=100)
 #logfc.min <- slice_min(m.df, order_by=m.df$logFC, prop=0.1)
 logfc.min <- slice_min(padj, order_by=padj$logFC, n=5)
 logfc.max <- slice_max(padj, order_by=padj$logFC, n=5)
@@ -406,7 +406,7 @@ viewGeneExpression
 
 
 ```{r}
-layer <- "TRUE"           
+layer <- "FALSE"           
 p <- list()
 for(i in seq(int.bins$genes)){
   p[[i]] <- viewGeneExpression(vesMorph, gene=int.bins$genes[[i]], as.layer=layer,norm=F, cex=0.1, territory1=s, territory2=q)
@@ -434,13 +434,25 @@ for(i in seq_along(padj$genes)){
   x <- as.list(subset(bin.file, bin_ind==padj$genes[[i]]))
   chr <- bind_rows(chr, x)
 }
-
+chr <- chr[c("bin_start", "bin_end", "chr_ind", "bin_ind")]
 chr <- chr[order(chr$bin_start),]
 chr <- chr[order(chr$chr_ind),]
 
-print(int.bins)
+print(padj)
 print(chr)
 ```
 
+```{r}
+
+
+names(padj)[names(padj) == 'genes'] <- 'bin_ind'
+bin.chr <- merge(chr, padj)
+
+x <- data.frame(k1 = c(NA,NA,3,4,5), k2 = c(1,NA,NA,4,5), data = 1:5)
+y <- data.frame(k1 = c(NA,2,NA,4,5), k2 = c(NA,NA,3,4,5), data = 1:5)
+merge(x, y, by = c("k1","k2")) # NA's match
+merge(x, y, by = "k1") # NA's match, so 6 rows
+merge(x, y, by = "k2", incomparables = NA) # 2 rows
+```
 
 
