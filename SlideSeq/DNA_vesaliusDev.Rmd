@@ -10,26 +10,32 @@ Specify dataset + Normalisation + dimensionality reduction method and other para
 
 For DNA use log and PCA, or use TFIDF and LSI?
 
+SlideDNASeq datasets:
+human_colon_cancer_3_dna_191204_19
+human_colon_cancer_4_dna_200114_13
+human_colon_cancer_dna_4x_201027_17
+mouse_liver_met_2_dna_200114_10
+mouse_liver_met_1_dna_191114_05
+mouse_liver_met_1_dna_191114_06
+
 ```{r}
 start.time <- Sys.time()
 # SlideSeq DNA datasets:
-#alias <- "human_colon_cancer_4_dna_200114_13"
-#alias <- "human_colon_cancer_3_dna_191204_19"
-#alias <- "mouse_liver_met_2_dna_200114_10"
-#alias <- "mouse_liver_met_1_dna_191114_05"
-alias <- "mouse_liver_met_1_dna_191114_06"
+
+alias <- "mouse_liver_met_2"
+al.num <- "_dna_200114_10"
 
 
 
-norm <- "TFIDF"             # Normalization method: "log","SCT","TFIDF","raw"
-meth <- "LSI"               # Dimensionality reduction method: "PCA","PCA_L","UMAP","LSI","LSI_UMAP"
+norm <- "log"             # Normalization method: "log","SCT","TFIDF","raw"
+meth <- "PCA"               # Dimensionality reduction method: "PCA","PCA_L","UMAP","LSI","LSI_UMAP"
 PCs <- 6                    # Number of Embeddings / dimensions / Principal Components / "LSI topics"
 plotPC <- 6                 # Number of PC plots to export.
 
 min.count <- 0
 max.count <- 6
 
-k <- 5
+k <- 10
 knn.type <- "Duplicate"     # KNN method: "Unique", "Duplicate"
 
 cores <- 5
@@ -43,13 +49,11 @@ st.meth <- "wilcox"          #Statistical method for extracting markers/bins, "w
 param <- paste(paste0(norm, "Norm"), paste0(meth, PCs), sep = "_")
 
 in.path <- "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/"
-out.path <- "~/Thesis_SpatialGenomics/R_Output/"
-out.pathDev <- "~/Thesis_SpatialGenomics/R_Output/VesaliusDev/mouse_liver_1/"
+out.path <- paste0("~/Thesis_SpatialGenomics/R_Output/VesaliusDev/", alias, "/")
 
 
 ```
 
-In paper they do k 50 for smoothing the beads before PCA (mouse liver)
 
 ## Load packages needed
 
@@ -96,8 +100,8 @@ barcodes    -     holds the barcode sequences
 sparse      -     Sparse count matrix, dgCMatrix
 
 ```{r}
-counts <- paste0(in.path, alias, ".sparse_counts_1Mb.txt")
-bead <- ReadSlideSeq(paste0(in.path, alias, ".bead_locations.csv"))
+counts <- paste0(in.path, alias, al.num, ".sparse_counts_1Mb.txt")
+bead <- ReadSlideSeq(paste0(in.path, alias, al.num, ".bead_locations.csv"))
 
 barcodes <- rownames(bead@coordinates)
 
@@ -231,7 +235,7 @@ ves <- buildVesaliusEmbeddings(vesalius, method = meth,
 Imageplot with chosen number of dimensions for the different PCs
 
 ```{r}
-cat( paste(Sys.time()," Plotting top", plotPC, "PCs and exporting to pdf.\n File located in:", out.pathDev, "\n"))
+cat( paste(Sys.time()," Plotting top", plotPC, "PCs and exporting to pdf.\n File located in:", out.path, "\n"))
 setwd(in.path)
 fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "Embeddings", alias, paste0(param, ".pdf"), sep="_")
 pdf(fname)
@@ -240,7 +244,7 @@ for(i in seq(plotPC)){
   print(imagePlot(ves, dims = i))
 }
 dev.off()
-file.rename(from = paste0(in.path, fname), to = paste0(out.pathDev, fname))
+file.rename(from = paste0(in.path, fname), to = paste0(out.path, fname))
 
 print(paste("Runtime so far: ", difftime(Sys.time(), start.time, units="mins"), "min"))
 ```
@@ -277,12 +281,21 @@ layout(matrix(c(1,3,2,4), 2, 2))
 territoryPlot(vesTerr,cex=10,cex.pt=pt.sz)
 print(imagePlot(vesImSeg))
 dev.off()
-file.rename(from = paste0(in.path, fname), to = paste0(out.pathDev, fname))
+file.rename(from = paste0(in.path, fname), to = paste0(out.path, fname))
 ```
+
+
+
+```{r}
+territoryPlot(vesTerr,cex=10,cex.pt=pt.sz)
+change territories and info in the next chunk!!
+```
+
 
 ## Extract marker bins and morph territories
 ExtractMarkers - DGE between selected territories - identify marker bins
   - Takes like 20 mins - if not specifying seed and query..
+      - More territories = more time?
   - Seed - set to 3 because? - Territories to be included in group 1 for DiffGeneExp
     - If I say 3 - does it only use territory 3 for comparison or does it compare 3 different territories?
   - Query - Territories to be included in group 2 of DGE.
@@ -307,19 +320,21 @@ TerritoryMorphing
  - Shrinking = Negative integers - Territory will be contracted by x number of pixels
  - Filling = grow followed by shrink.
  - Cleaning = shrink followed by grow.
+ - Morphology factor - integer or vector of integers describing growth and/or shrink extent.
 
 ```{r}
-territoryPlot(vesMorph,cex=10,cex.pt=pt.sz)
+
 
 # Specify territories for comparison, seed vs query
-vs <- "MetVsMetastasis"
-s <- c(8,7)
-q <- c(2,3)
+vs <- "AllvsAll"
+s <- NULL     #c(8,7)
+q <- NULL     #c(2,3)
 layer <- "FALSE"           # Set TRUE or FALSE whether you want to show the marker bin distribution per territory or per cell?
+pval <- 0.05
 
-vesMark <- extractMarkers(vesTerr,method=st.meth, seed=s, query=q, pval=0.05)
+vesMark <- extractMarkers(vesTerr,method=st.meth, seed=s, query=q, pval=pval)
 
-vesMorph <- territoryMorphing(vesMark, c(5,6))
+vesMorph <- territoryMorphing(vesMark, c(1,10))
 
 #vesTerrLay <- layerTerritory(vesMorph, c(28,34,32),morphologyFactor=0,layerDepth=5)
 
@@ -360,6 +375,11 @@ Are some bin patterns correlating with the territory regions?
 The beads are overlapping - change cex size from default 10 to less - or change alpha to change opacity/transparency
 
 ```{r}
+
+
+```
+
+One bin plotting version:
 setwd(in.path)
 fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "MarkerBins", vs, alias, param, paste0("layer-", layer), ".pdf", sep="_")
 pdf(fname)
@@ -367,11 +387,7 @@ for(i in seq_along(int.bins$genes)){
   print(viewGeneExpression(vesMorph, gene=int.bins$genes[[i]], as.layer=layer,norm=F,cex=0.5))
 }
 dev.off()
-file.rename(from = paste0(in.path, fname), to = paste0(out.pathDev, fname))
-
-```
-
-
+file.rename(from = paste0(in.path, fname), to = paste0(out.path, fname))
 
 
 
@@ -390,12 +406,13 @@ for(i in seq(int.bins$genes)){
 }
 
 setwd(in.path)
-fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "MarkerBins", vs, alias, param, paste0("layer-", layer), ".pdf", sep="_")
+fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "MarkerBins", vs, alias, param, paste0("layer", layer), ".pdf", sep="_")
 pdf(fname)
-grid.arrange(p[[1]], p[[2]], p[[3]], p[[4]], p[[5]], p[[6]], nrow = 3)
-grid.arrange(p[[7]], p[[8]], p[[9]], p[[10]], nrow = 2)
+grid.arrange(p[[1]], p[[2]], p[[3]], p[[4]], p[[5]], p[[6]], nrow = 2)
+grid.arrange(p[[5]], p[[6]], p[[7]], p[[8]], nrow = 2)
+grid.arrange(p[[9]], p[[10]], nrow = 2)
 dev.off()
-file.rename(from = paste0(in.path, fname), to = paste0(out.pathDev, fname))
+file.rename(from = paste0(in.path, fname), to = paste0(out.path, fname))
 ```
 
 ## Where are the bins?
