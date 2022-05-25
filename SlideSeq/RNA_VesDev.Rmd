@@ -19,14 +19,10 @@ start.time <- Sys.time()
 alias <- "mouse_liver_met_2"
 al.num <- "_rna_201002_04"
 
-
-
-
-
-norm <- "SCT"             # Normalization method: "log","SCT","TFIDF","raw"
+norm <- "log"             # Normalization method: "log","SCT","TFIDF","raw"
 meth <- "PCA"               # Dimensionality reduction method: "PCA","PCA_L","UMAP","LSI","LSI_UMAP"
-PCs <- 12                   # Number of Embeddings / dimensions / Principal Components / "LSI topics"
-plotPC <- 8                 # Number of PC plots to export. 4 plots per pdf page
+PCs <- 30                   # Number of Embeddings / dimensions / Principal Components / "LSI topics"
+plotPC <- 8                 # Number of PC plots to export. 
 
 
 cores <- 5
@@ -34,7 +30,7 @@ cores <- 5
 colD <- 6                   # Column Depth (3-6)
 smIter <- 10                # Smoothing Iterations
 #imSegDims <- 4             # Image Segmentation Dimensions
-st.meth <- "t.test"          #Statistical method for extracting markers/bins, "wilcox", "t.test", "chisq"
+st.meth <- "chisq"          # Statistical method for extracting marker genes - "wilcox", "t.test", "chisq"
 
 
 param <- paste(paste0(norm, "Norm"), paste0(meth, PCs), sep = "_")
@@ -45,7 +41,6 @@ out.path <- paste0("~/Thesis_SpatialGenomics/R_Output/VesaliusDev/RNA/", alias, 
 
 ```
 
-In paper they do k 50 for smoothing the beads before PCA (mouse liver)
 
 ## Load packages needed
 
@@ -124,7 +119,7 @@ if(grepl("human",alias)){
 
 
 ## Name column/rows in sparse matrix
-Assign bin index numbers to identify the rows. 
+Assign gene names to identify the rows. 
 Assign the barcodes to identify the columns
 
 ```{r}
@@ -172,7 +167,7 @@ ves <- buildVesaliusEmbeddings(vesalius, method = meth,
 
 ## Plotting vesalius images of the PC or LSI embeddings
 
-Imageplot with chosen number of dimensions for the different PCs
+Imageplot with chosen number of dimensions (for the different PCs)
 
 ```{r}
 cat( paste(Sys.time()," Plotting top", plotPC, "PCs and exporting to pdf.\n File located in:", out.path, "\n"))
@@ -192,7 +187,7 @@ print(paste("Runtime so far: ", difftime(Sys.time(), start.time, units="mins"), 
 
 ## Image processing:
 imageSegmentation - dims: number of dimred embeddings
-  - Embedding "last": last dimred method used (if you have multiple dimred obejcts stored in your ves object)
+  - Embedding "last": last dimred method used (if you have multiple dimred objects stored in your ves object)
 LayerTerritory - not relevant for DNA data?
 
 ```{r}
@@ -232,6 +227,12 @@ file.rename(from = paste0(in.path, fname), to = paste0(out.path, fname))
 ```{r}
 territoryPlot(vesTerr,cex=10,cex.pt=pt.sz)
 param2 <- param
+
+```
+## Stop in Pipeline
+Change parameters
+
+```{r}
 change territories and info in the next chunk!!
 ```
 
@@ -270,9 +271,9 @@ TerritoryMorphing
 
 
 # Specify territories for comparison, seed vs query
-vs <- "CloneBVsAll"
-s <- c(12,13)           #c(8,7) or NULL
-q <- NULL             #c(2,3) or NULL
+vs <- "CloneBVsCloneA"
+s <- c(14,13)           #c(8,7) or NULL
+q <- c(5,7)             #c(2,3) or NULL
 pval <- 0.05
 
 vesMark <- extractMarkers(vesTerr,method=st.meth, seed=s, query=q, pval=pval)
@@ -291,18 +292,20 @@ print(paste("Runtime so far: ", difftime(Sys.time(), start.time, units="mins"), 
 
 ## Pick top marker bins
  - Based on lowest adjusted p value and highest, furthest from 0, Log fold change
+ - With RNA we only get around 25 Genes - no need to subset..
 
 ```{r}
 mark <- vesMark@DEG$DEG_Territory_Trial_1
-m.df <- as.data.frame(mark)
-padj <- slice_min(m.df, order_by=m.df$p.value.adj, n=100)
-logfc.min <- slice_min(padj, order_by=padj$logFC, n=5)
-logfc.max <- slice_max(padj, order_by=padj$logFC, n=5)
-int.genes <- bind_rows(list(logfc.min, logfc.max))
-
+#m.df <- as.data.frame(mark)
+#padj <- slice_min(m.df, order_by=m.df$p.value.adj, n=100)
+#logfc.min <- slice_min(padj, order_by=padj$logFC, n=5)
+#logfc.max <- slice_max(padj, order_by=padj$logFC, n=5)
+#int.genes <- bind_rows(list(logfc.min, logfc.max))
+int.genes <- as.data.frame(mark)
+int.genes <- int.genes[order(int.genes$p.value.adj),]
 ```
 
-
+population[order(population$age),]
 
 
 ## Plot marker bins - export to pdf
@@ -364,6 +367,25 @@ Here I need to investigate the genes... How?!
 
 
 ```{r}
+
+fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "MarkerBins", vs, alias, param, "table.csv", sep="_")
+write.csv(int.genes, file=paste0(out.path,fname))
+
+print(paste("Runtime so far: ", difftime(Sys.time(), start.time, units="mins"), "min"))
+
+```
+
+
+
+DNA:
+## Chromosomal location
+In which chromosomes and where can we find the marker bins? 
+ - bin.all (vector with table from either human or mouse chromosomes and the bin indexes)
+ - find chromosome location for each bin index
+ - keep only bin index, start, stop, and chromosome number 
+ - merge the location information with the statistical output for each bin
+ - export table to csv
+ 
 chr <- data_frame()
 for(i in seq_along(padj$genes)){
   x <- as.list(subset(genes[,1], bin_ind==padj$genes[[i]]))
@@ -381,7 +403,6 @@ write.csv(bin.chr, file=paste0(out.path,fname))
 
 print(paste("Runtime so far: ", difftime(Sys.time(), start.time, units="mins"), "min"))
 
-```
 
 ## Check the log of your current vesalius object
 getLastLog(vesTerr)

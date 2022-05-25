@@ -241,7 +241,7 @@ ves <- buildVesaliusEmbeddings(vesalius, method = meth,
 Imageplot with chosen number of dimensions for the different PCs
 
 ```{r}
-cat( paste(Sys.time()," Plotting top", plotPC, "PCs and exporting to pdf.\n File located in:", out.path, "\n"))
+cat( paste(Sys.time()," Plotting top", plotPC, "principal components and exporting to pdf.\n\t\t\t File located in:", out.path, "\n"))
 setwd(in.path)
 fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "Embeddings", alias, paste0(param, ".pdf"), sep="_")
 pdf(fname)
@@ -271,9 +271,6 @@ vesTerr <- isolateTerritories(vesImSeg, trial = "last")
 
 param <- paste(param, paste0("dims1-", PCs), paste0("colD", colD), paste0("Iter", smIter), sep="_")
 print(paste("Runtime so far: ", difftime(Sys.time(), start.time, units="mins"), "min"))
-
-
-Stopp
 ```
 
 
@@ -296,9 +293,21 @@ file.rename(from = paste0(in.path, fname), to = paste0(out.path, fname))
 
 
 
+## Plot territory in markdown
+to decide which territories to compare
+
 ```{r}
-territoryPlot(vesTerr,cex=10,cex.pt=pt.sz)
+
 param2 <- param
+territoryPlot(vesTerr,cex=10,cex.pt=pt.sz)
+
+```
+
+
+## Stop in Pipeline
+Change parameters
+
+```{r}
 change territories and info in the next chunk!!
 ```
 
@@ -326,6 +335,7 @@ Output:
  - queryTerritory (territory used as group 2)
   
 TerritoryMorphing
+  - c(1,10) - Shrinking/Growing factor??!!!
  - Territory morphing can manipulate territories by growing, shrinking, filling, and cleaning territories.
  - Growing = Positive integers - Territory will be dilated by x number of pixels
  - Shrinking = Negative integers - Territory will be contracted by x number of pixels
@@ -337,9 +347,9 @@ TerritoryMorphing
 
 
 # Specify territories for comparison, seed vs query
-vs <- "CloneBVsAll"
-s <- c(12,13)           #c(8,7) or NULL
-q <- NULL             #c(2,3) or NULL
+vs <- "CloneAVsAll"
+s <- c(13,14)           #eg c(8,7) or NULL
+q <- NULL             #eg c(7,5) or NULL
 pval <- 0.05
 
 vesMark <- extractMarkers(vesTerr,method=st.meth, seed=s, query=q, pval=pval)
