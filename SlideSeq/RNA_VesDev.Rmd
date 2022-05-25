@@ -175,7 +175,7 @@ ves <- buildVesaliusEmbeddings(vesalius, method = meth,
 Imageplot with chosen number of dimensions for the different PCs
 
 ```{r}
-cat( paste(Sys.time()," Plotting top", plotPC, "PCs and exporting to pdf.\n File located in:", out.pathDev, "\n"))
+cat( paste(Sys.time()," Plotting top", plotPC, "PCs and exporting to pdf.\n File located in:", out.path, "\n"))
 setwd(in.path)
 fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "Embeddings", alias, param, "VesDev.pdf", sep="_")
 pdf(fname)
@@ -184,7 +184,7 @@ for(i in seq(plotPC)){
   print(imagePlot(ves, dims = i))
 }
 dev.off()
-file.rename(from = paste0(in.path, fname), to = paste0(out.pathDev, fname))
+file.rename(from = paste0(in.path, fname), to = paste0(out.path, fname))
 
 print(paste("Runtime so far: ", difftime(Sys.time(), start.time, units="mins"), "min"))
 ```
@@ -212,76 +212,186 @@ param <- paste(param, paste0("dims1-", PCs), paste0("colD", colD), paste0("Iter"
 
 
 # Export territory plots to pdf
+Is there a difference between the territory isolation and the territory morphing?
+Also plot the first imagesegmentation
 
 ```{r}
 setwd(in.path)
-fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "ImageProcessing", alias, param, "VesDev.pdf", sep="_")
+fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "Territories", alias, paste0(param, ".pdf"), sep="_")
 pdf(fname)
 layout(matrix(c(1,3,2,4), 2, 2))
-print(imagePlot(vesImSeg))
 territoryPlot(vesTerr,cex=10,cex.pt=pt.sz)
-territoryPlot(vesMorph,cex=10,cex.pt=pt.sz)
+print(imagePlot(vesImSeg))
+print(getLastLog(vesTerr))
 dev.off()
-file.rename(from = paste0(in.path, fname), to = paste0(out.pathDev, fname))
+file.rename(from = paste0(in.path, fname), to = paste0(out.path, fname))
 ```
+
+
+
+```{r}
+territoryPlot(vesTerr,cex=10,cex.pt=pt.sz)
+param2 <- param
+change territories and info in the next chunk!!
+```
+
+
+## Extract marker bins and morph territories
+ExtractMarkers - DGE between selected territories - identify marker bins
+  - Takes like 20 mins - if not specifying seed and query..
+      - More territories = more time?
+  - Seed - set to 3 because? - Territories to be included in group 1 for DiffGeneExp
+    - If I say 3 - does it only use territory 3 for comparison or does it compare 3 different territories?
+  - Query - Territories to be included in group 2 of DGE.
+
+
+seed against query - pick territories manually!! based on the territory plot
+  - eg inner vs outer part of metastasis
+  - outer part vs normal
+  - outer part vs other metastasis
+  
+Output:
+ - p.value,
+ - logFC,
+ - seedPct (percentage of cells containing gene in first group),
+ - queryPct (percentage of cells containing gene in second group),
+ - seedTerritory (territory used as group 1)
+ - queryTerritory (territory used as group 2)
+  
+TerritoryMorphing
+ - Territory morphing can manipulate territories by growing, shrinking, filling, and cleaning territories.
+ - Growing = Positive integers - Territory will be dilated by x number of pixels
+ - Shrinking = Negative integers - Territory will be contracted by x number of pixels
+ - Filling = grow followed by shrink.
+ - Cleaning = shrink followed by grow.
+ - Morphology factor - integer or vector of integers describing growth and/or shrink extent.
+
+```{r}
+
+
+# Specify territories for comparison, seed vs query
+vs <- "CloneBVsAll"
+s <- c(12,13)           #c(8,7) or NULL
+q <- NULL             #c(2,3) or NULL
+pval <- 0.05
+
+vesMark <- extractMarkers(vesTerr,method=st.meth, seed=s, query=q, pval=pval)
+
+vesMorph <- territoryMorphing(vesMark, c(1,10))
+
+#vesTerrLay <- layerTerritory(vesMorph, c(28,34,32),morphologyFactor=0,layerDepth=5)
+
+param <- paste(param2, paste0("markerMethod", st.meth), sep="_")
+print(paste("Runtime so far: ", difftime(Sys.time(), start.time, units="mins"), "min"))
+```
+
+
+
+
+
+## Pick top marker bins
+ - Based on lowest adjusted p value and highest, furthest from 0, Log fold change
+
 ```{r}
 mark <- vesMark@DEG$DEG_Territory_Trial_1
 m.df <- as.data.frame(mark)
-#padj <- m.df[order(m.df$p.value.adj),]
-padj <- slice_min(m.df, order_by=m.df$p.value.adj, prop=0.5)
-#logfc.min <- slice_min(m.df, order_by=m.df$logFC, prop=0.1)
-#logfc.max <- slice_max(m.df, order_by=m.df$logFC, prop=0.1)
-logfc.min <- slice_min(padj, order_by=padj$logFC, prop=0.1)
-logfc.max <- slice_max(padj, order_by=padj$logFC, prop=0.1)
+padj <- slice_min(m.df, order_by=m.df$p.value.adj, n=100)
+logfc.min <- slice_min(padj, order_by=padj$logFC, n=5)
+logfc.max <- slice_max(padj, order_by=padj$logFC, n=5)
 int.bins <- bind_rows(list(logfc.min, logfc.max))
 
 
+
+
+
 ```
 
 
 
 
+## Plot marker bins - export to pdf
+Investigate individual marker bins over the whole tissue slice.
+Are some bin patterns correlating with the territory regions?
+
+The beads are overlapping - change cex size from default 10 to less - or change alpha to change opacity/transparency
+
+
+
+
+
+
+viewGeneExpression
+  - why vesMorph as input? better with territory?
+  - as.layer - should it show marker bin's expression/distribution per bead or overall per territory? - TRUE / FALSE
+  
+
+
+
+
+
 ```{r}
+layer <- "FALSE"           
+p <- list()
+for(i in seq(int.bins$genes)){
+  p[[i]] <- viewGeneExpression(vesMorph, gene=int.bins$genes[[i]], as.layer=layer,norm=F, cex=0.1, territory1=s, territory2=q)
+}
+
 setwd(in.path)
-fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "MarkerBins", alias, param, "VesDev.pdf", sep="_")
+fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "MarkerBins", vs, alias, param, paste0("layer", layer), ".pdf", sep="_")
 pdf(fname)
-layout(matrix(c(1,3,2,4), 2, 2))
+grid.arrange(p[[1]], p[[2]], p[[3]], p[[4]], nrow = 2)
+grid.arrange(p[[5]], p[[6]], p[[7]], p[[8]], nrow = 2)
+grid.arrange(p[[9]], p[[10]], nrow = 2)
+dev.off()
+file.rename(from = paste0(in.path, fname), to = paste0(out.path, fname))
+```
+
+## Another bin plotting version: (One plot per pdf page)
+setwd(in.path)
+fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "MarkerBins", vs, alias, param, paste0("layer-", layer), ".pdf", sep="_")
+pdf(fname)
 for(i in seq_along(int.bins$genes)){
-  print(viewGeneExpression(vesMorph, gene=int.bins$genes[[i]], as.layer=F,norm=F))
+  print(viewGeneExpression(vesMorph, gene=int.bins$genes[[i]], as.layer=layer,norm=F,cex=0.5))
 }
 dev.off()
-file.rename(from = paste0(in.path, fname), to = paste0(out.pathDev, fname))
+file.rename(from = paste0(in.path, fname), to = paste0(out.path, fname))
 
-
-
-
-```
-
-
-
-
-```{r}
-p <- list()
-for(i in seq(4)){
-  p[[i]] <- viewGeneExpression(vesMorph, gene=int.bins$genes[[i]], as.layer=F,norm=F)
-}
-grid.arrange(p[[1]], p[[2]], nrow = 2)
-```
-
-
-```{r}
-
-bin.file <- read.table("~/Thesis_SpatialGenomics/SlideSeq/GroupSlideSeq/mm10_1Mb_bins.txt", header = T)
-chr <- data_frame()
+## Plot bins here in markdown:
 for(i in seq_along(int.bins$genes)){
-  x <- as.list(subset(bin.file, bin_ind==int.bins$genes[[i]]))
+  print(viewGeneExpression(vesMorph, gene=int.bins$genes[[i]], as.layer=F,norm=F,cex=2))
+}
+
+
+
+## Chromosomal location
+In which chromosomes and where can we find the marker bins? 
+ - bin.all (vector with table from either human or mouse chromosomes and the bin indexes)
+ - find chromosome location for each bin index
+ - keep only bin index, start, stop, and chromosome number 
+ - merge the location information with the statistical output for each bin
+ - export table to csv
+ 
+
+
+```{r}
+chr <- data_frame()
+for(i in seq_along(padj$genes)){
+  x <- as.list(subset(bin.all, bin_ind==padj$genes[[i]]))
   chr <- bind_rows(chr, x)
 }
+chr <- chr[c("bin_start", "bin_end", "chr_ind", "bin_ind")]
 
-chr <- chr[order(chr$chr_ind),]
+names(padj)[names(padj) == 'genes'] <- 'bin_ind'
+bin.chr <- merge(chr, padj)
+bin.chr <- bin.chr[order(bin.chr$bin_start),]
+bin.chr <- bin.chr[order(bin.chr$chr_ind),]
 
-print(int.bins)
-print(chr)
+fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "MarkerBins", vs, alias, param, "table.csv", sep="_")
+write.csv(bin.chr, file=paste0(out.path,fname))
+
+print(paste("Runtime so far: ", difftime(Sys.time(), start.time, units="mins"), "min"))
+
 ```
 
-
+## Check the log of your current vesalius object
+getLastLog(vesTerr)
