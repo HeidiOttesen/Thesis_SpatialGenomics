@@ -18,6 +18,8 @@ mouse_liver_met_2_dna_200114_10
 mouse_liver_met_1_dna_191114_05
 mouse_liver_met_1_dna_191114_06
 
+KNN duplicate vs unique - unique makes the dataset much smaller! More efficient for testing..
+
 ```{r}
 start.time <- Sys.time()
 # SlideSeq DNA datasets:
@@ -35,7 +37,7 @@ plotPC <- 4                 # Number of PC plots to export.
 min.count <- 0
 max.count <- 6
 
-k <- 15
+k <- 5
 knn.type <- "Unique"     # KNN method: "Unique", "Duplicate"
 
 cores <- 5
@@ -110,7 +112,7 @@ ctmp <- read.table(counts, header = TRUE, sep=sep ) %>% na.exclude()
 
 sparse <- sparseMatrix(i= ctmp[,2],j=ctmp[,1],x=ctmp[,3]) 
 
-# Set point size for plotting the UMIs - adjusted for knn later
+# Set default point size for plotting the UMIs (KNN unique will make changes)
 pt.sz <- 0.25
 ```
 
@@ -271,7 +273,7 @@ param <- paste(param, paste0("dims1-", PCs), paste0("colD", colD), paste0("Iter"
 print(paste("Runtime so far: ", difftime(Sys.time(), start.time, units="mins"), "min"))
 
 
-stopp
+Stopp
 ```
 
 
@@ -335,9 +337,9 @@ TerritoryMorphing
 
 
 # Specify territories for comparison, seed vs query
-vs <- "CloneBInnerVsOuter"
-s <- 7           #c(8,7) or NULL
-q <- 6             #c(2,3) or NULL
+vs <- "CloneBVsAll"
+s <- c(12,13)           #c(8,7) or NULL
+q <- NULL             #c(2,3) or NULL
 pval <- 0.05
 
 vesMark <- extractMarkers(vesTerr,method=st.meth, seed=s, query=q, pval=pval)
@@ -453,6 +455,8 @@ bin.chr <- bin.chr[order(bin.chr$chr_ind),]
 
 fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "MarkerBins", vs, alias, param, "table.csv", sep="_")
 write.csv(bin.chr, file=paste0(out.path,fname))
+
+print(paste("Runtime so far: ", difftime(Sys.time(), start.time, units="mins"), "min"))
 
 ```
 

@@ -8,21 +8,23 @@ output: html_document
 
 Specify dataset + Normalisation + dimensionality reduction method and other parameters
 
-For 
+Available Slide-RNA-Seq datasets
+human_colon_cancer_4_rna_200102_06
+mouse_liver_met_2_rna_201002_04
 
 ```{r}
 start.time <- Sys.time()
 # SlideSeq RNA datasets:
 
-alias <- "mouse_liver_met_2_rna_201002_04"
+alias <- "mouse_liver_met_2"
+al.num <- "_rna_201002_04"
 
-#alias <- "human_colon_cancer_4_rna_200102_06"
 
 
 
 
 norm <- "SCT"             # Normalization method: "log","SCT","TFIDF","raw"
-meth <- "UMAP"               # Dimensionality reduction method: "PCA","PCA_L","UMAP","LSI","LSI_UMAP"
+meth <- "PCA"               # Dimensionality reduction method: "PCA","PCA_L","UMAP","LSI","LSI_UMAP"
 PCs <- 12                   # Number of Embeddings / dimensions / Principal Components / "LSI topics"
 plotPC <- 8                 # Number of PC plots to export. 4 plots per pdf page
 
@@ -38,8 +40,7 @@ st.meth <- "t.test"          #Statistical method for extracting markers/bins, "w
 param <- paste(paste0(norm, "Norm"), paste0(meth, PCs), sep = "_")
 
 in.path <- "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/"
-out.path <- "~/Thesis_SpatialGenomics/R_Output/"
-out.pathDev <- "~/Thesis_SpatialGenomics/R_Output/VesaliusDev/"
+out.path <- paste0("~/Thesis_SpatialGenomics/R_Output/VesaliusDev/RNA/", alias, "/")
 
 
 ```
@@ -91,8 +92,8 @@ barcodes    -     holds the barcode sequences
 sparse      -     Sparse count matrix, dgCMatrix
 
 ```{r}
-counts <- paste0(in.path, alias, ".sparse_expression.txt")
-bead <- ReadSlideSeq(paste0(in.path, alias, ".bead_locations.csv"))
+counts <- paste0(in.path, alias, al.num, ".sparse_expression.txt")
+bead <- ReadSlideSeq(paste0(in.path, alias, al.num, ".bead_locations.csv"))
 
 barcodes <- rownames(bead@coordinates)
 
@@ -101,16 +102,25 @@ ctmp <- read.table(counts, header = TRUE, sep=sep ) %>% na.exclude()
 #rownames(ctmp) <- ctmp[,1] #Non-Unique values - are these the genes/features?
 #ctmp <- ctmp[,-1]
 
-sparse <- sparseMatrix(i= ctmp[,2],j=ctmp[,1],x=ctmp[,3]) ##change this to get the same column vs row (barcode and feature) as with DNA
+sparse <- sparseMatrix(i= ctmp[,1],j=ctmp[,2],x=ctmp[,3])
+
 
 # Set point size for plotting the UMIs - adjusted for knn later
 pt.sz <- 0.25
 ```
 
 
-Mouse liver metastasis 2:
-Barcodes: 31290
-Features: 21902
+## Features
+Assign the genes as rownames on count matrix
+
+```{r}
+if(grepl("human",alias)){
+  genes <- read.table("~/Thesis_SpatialGenomics/SlideSeq/GroupSlideSeq/human_genes.txt", header = T)
+} else {
+  genes <- read.table("~/Thesis_SpatialGenomics/SlideSeq/GroupSlideSeq/mouse_genes.txt", header = T)
+}
+```
+
 
 
 ## Name column/rows in sparse matrix
@@ -119,27 +129,12 @@ Assign the barcodes to identify the columns
 
 ```{r}
 colnames(sparse) <- barcodes
-rownames(sparse) <- bins
+rownames(sparse) <- genes[,1]
+bead <- bead@coordinates
+bead <- cbind(rownames(bead), bead[[1]], bead[[2]])
+colnames(bead) <- c("barcodes","xcoord","ycoord")
 ```
 
-#Remove outlier counts
-Expected CNA varies between 
-High outlier counts might represent mitochondrial DNA bins
-
-
-```{r}
-
-if(exists("min.count")){
-  sparse <- filterSparse(sparse, function(x) x >= min.count)
-}
-if(exists("max.count")){
-  sparse <- filterSparse(sparse, function(x) x <= max.count)
-  miax <- paste0("counts", min.count, "-", max.count)
-  param <- paste(miax, param, sep="_")
-}
-
-
-```
 
 
 ## Vector holders - Checkpoint
@@ -155,36 +150,6 @@ param <- param1
 ```
 
 
-## Run KNN
-- Decide between only using each barcode once (KNN.DNA.Unique function)
-  or having many duplicate groups of barcodes, each barcode gets a group of k nearest neighbors (KNN.DNA function)
-
-
-```{r}
-if(exists("k")){
-  if(knn.type == "Unique"){
-    ls <- KNN.DNA.Unique(bead, df, k)
-  }else{
-    ls <- KNN.DNA(bead, df, k)
-  }
-  param <- paste(param, paste0("knn", knn.type, k), sep="_")
-  sparse <- ls[[1]] #Retrieve sparse matrix output from knn function
-  bead <- ls[[2]] #Retrieve Bead info (barcodes and coordinates) in SlideSeq assay format compatible with Seurat/Vesalius object
-
-  pt.sz <- k/15 #Adjusting point size for plotting
-  rm(ls)
-}
-
-bead <- cbind(rownames(bead), bead[[1]], bead[[2]])
-colnames(bead) <- c("barcodes","xcoord","ycoord")
-bead <- as.data.frame(bead)
-bead <- transform(bead, xcoord = as.numeric(xcoord), 
-               ycoord = as.numeric(ycoord))
-
-sparse.df <- as.data.frame(sparse)
-sparse.spmx <- Matrix(sparse, sparse = TRUE)
-
-```
 
 ## Create Vesalius Object - Milestone
 Based on the counts and bead coordinates
@@ -198,10 +163,8 @@ PCA / UMAP / tSNE (/LSI)
 
 set filterThreshold to remove outlier beads (0.99)
 ```{r}
-#sparse <- sparse.df
-sparse <- sparse.spmx
 
-vesalius <- buildVesaliusObject(bead,sparse)
+vesalius <- buildVesaliusObject(bead,df)
 ves <- buildVesaliusEmbeddings(vesalius, method = meth, 
   norm = norm, pcs = PCs, tensorResolution = 0.1, cores = cores, filterThreshold =0.99)
 
