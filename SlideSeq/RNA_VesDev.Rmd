@@ -298,11 +298,7 @@ m.df <- as.data.frame(mark)
 padj <- slice_min(m.df, order_by=m.df$p.value.adj, n=100)
 logfc.min <- slice_min(padj, order_by=padj$logFC, n=5)
 logfc.max <- slice_max(padj, order_by=padj$logFC, n=5)
-int.bins <- bind_rows(list(logfc.min, logfc.max))
-
-
-
-
+int.genes <- bind_rows(list(logfc.min, logfc.max))
 
 ```
 
@@ -332,12 +328,12 @@ viewGeneExpression
 ```{r}
 layer <- "FALSE"           
 p <- list()
-for(i in seq(int.bins$genes)){
-  p[[i]] <- viewGeneExpression(vesMorph, gene=int.bins$genes[[i]], as.layer=layer,norm=F, cex=0.1, territory1=s, territory2=q)
+for(i in seq(int.genes$genes)){
+  p[[i]] <- viewGeneExpression(vesMorph, gene=int.genes$genes[[i]], as.layer=layer,norm=F, cex=0.1, territory1=s, territory2=q)
 }
 
 setwd(in.path)
-fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "MarkerBins", vs, alias, param, paste0("layer", layer), ".pdf", sep="_")
+fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "MarkerGenes", vs, alias, param, paste0("layer", layer), ".pdf", sep="_")
 pdf(fname)
 grid.arrange(p[[1]], p[[2]], p[[3]], p[[4]], nrow = 2)
 grid.arrange(p[[5]], p[[6]], p[[7]], p[[8]], nrow = 2)
@@ -348,35 +344,29 @@ file.rename(from = paste0(in.path, fname), to = paste0(out.path, fname))
 
 ## Another bin plotting version: (One plot per pdf page)
 setwd(in.path)
-fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "MarkerBins", vs, alias, param, paste0("layer-", layer), ".pdf", sep="_")
+fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "MarkerGenes", vs, alias, param, paste0("layer-", layer), ".pdf", sep="_")
 pdf(fname)
-for(i in seq_along(int.bins$genes)){
-  print(viewGeneExpression(vesMorph, gene=int.bins$genes[[i]], as.layer=layer,norm=F,cex=0.5))
+for(i in seq_along(int.genes$genes)){
+  print(viewGeneExpression(vesMorph, gene=int.genes$genes[[i]], as.layer=layer,norm=F,cex=0.5))
 }
 dev.off()
 file.rename(from = paste0(in.path, fname), to = paste0(out.path, fname))
 
 ## Plot bins here in markdown:
-for(i in seq_along(int.bins$genes)){
-  print(viewGeneExpression(vesMorph, gene=int.bins$genes[[i]], as.layer=F,norm=F,cex=2))
+for(i in seq_along(int.genes$genes)){
+  print(viewGeneExpression(vesMorph, gene=int.genes$genes[[i]], as.layer=F,norm=F,cex=2))
 }
 
 
 
-## Chromosomal location
-In which chromosomes and where can we find the marker bins? 
- - bin.all (vector with table from either human or mouse chromosomes and the bin indexes)
- - find chromosome location for each bin index
- - keep only bin index, start, stop, and chromosome number 
- - merge the location information with the statistical output for each bin
- - export table to csv
+Here I need to investigate the genes... How?!
  
 
 
 ```{r}
 chr <- data_frame()
 for(i in seq_along(padj$genes)){
-  x <- as.list(subset(bin.all, bin_ind==padj$genes[[i]]))
+  x <- as.list(subset(genes[,1], bin_ind==padj$genes[[i]]))
   chr <- bind_rows(chr, x)
 }
 chr <- chr[c("bin_start", "bin_end", "chr_ind", "bin_ind")]
