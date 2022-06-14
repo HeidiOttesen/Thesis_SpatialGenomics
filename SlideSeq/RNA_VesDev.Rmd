@@ -16,10 +16,10 @@ mouse_liver_met_2_rna_201002_04
 start.time <- Sys.time()
 # SlideSeq RNA datasets:
 
-alias <- "mouse_liver_met_2"
-al.num <- "_rna_201002_04"
+alias <- "human_colon_cancer_4"
+al.num <- "_rna_200102_06"
 
-norm <- "log"             # Normalization method: "log","SCT","TFIDF","raw"
+norm <- "SCT"             # Normalization method: "log","SCT","TFIDF","raw"
 meth <- "PCA"               # Dimensionality reduction method: "PCA","PCA_L","UMAP","LSI","LSI_UMAP"
 PCs <- 30                   # Number of Embeddings / dimensions / Principal Components / "LSI topics"
 plotPC <- 8                 # Number of PC plots to export. 
@@ -32,8 +32,6 @@ smIter <- 10                # Smoothing Iterations
 #imSegDims <- 4             # Image Segmentation Dimensions
 st.meth <- "chisq"          # Statistical method for extracting marker genes - "wilcox", "t.test", "chisq"
 
-
-param <- paste(paste0(norm, "Norm"), paste0(meth, PCs), sep = "_")
 
 in.path <- "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/"
 out.path <- paste0("~/Thesis_SpatialGenomics/R_Output/VesaliusDev/RNA/", alias, "/")
@@ -105,8 +103,17 @@ pt.sz <- 0.25
 ```
 
 
+## Parameters
+Keep track of parameters in param vector for file naming etc.
+
+```{r}
+param <- paste(paste0(norm, "Norm"), paste0(meth, PCs), sep = "_")
+```
+
+
+
 ## Features
-Assign the genes as rownames on count matrix
+Assign either the mouse or human genes as rownames of count matrix
 
 ```{r}
 if(grepl("human",alias)){
