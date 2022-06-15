@@ -31,7 +31,7 @@ al.num <- "_dna_200114_13"
 
 norm <- "TFIDF"             # Normalization method: "log","SCT","TFIDF","raw"
 meth <- "LSI"               # Dimensionality reduction method: "PCA","PCA_L","UMAP","LSI","LSI_UMAP"
-PCs <- 12                    # Number of Embeddings / dimensions / Principal Components / "LSI topics"
+PCs <- 20                    # Number of Embeddings / dimensions / Principal Components / "LSI topics"
 plotPC <- 8                 # Number of PC plots to export.
 
 min.count <- 0
@@ -43,7 +43,7 @@ knn.type <- "Duplicate"     # KNN method: "Unique", "Duplicate"
 cores <- 5
 
 colD <- 6                   # Column Depth (3-6)
-smIter <- 10                # Smoothing Iterations
+smIter <- 15                # Smoothing Iterations
 #imSegDims <- 4             # Image Segmentation Dimensions
 st.meth <- "wilcox"          #Statistical method for extracting markers/bins, "wilcox", "t.test", "chisq"
 
