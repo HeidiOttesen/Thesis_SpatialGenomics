@@ -257,6 +257,10 @@ seed against query - pick territories manually!! based on the territory plot
   - eg inner vs outer part of metastasis
   - outer part vs normal
   - outer part vs other metastasis
+  - metastasis vs metastasis
+Naming examples:
+  - "CloneBInnerVsOuter"    CloneBVsCloneA    CloneAVsAll
+  
   
 Output:
  - p.value,
@@ -278,9 +282,9 @@ TerritoryMorphing
 
 
 # Specify territories for comparison, seed vs query
-vs <- "CloneBVsCloneA"
-s <- c(14,13)           #c(8,7) or NULL
-q <- c(5,7)             #c(2,3) or NULL
+vs <- "CloneAInnerVsOuter"
+s <- c(8)           #c(8,7) or NULL
+q <- c(9)             #c(2,3) or NULL
 pval <- 0.05
 
 vesMark <- extractMarkers(vesTerr,method=st.meth, seed=s, query=q, pval=pval)

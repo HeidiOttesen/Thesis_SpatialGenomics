@@ -18,27 +18,27 @@ mouse_liver_met_2_dna_200114_10
 mouse_liver_met_1_dna_191114_05
 mouse_liver_met_1_dna_191114_06
 
-KNN duplicate vs unique - unique makes the dataset much smaller! More efficient for testing..
+KNN duplicate vs unique - unique makes the dataset much smaller! More efficient for testing.. Duplicate makes the downstream PCA etc more robust and meaningful.
 
 ```{r}
 start.time <- Sys.time()
 # SlideSeq DNA datasets:
 
-alias <- "mouse_liver_met_2"
-al.num <- "_dna_200114_10"
+alias <- "human_colon_cancer_4"
+al.num <- "_dna_200114_13"
 
 
 
-norm <- "log"             # Normalization method: "log","SCT","TFIDF","raw"
-meth <- "PCA"               # Dimensionality reduction method: "PCA","PCA_L","UMAP","LSI","LSI_UMAP"
-PCs <- 6                    # Number of Embeddings / dimensions / Principal Components / "LSI topics"
-plotPC <- 4                 # Number of PC plots to export.
+norm <- "TFIDF"             # Normalization method: "log","SCT","TFIDF","raw"
+meth <- "LSI"               # Dimensionality reduction method: "PCA","PCA_L","UMAP","LSI","LSI_UMAP"
+PCs <- 12                    # Number of Embeddings / dimensions / Principal Components / "LSI topics"
+plotPC <- 8                 # Number of PC plots to export.
 
 min.count <- 0
 max.count <- 6
 
 k <- 5
-knn.type <- "Unique"     # KNN method: "Unique", "Duplicate"
+knn.type <- "Duplicate"     # KNN method: "Unique", "Duplicate"
 
 cores <- 5
 
