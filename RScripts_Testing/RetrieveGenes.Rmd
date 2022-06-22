@@ -1,0 +1,121 @@
+---
+title: "GeneFinding"
+output: html_document
+date: '2022-06-15'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(biomaRt)
+library(dplyr)
+```
+
+## Read input csv
+Containing the top 100 marker bins (lowest adjusted P-values)
+From when comparing the different territories..
+
+Sample aliases / Folder names:
+
+human_colon_cancer_3
+human_colon_cancer_4
+human_colon_cancer_dna_4x
+mouse_liver_met_2 - Need to do more with TFIDF and LSI (I only have logNorm+PCA output now 20/6....)
+mouse_liver_met_1
+
+
+```{r}
+alias <- "mouse_liver_met_2"
+in.path <- paste0("~/Thesis_SpatialGenomics/R_Output/VesaliusDev/", alias, "/")
+files <- list.files(in.path,pattern = ".csv")
+fname <- files[7]
+
+
+orig <- read.csv(paste0(in.path, fname))
+
+#length(orig$X), ncol=1))
+#regions <- data.frame()
+```
+
+For manual input into the web-tool biomart:
+Human (hg19 - GRCh37): http://grch37.ensembl.org/biomart/martview/8353f16f6694f7e81986e040d1dc6609 
+mouse (mm10 - GRCm38): http://nov2020.archive.ensembl.org/biomart/martview/3ccc2e3bf258b2dab26f41bc9aacfe2d
+
+
+```{r}
+fw <- vector() 
+rv <- vector()
+for(i in seq_along(orig$X)){
+  r <- paste0(orig$chr_ind[i], ":", orig$bin_start[i], ":", orig$bin_end[i])
+  fw <- paste0(fw, r, ":1, ")
+  rv <- paste0(rv, r, ":-1, ")
+}
+
+#fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "Genes", alias,  sep="_")
+fname <- paste0("Genes_", fname)
+print(fw)
+print(rv)
+print(fname)
+
+
+```
+
+
+Input forward and reverse locations/regions as search queries at:
+- Human (hg19):
+  http://grch37.ensembl.org/biomart/martview/4c1c4ff5c91101978cc6a377aff7dd80
+- Mouse (mm10):
+  http://dec2017.archive.ensembl.org/biomart/martview/b5213d9aba47aeb64ba1c76a8a3d5c7a
+  
+Attributes:
+  Gene Stable ID, Description, Chr name, Start, End, Strand, Name, Type
+  
+
+## Select top interesting bins
+100 bins are too many (gives thousands of genes..)
+Here I'm taking the 10 highest logFC bins out of those top 100 adjusted p-value bins
+  
+```{r}
+logfc.min <- slice_min(orig, order_by=orig$logFC, n=5)
+logfc.max <- slice_max(orig, order_by=orig$logFC, n=5)
+int.bins <- bind_rows(list(logfc.min, logfc.max))
+
+```
+  
+## For use with Biomart in R:
+
+Retrieve either human or mouse genome (archived assemblies) from Ensembl
+
+```{r}
+if(grepl("human",alias)){
+  mart <- useMart(biomart="ENSEMBL_MART_ENSEMBL", host="grch37.ensembl.org", path="/biomart/martservice", dataset="hsapiens_gene_ensembl")
+} else if(grepl("mouse",alias)){
+  mart <- useMart(biomart="ENSEMBL_MART_ENSEMBL", host="nov2020.archive.ensembl.org", path="/biomart/martservice", dataset="mmusculus_gene_ensembl")
+}
+```
+
+Iterating over each bin
+Take location info (chromosome name, start position and end position) of the bin in vector r.
+Pick relevant attributes to get from biomart gene info
+filters - what attributes do you use for as your query (location: chr, start, end)
+values - query as list (chr, start, end -values)
+mart - which database/genome are you extracting from.
+
+Sort genes output based on chromosome and start position
+
+```{r}
+
+r <- vector()
+genes <- data.frame()
+for(i in seq_along(int.bins$X)){
+  r <- list(int.bins$chr_ind[i], int.bins$bin_start[i], int.bins$bin_end[i])
+  g <- getBM(c("external_gene_name", "description", "ensembl_gene_id", "gene_biotype", "go_id", "chromosome_name", 
+               "start_position","end_position", "strand"),
+             filters=c("chromosome_name","start","end"),
+             values=r, mart=mart)
+  genes <- rbind(genes, g)
+}
+genes <- genes[order(genes$start_position),]
+genes <- genes[order(genes$chromosome_name),]
+
+```
+

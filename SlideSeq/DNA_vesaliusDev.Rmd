@@ -38,7 +38,7 @@ min.count <- 0
 max.count <- 6
 
 k <- 5
-knn.type <- "Duplicate"     # KNN method: "Unique", "Duplicate"
+knn.type <- "Chromosome"     # KNN method: "Unique", "Duplicate", "Chromosome"
 
 cores <- 5
 
@@ -64,13 +64,13 @@ knitr::opts_knit$set(root.dir = "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_
 knitr::opts_chunk$set(echo = TRUE)
 library(imagerExtra)
 library(Seurat)
+library(Signac)
 library(ggplot2)
 library(patchwork)
 library(viridis)
 library(RColorBrewer)
 library(dplyr)
 library(tvR)
-library(Signac)
 library(sp)
 library(spdep)
 library(grid)
@@ -85,7 +85,6 @@ for(i in seq_along(files)){
   source(files[i])
 }
 
-# Standard libraries - just in case you are a command line fiend
 library(utils)
 library(stats)
 library(graphics)
@@ -180,6 +179,7 @@ param <- param1
 ```
 
 
+
 ## Run KNN
 - Decide between only using each barcode once (KNN.DNA.Unique function)
   or having many duplicate groups of barcodes, each barcode gets a group of k nearest neighbors (KNN.DNA function)
@@ -190,8 +190,10 @@ if(exists("k")){
   if(knn.type == "Unique"){
     ls <- KNN.DNA.Unique(bead, df, k)
     pt.sz <- k/15 #Adjusting point size for plotting
-  }else{
+  }else if(knn.type == "Duplicate"){
     ls <- KNN.DNA(bead, df, k)
+  }else if(knn.type == "Chromosome"){
+    ls <- chromosome(bead, df)
   }
   param <- paste(param, paste0("knn", knn.type, k), sep="_")
   sparse <- ls[[1]] #Retrieve sparse matrix output from knn function
@@ -253,7 +255,9 @@ dev.off()
 file.rename(from = paste0(in.path, fname), to = paste0(out.path, fname))
 
 print(paste("Runtime so far: ", difftime(Sys.time(), start.time, units="mins"), "min"))
+imagePlot(ves, dims = 1)
 ```
+
 
 
 ## Image processing:
@@ -262,7 +266,15 @@ imageSegmentation - iterative k-means clustering
   - Embedding "last": last dimred method used (if you have multiple dimred obejcts stored in your ves object)
 LayerTerritory - not relevant for DNA data?
 
-  
+```{r}
+## For testing different smoothing iterations and column depths:
+#smIter <- 8 
+#colD <- 3
+param2 <- param
+param <- param2
+
+```
+
 
 ```{r}
 vesImSeg <- imageSegmentation(ves,dims=1:PCs, colDepth = colD, smoothIter=smIter,smoothType="iso",sigma=2,embedding=meth)
@@ -298,7 +310,7 @@ to decide which territories to compare
 
 ```{r}
 
-param2 <- param
+param3 <- param
 territoryPlot(vesTerr,cex=10,cex.pt=pt.sz)
 
 ```
@@ -469,6 +481,29 @@ write.csv(bin.chr, file=paste0(out.path,fname))
 print(paste("Runtime so far: ", difftime(Sys.time(), start.time, units="mins"), "min"))
 
 ```
+## Get bin location info w Function: - not working atm...?
+```{r}
+bin.chr <- binLocations(int.bins, bin.all)
+
+fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "MarkerBins", vs, alias, param, "table.csv", sep="_")
+write.csv(bin.chr, file=paste0(out.path,fname))
+
+print(paste("Runtime so far: ", difftime(Sys.time(), start.time, units="mins"), "min"))
+```
+
+
+
+## Get genes from top bins:
+```{r}
+genes <- genesBioMart(int.bins, alias)
+fname.g <- paste0("Genes_", fname)
+fname.g <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "Genes", alias, param, "table.csv", sep="_")
+write.csv(genes, file=paste0(out.path,fname.g))
+
+```
+
+
+
 
 ## Check the log of your current vesalius object
 getLastLog(vesTerr)
