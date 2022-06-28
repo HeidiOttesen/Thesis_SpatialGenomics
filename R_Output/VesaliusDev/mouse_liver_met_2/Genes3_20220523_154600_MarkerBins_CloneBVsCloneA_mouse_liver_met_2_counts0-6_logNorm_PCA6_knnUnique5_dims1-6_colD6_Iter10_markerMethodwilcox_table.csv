@@ -1,0 +1,415 @@
+"","external_gene_name","description","ensembl_gene_id","gene_biotype","chromosome_name","start_position","end_position","strand"
+"1","Pianp","PILR alpha associated neural protein [Source:MGI Symbol;Acc:MGI:2441908]","ENSMUSG00000030329","protein_coding",6,124996694,125003096,1
+"2","Zfp384","zinc finger protein 384 [Source:MGI Symbol;Acc:MGI:2443203]","ENSMUSG00000038346","protein_coding",6,125009145,125037870,1
+"3","4930557K07Rik","RIKEN cDNA 4930557K07 gene [Source:MGI Symbol;Acc:MGI:1925452]","ENSMUSG00000108034","antisense",6,125010173,125049851,-1
+"4","Ing4","inhibitor of growth family, member 4 [Source:MGI Symbol;Acc:MGI:107307]","ENSMUSG00000030330","protein_coding",6,125039760,125049265,1
+"5","Gm44597","predicted gene 44597 [Source:MGI Symbol;Acc:MGI:5753173]","ENSMUSG00000108037","processed_transcript",6,125039816,125051542,1
+"6","Acrbp","proacrosin binding protein [Source:MGI Symbol;Acc:MGI:1859515]","ENSMUSG00000072770","protein_coding",6,125049689,125063267,1
+"7","Lpar5","lysophosphatidic acid receptor 5 [Source:MGI Symbol;Acc:MGI:2685918]","ENSMUSG00000067714","protein_coding",6,125067920,125082472,1
+"8","2010008C14Rik","RIKEN cDNA 2010008C14 gene [Source:MGI Symbol;Acc:MGI:1917109]","ENSMUSG00000107761","TEC",6,125083437,125084029,1
+"9","Chd4","chromodomain helicase DNA binding protein 4 [Source:MGI Symbol;Acc:MGI:1344380]","ENSMUSG00000063870","protein_coding",6,125095981,125130591,1
+"10","Mir7045","microRNA 7045 [Source:MGI Symbol;Acc:MGI:5531140]","ENSMUSG00000098762","miRNA",6,125097024,125097086,1
+"11","Gm23751","predicted gene, 23751 [Source:MGI Symbol;Acc:MGI:5453528]","ENSMUSG00000088208","scaRNA",6,125121724,125121859,1
+"12","Nop2","NOP2 nucleolar protein [Source:MGI Symbol;Acc:MGI:107891]","ENSMUSG00000038279","protein_coding",6,125131909,125144753,1
+"13","Iffo1","intermediate filament family orphan 1 [Source:MGI Symbol;Acc:MGI:2444516]","ENSMUSG00000038271","protein_coding",6,125145241,125161782,1
+"14","Gapdh","glyceraldehyde-3-phosphate dehydrogenase [Source:MGI Symbol;Acc:MGI:95640]","ENSMUSG00000057666","protein_coding",6,125161715,125166467,-1
+"15","Ncapd2","non-SMC condensin I complex, subunit D2 [Source:MGI Symbol;Acc:MGI:1915548]","ENSMUSG00000038252","protein_coding",6,125168007,125191701,-1
+"16","Scarna10","small Cajal body-specific RNA 10 [Source:MGI Symbol;Acc:MGI:3819482]","ENSMUSG00000089617","snoRNA",6,125186359,125186683,-1
+"17","Gm28967","predicted gene 28967 [Source:MGI Symbol;Acc:MGI:5579673]","ENSMUSG00000099587","sense_intronic",6,125186361,125186641,-1
+"18","Mrpl51","mitochondrial ribosomal protein L51 [Source:MGI Symbol;Acc:MGI:1913743]","ENSMUSG00000030335","protein_coding",6,125191801,125196269,1
+"19","Mir3098","microRNA 3098 [Source:MGI Symbol;Acc:MGI:4834313]","ENSMUSG00000093157","miRNA",6,125195792,125195878,1
+"20","Gm44487","predicted gene, 44487 [Source:MGI Symbol;Acc:MGI:5690879]","ENSMUSG00000107995","processed_pseudogene",6,125208367,125208691,-1
+"21","Vamp1","vesicle-associated membrane protein 1 [Source:MGI Symbol;Acc:MGI:1313276]","ENSMUSG00000030337","protein_coding",6,125215551,125245964,1
+"22","Tapbpl","TAP binding protein-like [Source:MGI Symbol;Acc:MGI:2384853]","ENSMUSG00000038213","protein_coding",6,125223933,125231860,-1
+"23","Cd27","CD27 antigen [Source:MGI Symbol;Acc:MGI:88326]","ENSMUSG00000030336","protein_coding",6,125232622,125237010,-1
+"24","Mir8113","microRNA 8113 [Source:MGI Symbol;Acc:MGI:5530776]","ENSMUSG00000098856","miRNA",6,125234684,125234812,-1
+"25","Gm44259","predicted gene, 44259 [Source:MGI Symbol;Acc:MGI:5690651]","ENSMUSG00000107965","processed_pseudogene",6,125257711,125258008,-1
+"26","Gm24175","predicted gene, 24175 [Source:MGI Symbol;Acc:MGI:5453952]","ENSMUSG00000089556","snoRNA",6,125258049,125258177,-1
+"27","4930417O13Rik","RIKEN cDNA 4930417O13 gene [Source:MGI Symbol;Acc:MGI:1921120]","ENSMUSG00000108129","processed_transcript",6,125265476,125287286,1
+"28","Tuba3a","tubulin, alpha 3A [Source:MGI Symbol;Acc:MGI:1095406]","ENSMUSG00000067702","protein_coding",6,125278274,125286042,-1
+"29","Ltbr","lymphotoxin B receptor [Source:MGI Symbol;Acc:MGI:104875]","ENSMUSG00000030339","protein_coding",6,125306571,125313885,-1
+"30","Scnn1a","sodium channel, nonvoltage-gated 1 alpha [Source:MGI Symbol;Acc:MGI:101782]","ENSMUSG00000030340","protein_coding",6,125320659,125344943,1
+"31","Tnfrsf1a","tumor necrosis factor receptor superfamily, member 1a [Source:MGI Symbol;Acc:MGI:1314884]","ENSMUSG00000030341","protein_coding",6,125349362,125362484,1
+"32","Plekhg6","pleckstrin homology domain containing, family G (with RhoGef domain) member 6 [Source:MGI Symbol;Acc:MGI:2682298]","ENSMUSG00000038167","protein_coding",6,125362660,125380793,-1
+"33","Cd9","CD9 antigen [Source:MGI Symbol;Acc:MGI:88348]","ENSMUSG00000030342","protein_coding",6,125460266,125494791,-1
+"34","Gm28809","predicted gene 28809 [Source:MGI Symbol;Acc:MGI:5579515]","ENSMUSG00000101191","antisense",6,125481363,125484678,1
+"35","Gm26728","predicted gene, 26728 [Source:MGI Symbol;Acc:MGI:5477222]","ENSMUSG00000101162","processed_transcript",6,125494424,125509135,1
+"36","Vwf","Von Willebrand factor [Source:MGI Symbol;Acc:MGI:98941]","ENSMUSG00000001930","protein_coding",6,125546774,125686679,1
+"37","Ano2","anoctamin 2 [Source:MGI Symbol;Acc:MGI:2387214]","ENSMUSG00000038115","protein_coding",6,125690419,126040126,1
+"38","Gm16303","predicted gene 16303 [Source:MGI Symbol;Acc:MGI:3826584]","ENSMUSG00000089834","processed_pseudogene",6,125739406,125739795,1
+"39","Gm24947","predicted gene, 24947 [Source:MGI Symbol;Acc:MGI:5454724]","ENSMUSG00000088959","snRNA",6,125884415,125884524,1
+"188","Galnt2l","polypeptide N-acetylgalactosaminyltransferase 2-like [Source:MGI Symbol;Acc:MGI:5141853]","ENSMUSG00000092329","protein_coding",8,119910841,124345722,1
+"197","Ankrd11","ankyrin repeat domain 11 [Source:MGI Symbol;Acc:MGI:1924337]","ENSMUSG00000035569","protein_coding",8,122883822,123042277,-1
+"201","2810013P06Rik","RIKEN cDNA 2810013P06 gene [Source:MGI Symbol;Acc:MGI:1914456]","ENSMUSG00000099881","bidirectional_promoter_lncRNA",8,123042466,123044602,1
+"207","Spg7","SPG7, paraplegin matrix AAA peptidase subunit [Source:MGI Symbol;Acc:MGI:2385906]","ENSMUSG00000000738","protein_coding",8,123062942,123097760,1
+"174","Rpl13","ribosomal protein L13 [Source:MGI Symbol;Acc:MGI:105922]","ENSMUSG00000000740","protein_coding",8,123102350,123105244,1
+"161","Snord68","small nucleolar RNA, C/D box 68 [Source:MGI Symbol;Acc:MGI:3819550]","ENSMUSG00000064450","snoRNA",8,123103038,123103123,1
+"120","Mir7079","microRNA 7079 [Source:MGI Symbol;Acc:MGI:5530660]","ENSMUSG00000098550","miRNA",8,123104975,123105043,1
+"202","Cpne7","copine VII [Source:MGI Symbol;Acc:MGI:2142747]","ENSMUSG00000034796","protein_coding",8,123117374,123135182,1
+"118","Mir7080","microRNA 7080 [Source:MGI Symbol;Acc:MGI:5531293]","ENSMUSG00000098582","miRNA",8,123130106,123130172,1
+"198","Sult5a1","sulfotransferase family 5A, member 1 [Source:MGI Symbol;Acc:MGI:1931463]","ENSMUSG00000000739","protein_coding",8,123140192,123158315,-1
+"204","Gm4316","predicted gene 4316 [Source:MGI Symbol;Acc:MGI:3782497]","ENSMUSG00000110537","lincRNA",8,123165255,123178765,1
+"209","Dpep1","dipeptidase 1 [Source:MGI Symbol;Acc:MGI:94917]","ENSMUSG00000019278","protein_coding",8,123186242,123201812,1
+"213","Chmp1a","charged multivesicular body protein 1A [Source:MGI Symbol;Acc:MGI:1920159]","ENSMUSG00000000743","protein_coding",8,123204264,123212763,-1
+"205","Rps12-ps9","ribosomal protein S12, pseudogene 9 [Source:MGI Symbol;Acc:MGI:3704324]","ENSMUSG00000069862","processed_pseudogene",8,123206623,123207021,1
+"193","Spata33","spermatogenesis associated 33 [Source:MGI Symbol;Acc:MGI:2444920]","ENSMUSG00000048478","protein_coding",8,123212832,123222046,1
+"200","Cdk10","cyclin-dependent kinase 10 [Source:MGI Symbol;Acc:MGI:2448549]","ENSMUSG00000033862","protein_coding",8,123224842,123232250,1
+"206","Spata2l","spermatogenesis associated 2-like [Source:MGI Symbol;Acc:MGI:1926029]","ENSMUSG00000033594","protein_coding",8,123229801,123236233,-1
+"173","Gm45842","predicted gene 45842 [Source:MGI Symbol;Acc:MGI:5804957]","ENSMUSG00000110505","antisense",8,123230799,123242160,1
+"196","4933417D19Rik","RIKEN cDNA 4933417D19 gene [Source:MGI Symbol;Acc:MGI:1918436]","ENSMUSG00000097637","antisense",8,123235091,123242359,1
+"178","Vps9d1","VPS9 domain containing 1 [Source:MGI Symbol;Acc:MGI:1914143]","ENSMUSG00000001062","protein_coding",8,123242356,123254348,-1
+"177","Zfp276","zinc finger protein (C2H2 type) 276 [Source:MGI Symbol;Acc:MGI:1888495]","ENSMUSG00000001065","protein_coding",8,123254195,123269745,1
+"183","Fanca","Fanconi anemia, complementation group A [Source:MGI Symbol;Acc:MGI:1341823]","ENSMUSG00000032815","protein_coding",8,123268300,123318576,-1
+"170","Spire2","spire type actin nucleation factor 2 [Source:MGI Symbol;Acc:MGI:2446256]","ENSMUSG00000010154","protein_coding",8,123332713,123369515,1
+"187","Tcf25","transcription factor 25 (basic helix-loop-helix) [Source:MGI Symbol;Acc:MGI:1914105]","ENSMUSG00000001472","protein_coding",8,123373753,123403835,1
+"175","Mc1r","melanocortin 1 receptor [Source:MGI Symbol;Acc:MGI:99456]","ENSMUSG00000074037","protein_coding",8,123407107,123410744,1
+"203","Gm38092","predicted gene, 38092 [Source:MGI Symbol;Acc:MGI:5611320]","ENSMUSG00000103244","TEC",8,123408100,123408752,-1
+"181","Tubb3","tubulin, beta 3 class III [Source:MGI Symbol;Acc:MGI:107813]","ENSMUSG00000062380","protein_coding",8,123411424,123422015,1
+"208","Def8","differentially expressed in FDCP 8 [Source:MGI Symbol;Acc:MGI:1346331]","ENSMUSG00000001482","protein_coding",8,123423527,123463270,1
+"152","Gm25428","predicted gene, 25428 [Source:MGI Symbol;Acc:MGI:5455205]","ENSMUSG00000088233","snoRNA",8,123471384,123471497,1
+"190","Afg3l1","AFG3-like AAA ATPase 1 [Source:MGI Symbol;Acc:MGI:1928277]","ENSMUSG00000031967","protein_coding",8,123477903,123503916,1
+"172","Dbndd1","dysbindin (dystrobrevin binding protein 1) domain containing 1 [Source:MGI Symbol;Acc:MGI:1919435]","ENSMUSG00000031970","protein_coding",8,123504718,123515463,-1
+"180","Gas8","growth arrest specific 8 [Source:MGI Symbol;Acc:MGI:1202386]","ENSMUSG00000040220","protein_coding",8,123518834,123536650,1
+"143","Gm22314","predicted gene, 22314 [Source:MGI Symbol;Acc:MGI:5452091]","ENSMUSG00000088632","misc_RNA",8,123523260,123523540,1
+"128","n-R5s100","nuclear encoded rRNA 5S 100 [Source:MGI Symbol;Acc:MGI:4421948]","ENSMUSG00000094720","rRNA",8,123538786,123538904,-1
+"163","n-R5s101","nuclear encoded rRNA 5S 101 [Source:MGI Symbol;Acc:MGI:4421949]","ENSMUSG00000095073","rRNA",8,123540493,123540611,-1
+"121","n-R5s102","nuclear encoded rRNA 5S 102 [Source:MGI Symbol;Acc:MGI:4421950]","ENSMUSG00000096613","rRNA",8,123542178,123542296,-1
+"126","n-R5s103","nuclear encoded rRNA 5S 103 [Source:MGI Symbol;Acc:MGI:4421951]","ENSMUSG00000095249","rRNA",8,123543873,123543991,-1
+"146","n-R5s104","nuclear encoded rRNA 5S 104 [Source:MGI Symbol;Acc:MGI:4421952]","ENSMUSG00000096307","rRNA",8,123545578,123545696,-1
+"131","n-R5s105","nuclear encoded rRNA 5S 105 [Source:MGI Symbol;Acc:MGI:4421953]","ENSMUSG00000095966","rRNA",8,123547265,123547383,-1
+"138","n-R5s106","nuclear encoded rRNA 5S 106 [Source:MGI Symbol;Acc:MGI:4421954]","ENSMUSG00000094537","rRNA",8,123548956,123549074,-1
+"165","n-R5s107","nuclear encoded rRNA 5S 107 [Source:MGI Symbol;Acc:MGI:4421955]","ENSMUSG00000096367","rRNA",8,123550667,123550785,-1
+"166","n-R5s108","nuclear encoded rRNA 5S 108 [Source:MGI Symbol;Acc:MGI:4421956]","ENSMUSG00000096335","rRNA",8,123552364,123552482,-1
+"142","n-R5s109","nuclear encoded rRNA 5S 109 [Source:MGI Symbol;Acc:MGI:4421957]","ENSMUSG00000094265","rRNA",8,123554060,123554178,-1
+"133","n-R5s110","nuclear encoded rRNA 5S 110 [Source:MGI Symbol;Acc:MGI:4421958]","ENSMUSG00000095131","rRNA",8,123555763,123555881,-1
+"115","n-R5s111","nuclear encoded rRNA 5S 111 [Source:MGI Symbol;Acc:MGI:4421959]","ENSMUSG00000094097","rRNA",8,123557490,123557608,-1
+"127","n-R5s112","nuclear encoded rRNA 5S 112 [Source:MGI Symbol;Acc:MGI:4421960]","ENSMUSG00000095449","rRNA",8,123559201,123559319,-1
+"114","n-R5s113","nuclear encoded rRNA 5S 113 [Source:MGI Symbol;Acc:MGI:4421961]","ENSMUSG00000094801","rRNA",8,123560888,123561006,-1
+"162","n-R5s114","nuclear encoded rRNA 5S 114 [Source:MGI Symbol;Acc:MGI:4421962]","ENSMUSG00000096599","rRNA",8,123562595,123562713,-1
+"135","n-R5s115","nuclear encoded rRNA 5S 115 [Source:MGI Symbol;Acc:MGI:4421965]","ENSMUSG00000095915","rRNA",8,123564286,123564404,-1
+"148","Gm25018","predicted gene, 25018 [Source:MGI Symbol;Acc:MGI:5454795]","ENSMUSG00000094751","rRNA",8,123565969,123566087,-1
+"137","n-R5s117","nuclear encoded rRNA 5S 117 [Source:MGI Symbol;Acc:MGI:4421967]","ENSMUSG00000096710","rRNA",8,123567637,123567755,-1
+"123","n-R5s118","nuclear encoded rRNA 5S 118 [Source:MGI Symbol;Acc:MGI:4421968]","ENSMUSG00000094178","rRNA",8,123569328,123569446,-1
+"145","n-R5s119","nuclear encoded rRNA 5S 119 [Source:MGI Symbol;Acc:MGI:4421971]","ENSMUSG00000096132","rRNA",8,123571001,123571119,-1
+"136","n-R5s120","nuclear encoded rRNA 5S 120 [Source:MGI Symbol;Acc:MGI:4421972]","ENSMUSG00000096855","rRNA",8,123572710,123572828,-1
+"168","n-R5s121","nuclear encoded rRNA 5S 121 [Source:MGI Symbol;Acc:MGI:4421973]","ENSMUSG00000095410","rRNA",8,123574397,123574515,-1
+"125","n-R5s122","nuclear encoded rRNA 5S 122 [Source:MGI Symbol;Acc:MGI:4421974]","ENSMUSG00000094956","rRNA",8,123576076,123576194,-1
+"139","n-R5s123","nuclear encoded rRNA 5S 123 [Source:MGI Symbol;Acc:MGI:4421975]","ENSMUSG00000095652","rRNA",8,123577755,123577873,-1
+"130","n-R5s124","nuclear encoded rRNA 5S 124 [Source:MGI Symbol;Acc:MGI:4421976]","ENSMUSG00000093893","rRNA",8,123579450,123579568,-1
+"122","n-R5s125","nuclear encoded rRNA 5S 125 [Source:MGI Symbol;Acc:MGI:4421979]","ENSMUSG00000096092","rRNA",8,123581155,123581273,-1
+"150","Gm24312","predicted gene, 24312 [Source:MGI Symbol;Acc:MGI:5454089]","ENSMUSG00000093852","rRNA",8,123582850,123582968,-1
+"141","n-R5s127","nuclear encoded rRNA 5S 127 [Source:MGI Symbol;Acc:MGI:4421983]","ENSMUSG00000093960","rRNA",8,123584535,123584653,-1
+"116","n-R5s128","nuclear encoded rRNA 5S 128 [Source:MGI Symbol;Acc:MGI:4421984]","ENSMUSG00000094003","rRNA",8,123586242,123586360,-1
+"160","n-R5s129","nuclear encoded rRNA 5S 129 [Source:MGI Symbol;Acc:MGI:4421985]","ENSMUSG00000094455","rRNA",8,123587959,123588077,-1
+"156","n-R5s130","nuclear encoded rRNA 5S 130 [Source:MGI Symbol;Acc:MGI:4421986]","ENSMUSG00000096785","rRNA",8,123589654,123589772,-1
+"164","n-R5s131","nuclear encoded rRNA 5S 131 [Source:MGI Symbol;Acc:MGI:4421987]","ENSMUSG00000096358","rRNA",8,123591371,123591489,-1
+"167","Gm26391","predicted gene, 26391 [Source:MGI Symbol;Acc:MGI:5456168]","ENSMUSG00000094916","rRNA",8,123593071,123593189,-1
+"144","n-R5s133","nuclear encoded rRNA 5S 133 [Source:MGI Symbol;Acc:MGI:4421989]","ENSMUSG00000096343","rRNA",8,123594754,123594872,-1
+"129","n-R5s134","nuclear encoded rRNA 5S 134 [Source:MGI Symbol;Acc:MGI:4421990]","ENSMUSG00000096015","rRNA",8,123596457,123596575,-1
+"149","Rn5s","5S RNA [Source:MGI Symbol;Acc:MGI:97949]","ENSMUSG00000096406","rRNA",8,123598158,123598276,-1
+"117","n-R5s136","nuclear encoded rRNA 5S 136 [Source:MGI Symbol;Acc:MGI:4421992]","ENSMUSG00000096037","rRNA",8,123599861,123599979,-1
+"155","Gm24089","predicted gene, 24089 [Source:MGI Symbol;Acc:MGI:5453866]","ENSMUSG00000094541","rRNA",8,123601572,123601680,-1
+"157","n-R5s138","nuclear encoded rRNA 5S 138 [Source:MGI Symbol;Acc:MGI:4421994]","ENSMUSG00000095183","rRNA",8,123603247,123603365,-1
+"134","n-R5s139","nuclear encoded rRNA 5S 139 [Source:MGI Symbol;Acc:MGI:4421995]","ENSMUSG00000094760","rRNA",8,123604948,123605066,-1
+"132","Gm22109","predicted gene, 22109 [Source:MGI Symbol;Acc:MGI:5451886]","ENSMUSG00000095376","rRNA",8,123606613,123606731,-1
+"153","n-R5s141","nuclear encoded rRNA 5S 141 [Source:MGI Symbol;Acc:MGI:4421997]","ENSMUSG00000095749","rRNA",8,123608320,123608438,-1
+"119","n-R5s142","nuclear encoded rRNA 5S 142 [Source:MGI Symbol;Acc:MGI:4421998]","ENSMUSG00000094657","rRNA",8,123610017,123610135,-1
+"124","n-R5s143","nuclear encoded rRNA 5S 143 [Source:MGI Symbol;Acc:MGI:4421999]","ENSMUSG00000095645","rRNA",8,123611715,123611833,-1
+"159","n-R5s144","nuclear encoded rRNA 5S 144 [Source:MGI Symbol;Acc:MGI:4422000]","ENSMUSG00000096765","rRNA",8,123613414,123613532,-1
+"158","Gm25212","predicted gene, 25212 [Source:MGI Symbol;Acc:MGI:5454989]","ENSMUSG00000096300","rRNA",8,123615099,123615217,-1
+"147","n-R5s146","nuclear encoded rRNA 5S 146 [Source:MGI Symbol;Acc:MGI:4422002]","ENSMUSG00000096170","rRNA",8,123616810,123616928,-1
+"154","Gm22291","predicted gene, 22291 [Source:MGI Symbol;Acc:MGI:5452068]","ENSMUSG00000094270","rRNA",8,123618536,123618654,-1
+"140","Gm23284","predicted gene, 23284 [Source:MGI Symbol;Acc:MGI:5453061]","ENSMUSG00000095350","rRNA",8,123620241,123620359,-1
+"169","n-R5s149","nuclear encoded rRNA 5S 149 [Source:MGI Symbol;Acc:MGI:4422007]","ENSMUSG00000095453","rRNA",8,123621928,123622046,-1
+"151","Gm23647","predicted gene, 23647 [Source:MGI Symbol;Acc:MGI:5453424]","ENSMUSG00000095723","rRNA",8,123623637,123623745,-1
+"192","Rhou","ras homolog family member U [Source:MGI Symbol;Acc:MGI:1916831]","ENSMUSG00000039960","protein_coding",8,123653929,123663884,1
+"185","Gm45781","predicted gene 45781 [Source:MGI Symbol;Acc:MGI:5804896]","ENSMUSG00000110467","lincRNA",8,123727772,123735142,-1
+"210","6030466F02Rik","RIKEN cDNA 6030466F02 gene [Source:MGI Symbol;Acc:MGI:3045390]","ENSMUSG00000110599","lincRNA",8,123733958,123739941,1
+"186","4732419C18Rik","RIKEN cDNA 4732419C18 gene [Source:MGI Symbol;Acc:MGI:3045379]","ENSMUSG00000097203","lincRNA",8,123744631,123754726,-1
+"194","Gm45866","predicted gene 45866 [Source:MGI Symbol;Acc:MGI:5804981]","ENSMUSG00000110684","lincRNA",8,123754370,123767721,1
+"171","Gm45865","predicted gene 45865 [Source:MGI Symbol;Acc:MGI:5804980]","ENSMUSG00000110456","TEC",8,123767551,123768495,1
+"195","Rab4a","RAB4A, member RAS oncogene family [Source:MGI Symbol;Acc:MGI:105069]","ENSMUSG00000019478","protein_coding",8,123805985,123835287,1
+"182","2810455O05Rik","RIKEN cDNA 2810455O05 gene [Source:MGI Symbol;Acc:MGI:1920072]","ENSMUSG00000085030","lincRNA",8,123838553,123840785,-1
+"189","Ccsap","centriole, cilia and spindle associated protein [Source:MGI Symbol;Acc:MGI:1920670]","ENSMUSG00000031971","protein_coding",8,123840831,123860209,-1
+"211","Gm4342","predicted gene 4342 [Source:MGI Symbol;Acc:MGI:3782526]","ENSMUSG00000083911","processed_pseudogene",8,123853829,123854195,1
+"184","Acta1","actin, alpha 1, skeletal muscle [Source:MGI Symbol;Acc:MGI:87902]","ENSMUSG00000031972","protein_coding",8,123891769,123894751,-1
+"191","Gm29773","predicted gene, 29773 [Source:MGI Symbol;Acc:MGI:5588932]","ENSMUSG00000110547","antisense",8,123896273,123900620,1
+"199","Nup133","nucleoporin 133 [Source:MGI Symbol;Acc:MGI:2442620]","ENSMUSG00000039509","protein_coding",8,123897123,123949265,-1
+"176","Gm45890","predicted gene 45890 [Source:MGI Symbol;Acc:MGI:5805005]","ENSMUSG00000110615","antisense",8,123948790,123958935,1
+"179","Abcb10","ATP-binding cassette, sub-family B (MDR/TAP), member 10 [Source:MGI Symbol;Acc:MGI:1860508]","ENSMUSG00000031974","protein_coding",8,123952459,123983122,-1
+"212","Taf5l","TATA-box binding protein associated factor 5 like [Source:MGI Symbol;Acc:MGI:1919039]","ENSMUSG00000038697","protein_coding",8,123996318,124021397,-1
+"81","Vwa8","von Willebrand factor A domain containing 8 [Source:MGI Symbol;Acc:MGI:1919008]","ENSMUSG00000058997","protein_coding",14,78849052,79202310,1
+"82","Gm49011","predicted gene, 49011 [Source:MGI Symbol;Acc:MGI:6118369]","ENSMUSG00000115643","processed_pseudogene",14,79105709,79105879,1
+"83","Gm30970","predicted gene, 30970 [Source:MGI Symbol;Acc:MGI:5590129]","ENSMUSG00000115637","processed_pseudogene",14,79106039,79106401,-1
+"84","Gm49015","predicted gene, 49015 [Source:MGI Symbol;Acc:MGI:6118375]","ENSMUSG00000115167","antisense",14,79146259,79151389,-1
+"85","Gm4632","predicted gene 4632 [Source:MGI Symbol;Acc:MGI:3782814]","ENSMUSG00000115111","antisense",14,79178894,79199190,-1
+"86","Zfp957","zinc finger protein 957 [Source:MGI Symbol;Acc:MGI:2145729]","ENSMUSG00000071262","protein_coding",14,79212355,79247369,-1
+"87","Gm49028","predicted gene, 49028 [Source:MGI Symbol;Acc:MGI:6118398]","ENSMUSG00000115045","processed_pseudogene",14,79260453,79261382,1
+"88","Rgcc","regulator of cell cycle [Source:MGI Symbol;Acc:MGI:1913464]","ENSMUSG00000022018","protein_coding",14,79288756,79301645,-1
+"89","Naa16","N(alpha)-acetyltransferase 16, NatA auxiliary subunit [Source:MGI Symbol;Acc:MGI:1914147]","ENSMUSG00000022020","protein_coding",14,79325269,79390778,-1
+"90","Mtrf1","mitochondrial translational release factor 1 [Source:MGI Symbol;Acc:MGI:2384815]","ENSMUSG00000022022","protein_coding",14,79397772,79423587,1
+"91","Kbtbd7","kelch repeat and BTB (POZ) domain containing 7 [Source:MGI Symbol;Acc:MGI:2685141]","ENSMUSG00000043881","protein_coding",14,79426511,79431036,1
+"92","Kbtbd6","kelch repeat and BTB (POZ) domain containing 6 [Source:MGI Symbol;Acc:MGI:3643058]","ENSMUSG00000075502","protein_coding",14,79451835,79454818,1
+"93","Wbp4","WW domain binding protein 4 [Source:MGI Symbol;Acc:MGI:109568]","ENSMUSG00000022023","protein_coding",14,79459937,79481520,-1
+"94","Elf1","E74-like factor 1 [Source:MGI Symbol;Acc:MGI:107180]","ENSMUSG00000036461","protein_coding",14,79481194,79582494,1
+"95","Gm27857","predicted gene, 27857 [Source:MGI Symbol;Acc:MGI:5531239]","ENSMUSG00000093684","miRNA",14,79562167,79562292,-1
+"96","Sugt1","SGT1, suppressor of G2 allele of SKP1 (S. cerevisiae) [Source:MGI Symbol;Acc:MGI:1915205]","ENSMUSG00000022024","protein_coding",14,79587691,79635196,1
+"97","Cnmd","chondromodulin [Source:MGI Symbol;Acc:MGI:1341171]","ENSMUSG00000022025","protein_coding",14,79637690,79662170,-1
+"98","Gm49042","predicted gene, 49042 [Source:MGI Symbol;Acc:MGI:6118416]","ENSMUSG00000115740","lincRNA",14,79695037,79702410,-1
+"99","4930452G13Rik","RIKEN cDNA 4930452G13 gene [Source:MGI Symbol;Acc:MGI:1921239]","ENSMUSG00000115422","lincRNA",14,79702920,79714464,1
+"100","Mir759","microRNA 759 [Source:MGI Symbol;Acc:MGI:3691612]","ENSMUSG00000076453","miRNA",14,79738431,79738528,1
+"101","Pcdh8","protocadherin 8 [Source:MGI Symbol;Acc:MGI:1306800]","ENSMUSG00000036422","protein_coding",14,79766775,79771312,-1
+"102","Gm9748","predicted gene 9748 [Source:MGI Symbol;Acc:MGI:3642166]","ENSMUSG00000102774","antisense",14,79769908,79772743,1
+"103","Gm6999","predicted gene 6999 [Source:MGI Symbol;Acc:MGI:3647443]","ENSMUSG00000097927","lincRNA",14,79836712,80006326,1
+"104","Gm10845","predicted gene 10845 [Source:MGI Symbol;Acc:MGI:3641716]","ENSMUSG00000095959","lincRNA",14,79860521,79869176,-1
+"105","Gm49542","predicted gene, 49542 [Source:MGI Symbol;Acc:MGI:6155246]","ENSMUSG00000115190","lincRNA",14,79898467,79907230,1
+"106","Gm18605","predicted gene, 18605 [Source:MGI Symbol;Acc:MGI:5010790]","ENSMUSG00000115291","processed_pseudogene",14,79947657,79948279,1
+"107","Olfm4","olfactomedin 4 [Source:MGI Symbol;Acc:MGI:2685142]","ENSMUSG00000022026","protein_coding",14,79984081,80023139,1
+"40","Gm2559","predicted gene 2559 [Source:MGI Symbol;Acc:MGI:3780727]","ENSMUSG00000107344","processed_pseudogene",15,12031565,12031927,-1
+"41","Gm34759","predicted gene, 34759 [Source:MGI Symbol;Acc:MGI:5593918]","ENSMUSG00000115441","lincRNA",15,12068248,12085197,-1
+"42","Zfr","zinc finger RNA binding protein [Source:MGI Symbol;Acc:MGI:1341890]","ENSMUSG00000022201","protein_coding",15,12117831,12185683,1
+"43","Gm25713","predicted gene, 25713 [Source:MGI Symbol;Acc:MGI:5455490]","ENSMUSG00000089250","snRNA",15,12158333,12158441,-1
+"44","Mir1898","microRNA 1898 [Source:MGI Symbol;Acc:MGI:3811421]","ENSMUSG00000084592","miRNA",15,12171492,12171574,1
+"45","Gm2573","predicted gene 2573 [Source:MGI Symbol;Acc:MGI:3780740]","ENSMUSG00000115017","processed_pseudogene",15,12181147,12181464,1
+"46","Gm49240","predicted gene, 49240 [Source:MGI Symbol;Acc:MGI:6118707]","ENSMUSG00000115153","lincRNA",15,12194907,12196619,-1
+"47","Gm2581","predicted gene 2581 [Source:MGI Symbol;Acc:MGI:3780749]","ENSMUSG00000115356","processed_pseudogene",15,12198302,12198472,-1
+"48","Mtmr12","myotubularin related protein 12 [Source:MGI Symbol;Acc:MGI:2443034]","ENSMUSG00000039458","protein_coding",15,12205028,12274496,1
+"49","Gm46497","predicted gene, 46497 [Source:MGI Symbol;Acc:MGI:5826134]","ENSMUSG00000115594","processed_pseudogene",15,12286669,12287453,1
+"50","1810049J17Rik","RIKEN cDNA 1810049J17 gene [Source:MGI Symbol;Acc:MGI:3704453]","ENSMUSG00000097221","protein_coding",15,12321438,12321899,-1
+"51","Golph3","golgi phosphoprotein 3 [Source:MGI Symbol;Acc:MGI:1913879]","ENSMUSG00000022200","protein_coding",15,12321450,12351591,1
+"52","Pdzd2","PDZ domain containing 2 [Source:MGI Symbol;Acc:MGI:1922394]","ENSMUSG00000022197","protein_coding",15,12359711,12739924,-1
+"53","Gm24135","predicted gene, 24135 [Source:MGI Symbol;Acc:MGI:5453912]","ENSMUSG00000095516","miRNA",15,12572430,12572530,-1
+"54","Gm2606","predicted pseudogene 2606 [Source:MGI Symbol;Acc:MGI:3780774]","ENSMUSG00000078300","processed_pseudogene",15,12574889,12575890,1
+"55","F830212C03Rik","RIKEN cDNA F830212C03 gene [Source:MGI Symbol;Acc:MGI:3641876]","ENSMUSG00000103130","TEC",15,12633062,12635346,-1
+"56","Gm24302","predicted gene, 24302 [Source:MGI Symbol;Acc:MGI:5454079]","ENSMUSG00000095842","miRNA",15,12695124,12695224,1
+"57","Gm49276","predicted gene, 49276 [Source:MGI Symbol;Acc:MGI:6118760]","ENSMUSG00000115201","processed_pseudogene",15,12757098,12757464,-1
+"58","Gm17756","predicted gene, 17756 [Source:MGI Symbol;Acc:MGI:5009846]","ENSMUSG00000115119","processed_pseudogene",15,12765172,12765375,-1
+"59","Gm49277","predicted gene, 49277 [Source:MGI Symbol;Acc:MGI:6118761]","ENSMUSG00000115024","processed_pseudogene",15,12804782,12805173,-1
+"60","6030458C11Rik","RIKEN cDNA 6030458C11 gene [Source:MGI Symbol;Acc:MGI:1925127]","ENSMUSG00000022195","protein_coding",15,12808177,12824649,-1
+"61","Drosha","drosha, ribonuclease type III [Source:MGI Symbol;Acc:MGI:1261425]","ENSMUSG00000022191","protein_coding",15,12824815,12935291,1
+"62","Gm47288","predicted gene, 47288 [Source:MGI Symbol;Acc:MGI:6096141]","ENSMUSG00000104911","miRNA",15,12842096,12842235,1
+"63","Gm49100","predicted gene, 49100 [Source:MGI Symbol;Acc:MGI:6118496]","ENSMUSG00000115807","unprocessed_pseudogene",15,12955722,12960267,1
+"64","Gm24664","predicted gene, 24664 [Source:MGI Symbol;Acc:MGI:5454441]","ENSMUSG00000089564","rRNA",15,12980829,12980928,1
+"387","Fam83a","family with sequence similarity 83, member A [Source:MGI Symbol;Acc:MGI:2447773]","ENSMUSG00000051225","protein_coding",15,57985419,58011009,1
+"388","9130401M01Rik","RIKEN cDNA 9130401M01 gene [Source:MGI Symbol;Acc:MGI:1923008]","ENSMUSG00000101892","protein_coding",15,58022259,58034325,-1
+"389","Gm29394","predicted gene 29394 [Source:MGI Symbol;Acc:MGI:5580100]","ENSMUSG00000022362","protein_coding",15,58028243,58076425,-1
+"390","Gm22299","predicted gene, 22299 [Source:MGI Symbol;Acc:MGI:5452076]","ENSMUSG00000064597","snoRNA",15,58041516,58041651,-1
+"391","Zhx1","zinc fingers and homeoboxes 1 [Source:MGI Symbol;Acc:MGI:109271]","ENSMUSG00000022361","protein_coding",15,58047003,58076541,-1
+"392","Atad2","ATPase family, AAA domain containing 2 [Source:MGI Symbol;Acc:MGI:1917722]","ENSMUSG00000022360","protein_coding",15,58094044,58135082,-1
+"393","Wdyhv1","WDYHV motif containing 1 [Source:MGI Symbol;Acc:MGI:1924023]","ENSMUSG00000022359","protein_coding",15,58141377,58158665,1
+"394","Gm23475","predicted gene, 23475 [Source:MGI Symbol;Acc:MGI:5453252]","ENSMUSG00000089504","snRNA",15,58143208,58143269,-1
+"395","Gm22488","predicted gene, 22488 [Source:MGI Symbol;Acc:MGI:5452265]","ENSMUSG00000080461","snoRNA",15,58146616,58146742,1
+"396","Fbxo32","F-box protein 32 [Source:MGI Symbol;Acc:MGI:1914981]","ENSMUSG00000022358","protein_coding",15,58175879,58214932,-1
+"397","Gm15943","predicted gene 15943 [Source:MGI Symbol;Acc:MGI:3802102]","ENSMUSG00000086801","antisense",15,58214475,58324053,1
+"398","Klhl38","kelch-like 38 [Source:MGI Symbol;Acc:MGI:3045310]","ENSMUSG00000022357","protein_coding",15,58314573,58324169,-1
+"399","Anxa13","annexin A13 [Source:MGI Symbol;Acc:MGI:1917037]","ENSMUSG00000055114","processed_transcript",15,58341363,58389383,-1
+"400","Gm2675","predicted gene 2675 [Source:MGI Symbol;Acc:MGI:3780844]","ENSMUSG00000115576","lincRNA",15,58405824,58411326,1
+"401","Fam91a1","family with sequence similarity 91, member A1 [Source:MGI Symbol;Acc:MGI:1277178]","ENSMUSG00000037119","protein_coding",15,58415468,58457740,1
+"402","Fer1l6","fer-1-like 6 (C. elegans) [Source:MGI Symbol;Acc:MGI:3645398]","ENSMUSG00000037106","protein_coding",15,58510048,58665092,1
+"403","Gm23789","predicted gene, 23789 [Source:MGI Symbol;Acc:MGI:5453566]","ENSMUSG00000084485","misc_RNA",15,58565614,58565914,1
+"404","Gm20712","predicted gene 20712 [Source:MGI Symbol;Acc:MGI:5313159]","ENSMUSG00000093677","sense_overlapping",15,58780461,58781951,-1
+"405","Tmem65","transmembrane protein 65 [Source:MGI Symbol;Acc:MGI:1922118]","ENSMUSG00000062373","protein_coding",15,58782269,58823638,-1
+"406","Gm24041","predicted gene, 24041 [Source:MGI Symbol;Acc:MGI:5453818]","ENSMUSG00000065049","snRNA",15,58819323,58819478,-1
+"407","Ube2d4","ubiquitin-conjugating enzyme E2D 4 [Source:MGI Symbol;Acc:MGI:3644823]","ENSMUSG00000061490","processed_pseudogene",15,58846590,58847321,-1
+"408","Trmt12","tRNA methyltranferase 12 [Source:MGI Symbol;Acc:MGI:1915510]","ENSMUSG00000037085","protein_coding",15,58872674,58877127,1
+"409","Rnf139","ring finger protein 139 [Source:MGI Symbol;Acc:MGI:1923091]","ENSMUSG00000037075","protein_coding",15,58889229,58907057,1
+"410","Gm49356","predicted gene, 49356 [Source:MGI Symbol;Acc:MGI:6121562]","ENSMUSG00000115463","protein_coding",15,58889298,58937359,1
+"411","Tatdn1","TatD DNase domain containing 1 [Source:MGI Symbol;Acc:MGI:1916944]","ENSMUSG00000050891","protein_coding",15,58890155,58933738,-1
+"412","Ndufb9","NADH:ubiquinone oxidoreductase subunit B9 [Source:MGI Symbol;Acc:MGI:1913468]","ENSMUSG00000022354","protein_coding",15,58933756,58939488,1
+"413","Mtss1","MTSS I-BAR domain containing 1 [Source:MGI Symbol;Acc:MGI:2384818]","ENSMUSG00000022353","protein_coding",15,58941234,59082005,-1
+"414","4930544F09Rik","RIKEN cDNA 4930544F09 gene [Source:MGI Symbol;Acc:MGI:1922448]","ENSMUSG00000115062","antisense",15,58984136,58988905,1
+"65","4933412E24Rik","RIKEN cDNA 4933412E24 gene [Source:MGI Symbol;Acc:MGI:1918338]","ENSMUSG00000071749","protein_coding",15,60014866,60016613,-1
+"66","Gm25875","predicted gene, 25875 [Source:MGI Symbol;Acc:MGI:5455652]","ENSMUSG00000077511","snRNA",15,60084788,60084894,1
+"67","Gm2682","predicted gene 2682 [Source:MGI Symbol;Acc:MGI:3780851]","ENSMUSG00000115681","lincRNA",15,60120540,60187408,-1
+"68","Gm46507","predicted gene, 46507 [Source:MGI Symbol;Acc:MGI:5826144]","ENSMUSG00000115838","processed_pseudogene",15,60295792,60296950,-1
+"69","Gm4774","predicted gene 4774 [Source:MGI Symbol;Acc:MGI:3647065]","ENSMUSG00000115251","processed_pseudogene",15,60392119,60393169,1
+"70","Gm17892","predicted gene, 17892 [Source:MGI Symbol;Acc:MGI:5010077]","ENSMUSG00000115159","processed_pseudogene",15,60397297,60398089,1
+"71","Gm6392","predicted gene 6392 [Source:MGI Symbol;Acc:MGI:3644256]","ENSMUSG00000115503","processed_pseudogene",15,60468124,60469477,1
+"72","Gm48946","predicted gene, 48946 [Source:MGI Symbol;Acc:MGI:6118269]","ENSMUSG00000115504","lincRNA",15,60670343,60672084,1
+"73","Gm23835","predicted gene, 23835 [Source:MGI Symbol;Acc:MGI:5453612]","ENSMUSG00000077627","snoRNA",15,60703992,60704123,-1
+"74","Gm7086","predicted pseudogene 7086 [Source:MGI Symbol;Acc:MGI:3648861]","ENSMUSG00000112930","transcribed_unprocessed_pseudogene",15,60742858,60746535,1
+"75","Gm48947","predicted gene, 48947 [Source:MGI Symbol;Acc:MGI:6118271]","ENSMUSG00000114984","processed_pseudogene",15,60760231,60760744,1
+"76","Lratd2","LRAT domain containing 1 [Source:MGI Symbol;Acc:MGI:3026924]","ENSMUSG00000072568","protein_coding",15,60818994,60853778,-1
+"77","9930014A18Rik","RIKEN cDNA 9930014A18 gene [Source:MGI Symbol;Acc:MGI:2444091]","ENSMUSG00000097493","processed_transcript",15,60822271,60831793,1
+"78","A1bg","alpha-1-B glycoprotein [Source:MGI Symbol;Acc:MGI:2152878]","ENSMUSG00000022347","protein_coding",15,60896859,60923012,-1
+"79","4930402D18Rik","RIKEN cDNA 4930402D18 gene [Source:MGI Symbol;Acc:MGI:1922102]","ENSMUSG00000115231","antisense",15,60912974,60955320,1
+"80","Gm48951","predicted gene, 48951 [Source:MGI Symbol;Acc:MGI:6118278]","ENSMUSG00000115809","processed_pseudogene",15,60938347,60938636,-1
+"108","Gm2895","predicted gene 2895 [Source:MGI Symbol;Acc:MGI:3781073]","ENSMUSG00000091412","bidirectional_promoter_lncRNA",15,66969323,67013039,1
+"109","Gm31342","predicted gene, 31342 [Source:MGI Symbol;Acc:MGI:5590501]","ENSMUSG00000116289","lincRNA",15,67040058,67040824,1
+"110","St3gal1","ST3 beta-galactoside alpha-2,3-sialyltransferase 1 [Source:MGI Symbol;Acc:MGI:98304]","ENSMUSG00000013846","protein_coding",15,67102875,67176830,-1
+"111","1700012I11Rik","RIKEN cDNA 1700012I11 gene [Source:MGI Symbol;Acc:MGI:1916584]","ENSMUSG00000102069","lincRNA",15,67226769,67377094,1
+"112","Gm49408","predicted gene, 49408 [Source:MGI Symbol;Acc:MGI:6155033]","ENSMUSG00000115875","processed_pseudogene",15,67873828,67874067,1
+"113","Gm49409","predicted gene, 49409 [Source:MGI Symbol;Acc:MGI:6155034]","ENSMUSG00000116519","processed_pseudogene",15,67942552,67942804,-1
+"214","Fam83h","family with sequence similarity 83, member H [Source:MGI Symbol;Acc:MGI:2145900]","ENSMUSG00000046761","protein_coding",15,76001093,76014336,-1
+"215","Iqank1","IQ motif and ankyrin repeat containing 1 [Source:MGI Symbol;Acc:MGI:3588184]","ENSMUSG00000102018","protein_coding",15,76009888,76046981,1
+"216","Gm23027","predicted gene, 23027 [Source:MGI Symbol;Acc:MGI:5452804]","ENSMUSG00000089396","snRNA",15,76036459,76036616,1
+"217","Scrib","scribbled planar cell polarity [Source:MGI Symbol;Acc:MGI:2145950]","ENSMUSG00000022568","protein_coding",15,76047158,76069784,-1
+"218","Mir6952","microRNA 6952 [Source:MGI Symbol;Acc:MGI:5531330]","ENSMUSG00000098451","miRNA",15,76064828,76064888,-1
+"219","Puf60","poly-U binding splicing factor 60 [Source:MGI Symbol;Acc:MGI:1915209]","ENSMUSG00000002524","protein_coding",15,76070182,76080924,-1
+"220","Gm48952","predicted gene, 48952 [Source:MGI Symbol;Acc:MGI:6118279]","ENSMUSG00000115332","lincRNA",15,76083764,76087655,1
+"221","Nrbp2","nuclear receptor binding protein 2 [Source:MGI Symbol;Acc:MGI:2385017]","ENSMUSG00000075590","protein_coding",15,76085518,76091627,-1
+"222","Gm41349","predicted gene, 41349 [Source:MGI Symbol;Acc:MGI:5624234]","ENSMUSG00000116288","lincRNA",15,76095575,76097668,1
+"223","Eppk1","epiplakin 1 [Source:MGI Symbol;Acc:MGI:2386306]","ENSMUSG00000115388","protein_coding",15,76101481,76120195,-1
+"224","BC024139","cDNA sequence BC024139 [Source:MGI Symbol;Acc:MGI:2442591]","ENSMUSG00000044361","protein_coding",15,76119517,76126596,-1
+"225","Gm19945","predicted gene, 19945 [Source:MGI Symbol;Acc:MGI:5012130]","ENSMUSG00000116475","processed_pseudogene",15,76150368,76150607,1
+"226","Plec","plectin [Source:MGI Symbol;Acc:MGI:1277961]","ENSMUSG00000022565","protein_coding",15,76170974,76232574,-1
+"227","Gm25720","predicted gene, 25720 [Source:MGI Symbol;Acc:MGI:5455497]","ENSMUSG00000088128","snRNA",15,76214101,76214205,-1
+"228","Mir1942","microRNA 1942 [Source:MGI Symbol;Acc:MGI:3836981]","ENSMUSG00000087899","miRNA",15,76215611,76215673,-1
+"229","Parp10","poly (ADP-ribose) polymerase family, member 10 [Source:MGI Symbol;Acc:MGI:3712326]","ENSMUSG00000063268","protein_coding",15,76231174,76243441,-1
+"230","Grina","glutamate receptor, ionotropic, N-methyl D-aspartate-associated protein 1 (glutamate binding) [Source:MGI Symbol;Acc:MGI:1913418]","ENSMUSG00000022564","protein_coding",15,76246764,76249904,1
+"231","Mir6953","microRNA 6953 [Source:MGI Symbol;Acc:MGI:5531120]","ENSMUSG00000098625","miRNA",15,76248191,76248258,1
+"232","Mirt2","myocardial infraction associated transcript 2 [Source:MGI Symbol;Acc:MGI:3642813]","ENSMUSG00000115946","antisense",15,76266461,76269839,-1
+"233","Mirt2","myocardial infraction associated transcript 2 [Source:MGI Symbol;Acc:MGI:3642813]","ENSMUSG00000092920","misc_RNA",15,76267135,76267419,-1
+"234","Spatc1","spermatogenesis and centriole associated 1 [Source:MGI Symbol;Acc:MGI:1921531]","ENSMUSG00000049653","protein_coding",15,76268089,76292572,1
+"235","Mir3079","microRNA 3079 [Source:MGI Symbol;Acc:MGI:4834252]","ENSMUSG00000093169","miRNA",15,76290879,76290968,-1
+"236","Smpd5","sphingomyelin phosphodiesterase 5 [Source:MGI Symbol;Acc:MGI:3709877]","ENSMUSG00000071724","protein_coding",15,76294348,76296896,1
+"237","Oplah","5-oxoprolinase (ATP-hydrolysing) [Source:MGI Symbol;Acc:MGI:1922725]","ENSMUSG00000022562","protein_coding",15,76296601,76328015,-1
+"238","Exosc4","exosome component 4 [Source:MGI Symbol;Acc:MGI:1923576]","ENSMUSG00000034259","protein_coding",15,76327397,76330677,1
+"239","Gpaa1","GPI anchor attachment protein 1 [Source:MGI Symbol;Acc:MGI:1202392]","ENSMUSG00000022561","protein_coding",15,76331231,76334907,1
+"240","Rps6-ps1","ribosomal protein S6, pseudogene 1 [Source:MGI Symbol;Acc:MGI:3809093]","ENSMUSG00000063875","processed_pseudogene",15,76337616,76338362,1
+"241","Cyc1","cytochrome c-1 [Source:MGI Symbol;Acc:MGI:1913695]","ENSMUSG00000022551","protein_coding",15,76343523,76346260,1
+"242","Sharpin","SHANK-associated RH domain interacting protein [Source:MGI Symbol;Acc:MGI:1913331]","ENSMUSG00000022552","protein_coding",15,76347040,76351111,-1
+"243","Maf1","MAF1 homolog, negative regulator of RNA polymerase III [Source:MGI Symbol;Acc:MGI:1916127]","ENSMUSG00000022553","protein_coding",15,76351294,76354380,1
+"244","Gm35339","predicted gene, 35339 [Source:MGI Symbol;Acc:MGI:5594498]","ENSMUSG00000109179","protein_coding",15,76354432,76365201,1
+"245","Hgh1","HGH1 homolog [Source:MGI Symbol;Acc:MGI:1930628]","ENSMUSG00000022554","protein_coding",15,76368898,76371437,1
+"246","Tssk5","testis-specific serine kinase 5 [Source:MGI Symbol;Acc:MGI:1920792]","ENSMUSG00000060794","protein_coding",15,76371952,76374938,-1
+"247","Mroh1","maestro heat-like repeat family member 1 [Source:MGI Symbol;Acc:MGI:2442558]","ENSMUSG00000022558","protein_coding",15,76380261,76453038,1
+"248","Mir6954","microRNA 6954 [Source:MGI Symbol;Acc:MGI:5531152]","ENSMUSG00000099260","miRNA",15,76433214,76433273,1
+"249","Bop1","block of proliferation 1 [Source:MGI Symbol;Acc:MGI:1334460]","ENSMUSG00000022557","protein_coding",15,76452989,76477277,-1
+"250","Scx","scleraxis [Source:MGI Symbol;Acc:MGI:102934]","ENSMUSG00000034161","protein_coding",15,76457452,76459458,1
+"251","Hsf1","heat shock factor 1 [Source:MGI Symbol;Acc:MGI:96238]","ENSMUSG00000022556","protein_coding",15,76477422,76501913,1
+"252","Dgat1","diacylglycerol O-acyltransferase 1 [Source:MGI Symbol;Acc:MGI:1333825]","ENSMUSG00000022555","protein_coding",15,76502015,76511953,-1
+"253","Scrt1","scratch family zinc finger 1 [Source:MGI Symbol;Acc:MGI:2176606]","ENSMUSG00000048385","protein_coding",15,76516203,76522499,-1
+"254","Gm49550","predicted gene, 49550 [Source:MGI Symbol;Acc:MGI:6155258]","ENSMUSG00000116234","processed_pseudogene",15,76526770,76527021,-1
+"255","Tmem249","transmembrane protein 249 [Source:MGI Symbol;Acc:MGI:3647471]","ENSMUSG00000116376","protein_coding",15,76533213,76535366,-1
+"256","Fbxl6","F-box and leucine-rich repeat protein 6 [Source:MGI Symbol;Acc:MGI:1354705]","ENSMUSG00000022559","protein_coding",15,76535721,76538746,-1
+"257","Slc52a2","solute carrier protein 52, member 2 [Source:MGI Symbol;Acc:MGI:1289288]","ENSMUSG00000022560","protein_coding",15,76538832,76544608,1
+"258","Adck5","aarF domain containing kinase 5 [Source:MGI Symbol;Acc:MGI:2679274]","ENSMUSG00000022550","protein_coding",15,76576358,76595816,1
+"259","Gm49413","predicted gene, 49413 [Source:MGI Symbol;Acc:MGI:6155041]","ENSMUSG00000116238","TEC",15,76577825,76580863,1
+"260","5730521K06Rik","RIKEN cDNA 5730521K06 gene [Source:MGI Symbol;Acc:MGI:1917889]","ENSMUSG00000116145","TEC",15,76590120,76591727,1
+"261","Cpsf1","cleavage and polyadenylation specific factor 1 [Source:MGI Symbol;Acc:MGI:2679722]","ENSMUSG00000034022","protein_coding",15,76595803,76607591,-1
+"262","Slc39a4","solute carrier family 39 (zinc transporter), member 4 [Source:MGI Symbol;Acc:MGI:1919277]","ENSMUSG00000063354","protein_coding",15,76612383,76617384,-1
+"263","Vps28","vacuolar protein sorting 28 [Source:MGI Symbol;Acc:MGI:1914164]","ENSMUSG00000115987","protein_coding",15,76622087,76626086,-1
+"264","Tonsl","tonsoku-like, DNA repair protein [Source:MGI Symbol;Acc:MGI:1919999]","ENSMUSG00000059323","protein_coding",15,76626002,76639958,-1
+"265","Cyhr1","cysteine and histidine rich 1 [Source:MGI Symbol;Acc:MGI:1859320]","ENSMUSG00000053929","protein_coding",15,76643395,76660117,-1
+"266","Kifc2","kinesin family member C2 [Source:MGI Symbol;Acc:MGI:109187]","ENSMUSG00000004187","protein_coding",15,76659858,76668196,1
+"267","Foxh1","forkhead box H1 [Source:MGI Symbol;Acc:MGI:1347465]","ENSMUSG00000033837","protein_coding",15,76668225,76669948,-1
+"268","Ppp1r16a","protein phosphatase 1, regulatory subunit 16A [Source:MGI Symbol;Acc:MGI:1920312]","ENSMUSG00000033819","protein_coding",15,76671615,76694919,1
+"269","Gpt","glutamic pyruvic transaminase, soluble [Source:MGI Symbol;Acc:MGI:95802]","ENSMUSG00000022546","protein_coding",15,76695716,76699686,1
+"270","Mfsd3","major facilitator superfamily domain containing 3 [Source:MGI Symbol;Acc:MGI:1916822]","ENSMUSG00000019080","protein_coding",15,76701465,76704239,1
+"271","Recql4","RecQ protein-like 4 [Source:MGI Symbol;Acc:MGI:1931028]","ENSMUSG00000033762","protein_coding",15,76703553,76710548,-1
+"272","Lrrc14","leucine rich repeat containing 14 [Source:MGI Symbol;Acc:MGI:2445060]","ENSMUSG00000033728","protein_coding",15,76710623,76717699,1
+"273","Lrrc24","leucine rich repeat containing 24 [Source:MGI Symbol;Acc:MGI:3605040]","ENSMUSG00000033707","protein_coding",15,76715276,76722173,-1
+"274","C030006K11Rik","RIKEN cDNA C030006K11 gene [Source:MGI Symbol;Acc:MGI:1925941]","ENSMUSG00000116138","protein_coding",15,76721465,76723845,-1
+"275","Arhgap39","Rho GTPase activating protein 39 [Source:MGI Symbol;Acc:MGI:107858]","ENSMUSG00000033697","protein_coding",15,76723985,76818170,-1
+"276","Gm17271","predicted gene, 17271 [Source:MGI Symbol;Acc:MGI:4936905]","ENSMUSG00000090429","processed_pseudogene",15,76797696,76798050,1
+"277","Zfp251","zinc finger protein 251 [Source:MGI Symbol;Acc:MGI:1918841]","ENSMUSG00000022526","protein_coding",15,76851609,76871435,-1
+"278","Zfp7","zinc finger protein 7 [Source:MGI Symbol;Acc:MGI:99208]","ENSMUSG00000033669","protein_coding",15,76879259,76892395,1
+"279","Gm49527","predicted gene, 49527 [Source:MGI Symbol;Acc:MGI:6155227]","ENSMUSG00000116024","protein_coding",15,76879320,76901283,1
+"280","Commd5","COMM domain containing 5 [Source:MGI Symbol;Acc:MGI:1913648]","ENSMUSG00000055041","protein_coding",15,76899910,76901305,1
+"281","Rpl8","ribosomal protein L8 [Source:MGI Symbol;Acc:MGI:1350927]","ENSMUSG00000003970","protein_coding",15,76904078,76906314,1
+"282","Zfp647","zinc finger protein 647 [Source:MGI Symbol;Acc:MGI:3052806]","ENSMUSG00000054967","protein_coding",15,76910371,76925448,-1
+"283","Gm18283","predicted gene, 18283 [Source:MGI Symbol;Acc:MGI:5010468]","ENSMUSG00000115920","processed_pseudogene",15,76933705,76935060,-1
+"284","1110038F14Rik","RIKEN cDNA 1110038F14 gene [Source:MGI Symbol;Acc:MGI:2152337]","ENSMUSG00000063236","protein_coding",15,76948506,76950979,1
+"285","Gm35933","predicted gene, 35933 [Source:MGI Symbol;Acc:MGI:5595092]","ENSMUSG00000116339","lincRNA",15,76988024,76997054,1
+"286","Sgsm3","small G protein signaling modulator 3 [Source:MGI Symbol;Acc:MGI:1916329]","ENSMUSG00000042303","protein_coding",15,80977765,81012290,1
+"287","Gm31462","predicted gene, 31462 [Source:MGI Symbol;Acc:MGI:5590621]","ENSMUSG00000115976","antisense",15,81005407,81006410,-1
+"288","Mrtfa","myocardin related transcription factor A [Source:MGI Symbol;Acc:MGI:2384495]","ENSMUSG00000042292","protein_coding",15,81012281,81190757,-1
+"289","Gm25131","predicted gene, 25131 [Source:MGI Symbol;Acc:MGI:5454908]","ENSMUSG00000064587","snRNA",15,81039643,81039793,1
+"290","Gm49522","predicted gene, 49522 [Source:MGI Symbol;Acc:MGI:6155218]","ENSMUSG00000116321","TEC",15,81115033,81115845,-1
+"291","4930483J18Rik","RIKEN cDNA 4930483J18 gene [Source:MGI Symbol;Acc:MGI:1914888]","ENSMUSG00000047938","processed_transcript",15,81190774,81192763,1
+"292","Gm49537","predicted gene, 49537 [Source:MGI Symbol;Acc:MGI:6155239]","ENSMUSG00000116122","processed_pseudogene",15,81208725,81209160,-1
+"293","Mchr1","melanin-concentrating hormone receptor 1 [Source:MGI Symbol;Acc:MGI:2180756]","ENSMUSG00000050164","protein_coding",15,81235499,81238964,1
+"294","8430426J06Rik","RIKEN cDNA 8430426J06 gene [Source:MGI Symbol;Acc:MGI:1925352]","ENSMUSG00000115970","lincRNA",15,81242657,81312866,-1
+"295","Slc25a17","solute carrier family 25 (mitochondrial carrier, peroxisomal membrane protein), member 17 [Source:MGI Symbol;Acc:MGI:1342248]","ENSMUSG00000022404","protein_coding",15,81318911,81360812,-1
+"296","St13","suppression of tumorigenicity 13 [Source:MGI Symbol;Acc:MGI:1917606]","ENSMUSG00000022403","protein_coding",15,81363669,81400077,-1
+"297","Xpnpep3","X-prolyl aminopeptidase 3, mitochondrial [Source:MGI Symbol;Acc:MGI:2445217]","ENSMUSG00000022401","protein_coding",15,81400138,81457482,1
+"298","Dnajb7","DnaJ heat shock protein family (Hsp40) member B7 [Source:MGI Symbol;Acc:MGI:1914012]","ENSMUSG00000047108","protein_coding",15,81406926,81408299,-1
+"299","Gm17025","predicted gene 17025 [Source:MGI Symbol;Acc:MGI:4937852]","ENSMUSG00000091492","antisense",15,81415560,81419188,-1
+"300","Rbx1","ring-box 1 [Source:MGI Symbol;Acc:MGI:1891829]","ENSMUSG00000022400","protein_coding",15,81466296,81476369,1
+"301","Gm49406","predicted gene, 49406 [Source:MGI Symbol;Acc:MGI:6155031]","ENSMUSG00000115917","processed_pseudogene",15,81485972,81486381,-1
+"302","Gm5218","predicted gene 5218 [Source:MGI Symbol;Acc:MGI:3646583]","ENSMUSG00000091198","processed_pseudogene",15,81499081,81499545,-1
+"303","1110025M09Rik","RIKEN cDNA 1110025M09 gene [Source:MGI Symbol;Acc:MGI:1915885]","ENSMUSG00000103520","TEC",15,81584174,81585028,-1
+"304","Ep300","E1A binding protein p300 [Source:MGI Symbol;Acc:MGI:1276116]","ENSMUSG00000055024","protein_coding",15,81585351,81652077,1
+"305","Gm23880","predicted gene, 23880 [Source:MGI Symbol;Acc:MGI:5453657]","ENSMUSG00000080527","miRNA",15,81586133,81586186,1
+"306","Gm22067","predicted gene, 22067 [Source:MGI Symbol;Acc:MGI:5451844]","ENSMUSG00000084739","snRNA",15,81592093,81592199,1
+"307","Gm49444","predicted gene, 49444 [Source:MGI Symbol;Acc:MGI:6155091]","ENSMUSG00000116516","processed_pseudogene",15,81656185,81656399,-1
+"308","L3mbtl2","L3MBTL2 polycomb repressive complex 1 subunit [Source:MGI Symbol;Acc:MGI:2443584]","ENSMUSG00000022394","protein_coding",15,81663889,81688315,1
+"309","Gm18284","predicted gene, 18284 [Source:MGI Symbol;Acc:MGI:5010469]","ENSMUSG00000092325","processed_pseudogene",15,81674260,81674878,-1
+"310","Chadl","chondroadherin-like [Source:MGI Symbol;Acc:MGI:3036284]","ENSMUSG00000063765","protein_coding",15,81678296,81697287,-1
+"311","Rangap1","RAN GTPase activating protein 1 [Source:MGI Symbol;Acc:MGI:103071]","ENSMUSG00000022391","protein_coding",15,81704248,81745530,-1
+"312","Zc3h7b","zinc finger CCCH type containing 7B [Source:MGI Symbol;Acc:MGI:1328310]","ENSMUSG00000022390","protein_coding",15,81745057,81796260,1
+"313","Gm17597","predicted gene, 17597 [Source:MGI Symbol;Acc:MGI:4937231]","ENSMUSG00000097613","antisense",15,81800791,81802613,-1
+"314","Tef","thyrotroph embryonic factor [Source:MGI Symbol;Acc:MGI:98663]","ENSMUSG00000022389","protein_coding",15,81802421,81826863,1
+"315","Gm8444","predicted gene 8444 [Source:MGI Symbol;Acc:MGI:3645809]","ENSMUSG00000069439","processed_pseudogene",15,81843346,81843713,-1
+"316","Tob2","transducer of ERBB2, 2 [Source:MGI Symbol;Acc:MGI:1888525]","ENSMUSG00000048546","protein_coding",15,81848272,81858796,-1
+"317","Gm49476","predicted gene, 49476 [Source:MGI Symbol;Acc:MGI:6155145]","ENSMUSG00000116075","antisense",15,81857741,81858305,1
+"318","Phf5a","PHD finger protein 5A [Source:MGI Symbol;Acc:MGI:2156864]","ENSMUSG00000061360","protein_coding",15,81864520,81871911,-1
+"319","Aco2","aconitase 2, mitochondrial [Source:MGI Symbol;Acc:MGI:87880]","ENSMUSG00000022477","protein_coding",15,81872309,81915133,1
+"320","Polr3h","polymerase (RNA) III (DNA directed) polypeptide H [Source:MGI Symbol;Acc:MGI:1926179]","ENSMUSG00000022476","protein_coding",15,81888228,81926240,-1
+"321","Csdc2","cold shock domain containing C2, RNA binding [Source:MGI Symbol;Acc:MGI:2146027]","ENSMUSG00000042109","protein_coding",15,81936759,81950941,1
+"322","Pmm1","phosphomannomutase 1 [Source:MGI Symbol;Acc:MGI:1353418]","ENSMUSG00000022474","protein_coding",15,81951108,81960930,-1
+"323","Cyp2d67-ps","cytochrome P450, family 2, subfamily d, polypeptide 67, pseudogene [Source:MGI Symbol;Acc:MGI:5011286]","ENSMUSG00000116157","unprocessed_pseudogene",15,81966988,81968543,1
+"324","Gm5805","predicted gene 5805 [Source:MGI Symbol;Acc:MGI:3644633]","ENSMUSG00000061848","processed_pseudogene",15,81972390,81972845,1
+"325","1700029P11Rik","RIKEN cDNA 1700029P11 gene [Source:MGI Symbol;Acc:MGI:1913596]","ENSMUSG00000061633","protein_coding",15,81980540,81981563,1
+"326","Xrcc6","X-ray repair complementing defective repair in Chinese hamster cells 6 [Source:MGI Symbol;Acc:MGI:95606]","ENSMUSG00000022471","protein_coding",15,81987835,82040085,1
+"327","Desi1","desumoylating isopeptidase 1 [Source:MGI Symbol;Acc:MGI:106313]","ENSMUSG00000022472","protein_coding",15,81992523,82033862,-1
+"328","Gm8973","predicted gene 8973 [Source:MGI Symbol;Acc:MGI:3648534]","ENSMUSG00000064081","processed_pseudogene",15,99006057,99006369,1
+"329","Tuba1c","tubulin, alpha 1C [Source:MGI Symbol;Acc:MGI:1095409]","ENSMUSG00000043091","protein_coding",15,99029891,99038110,1
+"330","Prph","peripherin [Source:MGI Symbol;Acc:MGI:97774]","ENSMUSG00000023484","protein_coding",15,99055174,99058978,1
+"331","Gm34284","predicted gene, 34284 [Source:MGI Symbol;Acc:MGI:5593443]","ENSMUSG00000116371","antisense",15,99068138,99074669,-1
+"332","Troap","trophinin associated protein [Source:MGI Symbol;Acc:MGI:1925983]","ENSMUSG00000032783","protein_coding",15,99074575,99083409,1
+"333","Mir6960","microRNA 6960 [Source:MGI Symbol;Acc:MGI:5531002]","ENSMUSG00000098698","miRNA",15,99080805,99080865,1
+"334","C1ql4","complement component 1, q subcomponent-like 4 [Source:MGI Symbol;Acc:MGI:3579909]","ENSMUSG00000001076","protein_coding",15,99084086,99087817,-1
+"335","Dnajc22","DnaJ heat shock protein family (Hsp40) member C22 [Source:MGI Symbol;Acc:MGI:1920028]","ENSMUSG00000038009","protein_coding",15,99093170,99104737,1
+"336","Spats2","spermatogenesis associated, serine-rich 2 [Source:MGI Symbol;Acc:MGI:1919822]","ENSMUSG00000051934","protein_coding",15,99125916,99213215,1
+"337","Gm25183","predicted gene, 25183 [Source:MGI Symbol;Acc:MGI:5454960]","ENSMUSG00000088377","snoRNA",15,99133067,99133172,-1
+"338","Gm25057","predicted gene, 25057 [Source:MGI Symbol;Acc:MGI:5454834]","ENSMUSG00000087991","misc_RNA",15,99174850,99174937,-1
+"339","Kcnh3","potassium voltage-gated channel, subfamily H (eag-related), member 3 [Source:MGI Symbol;Acc:MGI:1341723]","ENSMUSG00000037579","protein_coding",15,99224861,99242817,1
+"340","Mcrs1","microspherule protein 1 [Source:MGI Symbol;Acc:MGI:1858420]","ENSMUSG00000037570","protein_coding",15,99242817,99251961,-1
+"341","1700120C14Rik","RIKEN cDNA 1700120C14 gene [Source:MGI Symbol;Acc:MGI:1920850]","ENSMUSG00000100599","processed_transcript",15,99249511,99262044,1
+"342","Gm49458","predicted gene, 49458 [Source:MGI Symbol;Acc:MGI:6155115]","ENSMUSG00000116241","processed_pseudogene",15,99254525,99254835,-1
+"343","Gm25999","predicted gene, 25999 [Source:MGI Symbol;Acc:MGI:5455776]","ENSMUSG00000093139","snoRNA",15,99254882,99255014,-1
+"344","Fam186b","family with sequence similarity 186, member B [Source:MGI Symbol;Acc:MGI:3647604]","ENSMUSG00000078907","protein_coding",15,99271018,99295888,-1
+"345","Prpf40b","pre-mRNA processing factor 40B [Source:MGI Symbol;Acc:MGI:1925583]","ENSMUSG00000023007","protein_coding",15,99295087,99317018,1
+"346","Fmnl3","formin-like 3 [Source:MGI Symbol;Acc:MGI:109569]","ENSMUSG00000023008","protein_coding",15,99317225,99370482,-1
+"347","Gm49478","predicted gene, 49478 [Source:MGI Symbol;Acc:MGI:6155149]","ENSMUSG00000115877","processed_pseudogene",15,99348821,99349535,-1
+"348","Gm22951","predicted gene, 22951 [Source:MGI Symbol;Acc:MGI:5452728]","ENSMUSG00000095635","snRNA",15,99368029,99368135,-1
+"349","Tmbim6","transmembrane BAX inhibitor motif containing 6 [Source:MGI Symbol;Acc:MGI:99682]","ENSMUSG00000023010","protein_coding",15,99392882,99410049,1
+"350","Gm49483","predicted gene, 49483 [Source:MGI Symbol;Acc:MGI:6155157]","ENSMUSG00000116039","processed_pseudogene",15,99413474,99413693,1
+"351","Nckap5l","NCK-associated protein 5-like [Source:MGI Symbol;Acc:MGI:3609653]","ENSMUSG00000023009","protein_coding",15,99422035,99457748,-1
+"352","Nckap5los","NCK-associated protein 5-like, opposite strand [Source:MGI Symbol;Acc:MGI:1918162]","ENSMUSG00000089968","antisense",15,99427701,99435313,1
+"353","Gm49484","predicted gene, 49484 [Source:MGI Symbol;Acc:MGI:6155158]","ENSMUSG00000116249","processed_transcript",15,99457934,99465328,-1
+"354","Bcdin3d","BCDIN3 domain containing [Source:MGI Symbol;Acc:MGI:1922534]","ENSMUSG00000037525","protein_coding",15,99470079,99474730,-1
+"355","Gm49485","predicted gene, 49485 [Source:MGI Symbol;Acc:MGI:6155160]","ENSMUSG00000115863","processed_pseudogene",15,99491824,99492224,-1
+"356","Faim2","Fas apoptotic inhibitory molecule 2 [Source:MGI Symbol;Acc:MGI:1919643]","ENSMUSG00000023011","protein_coding",15,99497012,99528165,-1
+"357","Gm5808","predicted gene 5808 [Source:MGI Symbol;Acc:MGI:3648628]","ENSMUSG00000096448","processed_pseudogene",15,99555542,99556192,-1
+"358","Aqp2","aquaporin 2 [Source:MGI Symbol;Acc:MGI:1096865]","ENSMUSG00000023013","protein_coding",15,99579055,99584547,1
+"359","Aqp5","aquaporin 5 [Source:MGI Symbol;Acc:MGI:106215]","ENSMUSG00000044217","protein_coding",15,99590782,99594829,1
+"360","Aqp6","aquaporin 6 [Source:MGI Symbol;Acc:MGI:1341204]","ENSMUSG00000043144","protein_coding",15,99601400,99605477,1
+"361","Racgap1","Rac GTPase-activating protein 1 [Source:MGI Symbol;Acc:MGI:1349423]","ENSMUSG00000023015","protein_coding",15,99620496,99651656,-1
+"362","Asic1","acid-sensing (proton-gated) ion channel 1 [Source:MGI Symbol;Acc:MGI:1194915]","ENSMUSG00000023017","protein_coding",15,99670368,99701130,1
+"363","Smarcd1","SWI/SNF related, matrix associated, actin dependent regulator of chromatin, subfamily d, member 1 [Source:MGI Symbol;Acc:MGI:1933623]","ENSMUSG00000023018","protein_coding",15,99702129,99713991,1
+"364","Gm17349","predicted gene, 17349 [Source:MGI Symbol;Acc:MGI:4936983]","ENSMUSG00000091604","protein_coding",15,99702176,99705490,-1
+"365","Gm34939","predicted gene, 34939 [Source:MGI Symbol;Acc:MGI:5594098]","ENSMUSG00000116250","antisense",15,99702664,99703976,-1
+"366","Gm17241","predicted gene, 17241 [Source:MGI Symbol;Acc:MGI:4936875]","ENSMUSG00000115938","processed_pseudogene",15,99706562,99706813,-1
+"367","Gm16537","predicted gene 16537 [Source:MGI Symbol;Acc:MGI:4414957]","ENSMUSG00000089671","antisense",15,99715543,99724474,-1
+"368","Gpd1","glycerol-3-phosphate dehydrogenase 1 (soluble) [Source:MGI Symbol;Acc:MGI:95679]","ENSMUSG00000023019","protein_coding",15,99717515,99725005,1
+"369","Cox14","cytochrome c oxidase assembly protein 14 [Source:MGI Symbol;Acc:MGI:1913629]","ENSMUSG00000023020","protein_coding",15,99725647,99729532,1
+"370","Cers5","ceramide synthase 5 [Source:MGI Symbol;Acc:MGI:1919199]","ENSMUSG00000023021","protein_coding",15,99734881,99772885,-1
+"371","Gm17058","predicted gene 17058 [Source:MGI Symbol;Acc:MGI:4937885]","ENSMUSG00000090406","antisense",15,99765991,99782332,1
+"372","Lima1","LIM domain and actin binding 1 [Source:MGI Symbol;Acc:MGI:1920992]","ENSMUSG00000023022","protein_coding",15,99778470,99875456,-1
+"373","Gm25897","predicted gene, 25897 [Source:MGI Symbol;Acc:MGI:5455674]","ENSMUSG00000065643","snRNA",15,99803020,99803126,-1
+"374","Gm4468","predicted gene 4468 [Source:MGI Symbol;Acc:MGI:3782652]","ENSMUSG00000092014","processed_pseudogene",15,99810289,99810582,-1
+"375","Gm17057","predicted gene 17057 [Source:MGI Symbol;Acc:MGI:4937884]","ENSMUSG00000090500","antisense",15,99819020,99834570,1
+"376","Gm49494","predicted gene, 49494 [Source:MGI Symbol;Acc:MGI:6155173]","ENSMUSG00000116518","processed_transcript",15,99875540,99877595,1
+"377","Gm18095","predicted gene, 18095 [Source:MGI Symbol;Acc:MGI:5010280]","ENSMUSG00000115856","processed_pseudogene",15,99880199,99881216,1
+"378","Gm18890","predicted gene, 18890 [Source:MGI Symbol;Acc:MGI:5011075]","ENSMUSG00000116478","processed_pseudogene",15,99883640,99884444,1
+"379","Uqcrh-ps1","ubiquinol-cytochrome c reductase hinge protein, pseudogene 1 [Source:MGI Symbol;Acc:MGI:3641869]","ENSMUSG00000037438","processed_pseudogene",15,99898289,99898556,-1
+"380","Gm49495","predicted gene, 49495 [Source:MGI Symbol;Acc:MGI:6155175]","ENSMUSG00000116141","TEC",15,99902963,99904276,1
+"381","Gm20564","predicted gene, 20564 [Source:MGI Symbol;Acc:MGI:5295671]","ENSMUSG00000116255","processed_pseudogene",15,99915428,99915900,-1
+"382","Fam186a","family with sequence similarity 186, member A [Source:MGI Symbol;Acc:MGI:2685766]","ENSMUSG00000045350","protein_coding",15,99918348,99967061,-1
+"383","Gm21917","predicted gene, 21917 [Source:MGI Symbol;Acc:MGI:5434081]","ENSMUSG00000096111","antisense",15,99931711,99953044,1
+"384","Gm23133","predicted gene, 23133 [Source:MGI Symbol;Acc:MGI:5452910]","ENSMUSG00000077443","snRNA",15,99937307,99937441,-1
+"385","Larp4","La ribonucleoprotein domain family, member 4 [Source:MGI Symbol;Acc:MGI:2443114]","ENSMUSG00000023025","protein_coding",15,99970065,100016358,1
+"386","2310068J16Rik","RIKEN cDNA 2310068J16 gene [Source:MGI Symbol;Acc:MGI:1917531]","ENSMUSG00000100084","antisense",15,99972158,99973287,-1

@@ -35,7 +35,9 @@ st.meth <- "chisq"          # Statistical method for extracting marker genes - "
 
 in.path <- "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/"
 out.path <- paste0("~/Thesis_SpatialGenomics/R_Output/VesaliusDev/RNA/", alias, "/")
-
+## On MacBook:
+in.path <- "~/Thesis/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/"
+out.path <- paste0("~/Thesis/Thesis_SpatialGenomics/R_Output/VesaliusDev/", alias, "/")
 
 ```
 
@@ -64,6 +66,8 @@ library(MatrixExtra)
 
 files <- list.files("~/Thesis_SpatialGenomics/VesaliusDev_2022/Vesalius/R",pattern = ".R")
 files <- paste0("~/Thesis_SpatialGenomics/VesaliusDev_2022/Vesalius/R/",files)
+## If on macbook:
+files <- paste0("~/Thesis/VesaliusDev_2022/Vesalius/R/",list.files("~/Thesis/VesaliusDev_2022/Vesalius/R",pattern = ".R"))
 for(i in seq_along(files)){
   source(files[i])
 }
@@ -73,8 +77,7 @@ library(utils)
 library(stats)
 library(graphics)
 library(grDevices)
-### Set seed
-set.seed(1)
+
 ```
 
 
@@ -116,10 +119,11 @@ param <- paste(paste0(norm, "Norm"), paste0(meth, PCs), sep = "_")
 Assign either the mouse or human genes as rownames of count matrix
 
 ```{r}
+
 if(grepl("human",alias)){
-  genes <- read.table("~/Thesis_SpatialGenomics/SlideSeq/GroupSlideSeq/human_genes.txt", header = T)
-} else {
-  genes <- read.table("~/Thesis_SpatialGenomics/SlideSeq/GroupSlideSeq/mouse_genes.txt", header = T)
+  genes <- read.table(paste0(in.path,"human_genes.txt"), header = T)
+} else if(grepl("mouse",alias)){
+  genes <- read.table(paste0(in.path,"mouse_genes.txt"), header = T)
 }
 ```
 
