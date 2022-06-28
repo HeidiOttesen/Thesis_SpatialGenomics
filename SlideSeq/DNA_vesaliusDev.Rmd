@@ -24,21 +24,23 @@ KNN duplicate vs unique - unique makes the dataset much smaller! More efficient 
 start.time <- Sys.time()
 # SlideSeq DNA datasets:
 
-alias <- "human_colon_cancer_4"
-al.num <- "_dna_200114_13"
+alias <- "mouse_liver_met_2"
+al.num <- "_dna_200114_10"
 
 
 
 norm <- "TFIDF"             # Normalization method: "log","SCT","TFIDF","raw"
 meth <- "LSI"               # Dimensionality reduction method: "PCA","PCA_L","UMAP","LSI","LSI_UMAP"
-PCs <- 20                    # Number of Embeddings / dimensions / Principal Components / "LSI topics"
-plotPC <- 8                 # Number of PC plots to export.
+PCs <- 6                    # Number of Embeddings / dimensions / Principal Components / "LSI topics"
+plotPC <- 6                 # Number of PC plots to export.
 
 min.count <- 0
 max.count <- 6
 
-k <- 5
-knn.type <- "Chromosome"     # KNN method: "Unique", "Duplicate", "Chromosome"
+sum <- "Chromosome"
+
+k <- 25
+knn.type <- "Duplicate"     # KNN method: "Unique", "Duplicate"
 
 cores <- 5
 
@@ -53,6 +55,10 @@ param <- paste(paste0(norm, "Norm"), paste0(meth, PCs), sep = "_")
 in.path <- "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/"
 out.path <- paste0("~/Thesis_SpatialGenomics/R_Output/VesaliusDev/", alias, "/")
 
+## On MacBook:
+in.path <- "~/Thesis/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/"
+out.path <- paste0("~/Thesis/Thesis_SpatialGenomics/R_Output/VesaliusDev/", alias, "/")
+
 
 ```
 
@@ -63,9 +69,14 @@ out.path <- paste0("~/Thesis_SpatialGenomics/R_Output/VesaliusDev/", alias, "/")
 knitr::opts_knit$set(root.dir = "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/")
 knitr::opts_chunk$set(echo = TRUE)
 library(imagerExtra)
+<<<<<<< HEAD
 #library(Seurat)
 library(Seurat,lib.loc="/usr/local/lib64/R-4.0.3/library")
 library(Signac)
+=======
+library(Seurat)
+library(Signac) #For running TFIDF
+>>>>>>> cb544d0f261ec07cb6ca044e989c71746e3756fb
 library(ggplot2)
 library(patchwork)
 library(viridis)
@@ -82,6 +93,9 @@ library(MatrixExtra)
 
 files <- list.files("~/Thesis_SpatialGenomics/VesaliusDev_2022/Vesalius/R",pattern = ".R")
 files <- paste0("~/Thesis_SpatialGenomics/VesaliusDev_2022/Vesalius/R/",files)
+## If on macbook:
+files <- paste0("~/Thesis/VesaliusDev_2022/Vesalius/R/",list.files("~/Thesis/VesaliusDev_2022/Vesalius/R",pattern = ".R"))
+
 for(i in seq_along(files)){
   source(files[i])
 }
@@ -90,8 +104,6 @@ library(utils)
 library(stats)
 library(graphics)
 library(grDevices)
-### Set seed
-set.seed(1)
 ```
 
 
@@ -125,13 +137,21 @@ Keep only the bin index numbers (1-3114. ~3.1bn bases)
 Human: 3114 bins human bins. Chr2 starts at bin 251
 Mouse: 2738 bins total 
 
-```{r}
-
 if(grepl("human",alias)){
   bin.all <- read.table("~/Thesis_SpatialGenomics/SlideSeq/GroupSlideSeq/hg19_1Mb_bins.txt", header = T)
   bins <- bin.all$bin_ind
 } else if(grepl("mouse",alias)){
   bin.all <- read.table("~/Thesis_SpatialGenomics/SlideSeq/GroupSlideSeq/mm10_1Mb_bins.txt", header = T)
+  bins <- bin.all$bin_ind
+}
+
+```{r}
+
+if(grepl("human",alias)){
+  bin.all <- read.table(paste0(in.path,"hg19bins.txt"), header = T)
+  bins <- bin.all$bin_ind
+} else if(grepl("mouse",alias)){
+  bin.all <- read.table(paste0(in.path,"mm10bins.txt"), header = T)
   bins <- bin.all$bin_ind
 }
 ```
@@ -167,6 +187,14 @@ if(exists("max.count")){
 ```
 
 
+```{r}
+if(exists("sum")){
+  sparse <- chromosomeCounts(as.matrix(sparse), bin.all)
+  param <- paste("ChrSummed", param, sep="_")
+}
+```
+
+
 ## Vector holders - Checkpoint
 
 ```{r}
@@ -187,19 +215,19 @@ param <- param1
 
 
 ```{r}
+bead.ls <- list()
 if(exists("k")){
   if(knn.type == "Unique"){
-    ls <- KNN.DNA.Unique(bead, df, k)
+    bead.ls <- KNN.DNA.Unique(bead, df, k)
     pt.sz <- k/15 #Adjusting point size for plotting
+    param <- paste(param, paste0("knn", knn.type, k), sep="_")
   }else if(knn.type == "Duplicate"){
-    ls <- KNN.DNA(bead, df, k)
-  }else if(knn.type == "Chromosome"){
-    ls <- chromosome(bead, df)
+    bead.ls <- KNN.DNA(bead, df, k)
+    param <- paste(param, paste0("knn", knn.type, k), sep="_")
   }
-  param <- paste(param, paste0("knn", knn.type, k), sep="_")
-  sparse <- ls[[1]] #Retrieve sparse matrix output from knn function
-  bead <- ls[[2]] #Retrieve Bead info (barcodes and coordinates) in SlideSeq assay format compatible with Seurat/Vesalius object
-  rm(ls)
+  sparse <- bead.ls[[1]] #Retrieve sparse matrix output from knn function
+  bead <- bead.ls[[2]] #Retrieve Bead info (barcodes and coordinates) in SlideSeq assay format compatible with Seurat/Vesalius object
+  rm(bead.ls)
 }
 
 bead <- cbind(rownames(bead), bead[[1]], bead[[2]])
@@ -338,6 +366,7 @@ seed against query - pick territories manually!! based on the territory plot
   - eg inner vs outer part of metastasis
   - outer part vs normal
   - outer part vs other metastasis
+  - metastasis vs metastasis                "CloneBVsCloneA"
   
 Output:
  - p.value,
@@ -348,7 +377,7 @@ Output:
  - queryTerritory (territory used as group 2)
   
 TerritoryMorphing
-  - c(1,10) - Shrinking/Growing factor??!!!
+  - c(1,10) - Shrinking/Growing factor??!!! - Nope territories
  - Territory morphing can manipulate territories by growing, shrinking, filling, and cleaning territories.
  - Growing = Positive integers - Territory will be dilated by x number of pixels
  - Shrinking = Negative integers - Territory will be contracted by x number of pixels
@@ -360,14 +389,14 @@ TerritoryMorphing
 
 
 # Specify territories for comparison, seed vs query
-vs <- "CloneAVsAll"
-s <- c(13,14)           #eg c(8,7) or NULL
-q <- NULL             #eg c(7,5) or NULL
-pval <- 0.05
+vs <- "CloneAVsNormal"
+s <- c(8,9,4,6)                   #eg c(8,7) or NULL c(8,9,4,6) c(10,11)
+q <- c(1,2,3,5,7,12,13)           #eg c(7,5) or NULL
+pval <- 0.5
 
 vesMark <- extractMarkers(vesTerr,method=st.meth, seed=s, query=q, pval=pval)
 
-vesMorph <- territoryMorphing(vesMark, c(1,10))
+#vesMorph <- territoryMorphing(vesMark, c(1,10))
 
 #vesTerrLay <- layerTerritory(vesMorph, c(28,34,32),morphologyFactor=0,layerDepth=5)
 
@@ -386,10 +415,10 @@ print(paste("Runtime so far: ", difftime(Sys.time(), start.time, units="mins"), 
 mark <- vesMark@DEG$DEG_Territory_Trial_1
 m.df <- as.data.frame(mark)
 padj <- slice_min(m.df, order_by=m.df$p.value.adj, n=100)
-logfc.min <- slice_min(padj, order_by=padj$logFC, n=5)
-logfc.max <- slice_max(padj, order_by=padj$logFC, n=5)
-int.bins <- bind_rows(list(logfc.min, logfc.max))
-
+#logfc.min <- slice_min(padj, order_by=padj$logFC, n=5)
+#logfc.max <- slice_max(padj, order_by=padj$logFC, n=5)
+#int.bins <- bind_rows(list(logfc.min, logfc.max))
+int.bins <- padj
 
 
 
@@ -423,15 +452,16 @@ viewGeneExpression
 layer <- "FALSE"           
 p <- list()
 for(i in seq(int.bins$genes)){
-  p[[i]] <- viewGeneExpression(vesMorph, gene=int.bins$genes[[i]], as.layer=layer,norm=F, cex=0.1, territory1=s, territory2=q)
+  p[[i]] <- viewGeneExpression(vesMark, gene=int.bins$genes[[i]], as.layer=layer,norm=F, cex=0.1, territory1=s, territory2=q)
 }
 
 setwd(in.path)
 fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "MarkerBins", vs, alias, param, paste0("layer", layer), ".pdf", sep="_")
 pdf(fname)
-grid.arrange(p[[1]], p[[2]], p[[3]], p[[4]], nrow = 2)
-grid.arrange(p[[5]], p[[6]], p[[7]], p[[8]], nrow = 2)
-grid.arrange(p[[9]], p[[10]], nrow = 2)
+grid.arrange(p[[1]], nrow = 2)
+#grid.arrange(p[[1]], p[[2]], p[[3]], p[[4]], nrow = 2)
+#grid.arrange(p[[5]], p[[6]], p[[7]], p[[8]], nrow = 2)
+#grid.arrange(p[[9]], p[[10]], nrow = 2)
 dev.off()
 file.rename(from = paste0(in.path, fname), to = paste0(out.path, fname))
 ```
@@ -463,7 +493,21 @@ In which chromosomes and where can we find the marker bins?
  
 
 
+## Get bin location info w Function:
 ```{r}
+if(exists("sum")){
+  bin.chr <- binLocationsChr(padj, bin.all)
+}else{
+  bin.chr <- binLocations(int.bins, bin.all)
+}
+
+
+fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "MarkerBins", vs, alias, param, "table.csv", sep="_")
+write.csv(bin.chr, file=paste0(out.path,fname))
+
+print(paste("Runtime so far: ", difftime(Sys.time(), start.time, units="mins"), "min"))
+```
+
 chr <- data_frame()
 for(i in seq_along(padj$genes)){
   x <- as.list(subset(bin.all, bin_ind==padj$genes[[i]]))
@@ -481,21 +525,13 @@ write.csv(bin.chr, file=paste0(out.path,fname))
 
 print(paste("Runtime so far: ", difftime(Sys.time(), start.time, units="mins"), "min"))
 
-```
-## Get bin location info w Function: - not working atm...?
-```{r}
-bin.chr <- binLocations(int.bins, bin.all)
 
-fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "MarkerBins", vs, alias, param, "table.csv", sep="_")
-write.csv(bin.chr, file=paste0(out.path,fname))
-
-print(paste("Runtime so far: ", difftime(Sys.time(), start.time, units="mins"), "min"))
-```
 
 
 
 ## Get genes from top bins:
 ```{r}
+blah
 genes <- genesBioMart(int.bins, alias)
 fname.g <- paste0("Genes_", fname)
 fname.g <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "Genes", alias, param, "table.csv", sep="_")
