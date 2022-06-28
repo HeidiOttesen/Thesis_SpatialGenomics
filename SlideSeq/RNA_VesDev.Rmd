@@ -36,8 +36,8 @@ st.meth <- "chisq"          # Statistical method for extracting marker genes - "
 in.path <- "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/"
 out.path <- paste0("~/Thesis_SpatialGenomics/R_Output/VesaliusDev/RNA/", alias, "/")
 ## On MacBook:
-in.path <- "~/Thesis/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/"
-out.path <- paste0("~/Thesis/Thesis_SpatialGenomics/R_Output/VesaliusDev/", alias, "/")
+#in.path <- "~/Thesis/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/"
+#out.path <- paste0("~/Thesis/Thesis_SpatialGenomics/R_Output/VesaliusDev/", alias, "/")
 
 ```
 
@@ -49,14 +49,14 @@ knitr::opts_knit$set(root.dir = "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_
 knitr::opts_chunk$set(echo = TRUE)
 library(imagerExtra)
 #library(Seurat)
-library(Seurat,lib.loc="/usr/local/lib64/R-4.0.3/library")
+library(Seurat,lib.loc="/home/hottesen/R/x86_64-pc-linux-gnu-library/4.0")
 library(ggplot2)
 library(patchwork)
 library(viridis)
 library(RColorBrewer)
 library(dplyr)
 library(tvR)
-library(Signac)
+#library(Signac) #Needs Seurat >4.0.6 (installed in personal folder but not working - rgeos config error...)
 library(sp)
 library(spdep)
 library(grid)
@@ -68,7 +68,7 @@ library(MatrixExtra)
 files <- list.files("~/Thesis_SpatialGenomics/VesaliusDev_2022/Vesalius/R",pattern = ".R")
 files <- paste0("~/Thesis_SpatialGenomics/VesaliusDev_2022/Vesalius/R/",files)
 ## If on macbook:
-files <- paste0("~/Thesis/VesaliusDev_2022/Vesalius/R/",list.files("~/Thesis/VesaliusDev_2022/Vesalius/R",pattern = ".R"))
+#files <- paste0("~/Thesis/VesaliusDev_2022/Vesalius/R/",list.files("~/Thesis/VesaliusDev_2022/Vesalius/R",pattern = ".R"))
 for(i in seq_along(files)){
   source(files[i])
 }
