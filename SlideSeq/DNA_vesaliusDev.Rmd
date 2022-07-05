@@ -32,13 +32,13 @@ al.num <- "_dna_200114_10"
 
 norm <- "TFIDF"             # Normalization method: "log","SCT","TFIDF","raw"
 meth <- "LSI"               # Dimensionality reduction method: "PCA","PCA_L","UMAP","LSI","LSI_UMAP"
-PCs <- 6                    # Number of Embeddings / dimensions / Principal Components / "LSI topics"
-plotPC <- 6                 # Number of PC plots to export.
+PCs <- 10                    # Number of Embeddings / dimensions / Principal Components / "LSI topics"
+plotPC <- 4                 # Number of PC plots to export.
 
 min.count <- 0
 max.count <- 6
 
-sum <- "Chromosome"
+#chrsum <- "Chromosome"
 
 k <- 25
 knn.type <- "Duplicate"     # KNN method: "Unique", "Duplicate"
@@ -46,7 +46,7 @@ knn.type <- "Duplicate"     # KNN method: "Unique", "Duplicate"
 cores <- 5
 
 colD <- 6                   # Column Depth (3-6)
-smIter <- 15                # Smoothing Iterations
+smIter <- 10                # Smoothing Iterations
 #imSegDims <- 4             # Image Segmentation Dimensions
 st.meth <- "wilcox"          #Statistical method for extracting markers/bins, "wilcox", "t.test", "chisq"
 
@@ -211,7 +211,7 @@ For comparing counts over chromosomes instead of over bins.
 
 
 ```{r}
-if(exists("sum")){
+if(exists("chrsum")){
   sparse <- chromosomeCounts(as.matrix(sparse), bin.all)
   param <- paste("ChrSummed", param, sep="_")
 }
@@ -238,13 +238,15 @@ if(exists("k")){
   sparse <- bead.ls[[1]] #Retrieve sparse matrix output from knn function
   bead <- bead.ls[[2]] #Retrieve Bead info (barcodes and coordinates) in SlideSeq assay format compatible with Seurat/Vesalius object
   rm(bead.ls)
+}else{
+  bead <- bead@coordinates
 }
 
 bead <- cbind(rownames(bead), bead[[1]], bead[[2]])
 colnames(bead) <- c("barcodes","xcoord","ycoord")
 bead <- as.data.frame(bead)
 bead <- transform(bead, xcoord = as.numeric(xcoord), 
-               ycoord = as.numeric(ycoord))
+                  ycoord = as.numeric(ycoord))
 
 sparse.df <- as.data.frame(sparse)
 sparse.spmx <- Matrix(sparse, sparse = TRUE)
@@ -373,7 +375,7 @@ ExtractMarkers - DGE between selected territories - identify marker bins
 
 
 seed against query - pick territories manually!! based on the territory plot
-  - eg inner vs outer part of metastasis
+  - eg inner vs outer part of metastasis    "CloneAInnerVsOuter"
   - outer part vs normal
   - outer part vs other metastasis
   - metastasis vs metastasis                "CloneBVsCloneA"
@@ -399,10 +401,10 @@ TerritoryMorphing
 
 
 # Specify territories for comparison, seed vs query
-vs <- "CloneAVsNormal"
-s <- c(8,9,4,6)                   #eg c(8,7) or NULL c(8,9,4,6) c(10,11)
-q <- c(1,2,3,5,7,12,13)           #eg c(7,5) or NULL
-pval <- 0.5
+vs <- "CloneAInnerVsOuter"
+s <- c(3)                   #eg c(8,7) or NULL c(8,9,4,6) c(10,11)
+q <- c(2)           #eg c(7,5) or NULL
+pval <- 0.05                # P- value threshold
 
 vesMark <- extractMarkers(vesTerr,method=st.meth, seed=s, query=q, pval=pval)
 
@@ -505,7 +507,7 @@ In which chromosomes and where can we find the marker bins?
 
 ## Get bin location info w Function:
 ```{r}
-if(exists("sum")){
+if(exists("chrsum")){
   bin.chr <- binLocationsChr(padj, bin.all)
 }else{
   bin.chr <- binLocations(int.bins, bin.all)
@@ -541,8 +543,7 @@ print(paste("Runtime so far: ", difftime(Sys.time(), start.time, units="mins"), 
 
 ## Get genes from top bins:
 ```{r}
-blah
-genes <- genesBioMart(int.bins, alias)
+genes <- genesBioMart(bin.chr, alias)
 fname.g <- paste0("Genes_", fname)
 fname.g <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "Genes", alias, param, "table.csv", sep="_")
 write.csv(genes, file=paste0(out.path,fname.g))

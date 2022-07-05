@@ -14,8 +14,8 @@ mouse_liver_met_2_rna_201002_04
 
 ```{r}
 start.time <- Sys.time()
-# SlideSeq RNA datasets:
 
+# SlideSeq RNA dataset:
 alias <- "mouse_liver_met_2"
 al.num <- "_rna_201002_04"
 
@@ -36,8 +36,8 @@ st.meth <- "chisq"          # Statistical method for extracting marker genes - "
 in.path <- "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/"
 out.path <- paste0("~/Thesis_SpatialGenomics/R_Output/VesaliusDev/RNA/", alias, "/")
 ## On MacBook:
-#in.path <- "~/Thesis/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/"
-#out.path <- paste0("~/Thesis/Thesis_SpatialGenomics/R_Output/VesaliusDev/", alias, "/")
+in.path <- "~/Thesis/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/"
+out.path <- paste0("~/Thesis/Thesis_SpatialGenomics/R_Output/VesaliusDev/", alias, "/")
 
 ```
 
@@ -48,8 +48,8 @@ out.path <- paste0("~/Thesis_SpatialGenomics/R_Output/VesaliusDev/RNA/", alias, 
 knitr::opts_knit$set(root.dir = "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/")
 knitr::opts_chunk$set(echo = TRUE)
 library(imagerExtra)
-#library(Seurat)
-library(Seurat,lib.loc="/usr/local/lib64/R-4.0.3/library")
+library(Seurat)
+#library(Seurat,lib.loc="/usr/local/lib64/R-4.0.3/library") - on tycho RStudio session as new personal seurat does not work
 library(ggplot2)
 library(patchwork)
 library(viridis)
@@ -68,7 +68,7 @@ library(MatrixExtra)
 files <- list.files("~/Thesis_SpatialGenomics/VesaliusDev_2022/Vesalius/R",pattern = ".R")
 files <- paste0("~/Thesis_SpatialGenomics/VesaliusDev_2022/Vesalius/R/",files)
 ## If on macbook:
-#files <- paste0("~/Thesis/VesaliusDev_2022/Vesalius/R/",list.files("~/Thesis/VesaliusDev_2022/Vesalius/R",pattern = ".R"))
+files <- paste0("~/Thesis/VesaliusDev_2022/Vesalius/R/",list.files("~/Thesis/VesaliusDev_2022/Vesalius/R",pattern = ".R"))
 for(i in seq_along(files)){
   source(files[i])
 }
@@ -95,11 +95,11 @@ bead <- ReadSlideSeq(paste0(in.path, alias, al.num, ".bead_locations.csv"))
 barcodes <- rownames(bead@coordinates)
 
 sep = "," #separator used in this count matrix
-ctmp <- read.table(counts, header = TRUE, sep=sep ) %>% na.exclude()
+sparse <- read.table(counts, header = TRUE, sep=sep ) %>% na.exclude()
 #rownames(ctmp) <- ctmp[,1] #Non-Unique values - are these the genes/features?
 #ctmp <- ctmp[,-1]
 
-sparse <- sparseMatrix(i= ctmp[,1],j=ctmp[,2],x=ctmp[,3])
+sparse <- sparseMatrix(i= sparse[,1],j=sparse[,2],x=sparse[,3])
 
 
 # Set point size for plotting the UMIs - adjusted for knn later
@@ -147,12 +147,12 @@ colnames(bead) <- c("barcodes","xcoord","ycoord")
 ## Vector holders - Checkpoint
 
 ```{r}
-df1 <- as.matrix(sparse) 
-bead1 <- bead
+#df1 <- as.matrix(sparse) 
+#bead1 <- bead
 param1 <- param
 
-df <- df1
-bead <- bead1
+#df <- df1
+#bead <- bead1
 param <- param1
 ```
 
@@ -169,15 +169,24 @@ Latent space
 PCA / UMAP / tSNE (/LSI)
 
 set filterThreshold to remove outlier beads (0.99)
+buildVesaliusEmbeddings
+  - tensorResolution - Pixel resolution - all "beads" are retained but might collapse and sum counts if they overlap
+    - 0.05 doesn't work
+    2022-06-29 11:54:28  Pre-processing Count Data
+    Error: vector memory exhausted (limit reached?)
+    Error during wrapup: vector memory exhausted (limit reached?)
+    Error: no more error handlers available (recursive errors?); invoking 'abort' restart
 ```{r}
 
 vesalius <- buildVesaliusObject(bead,df)
-ves <- buildVesaliusEmbeddings(vesalius, method = meth, 
+ves1 <- buildVesaliusEmbeddings(vesalius, method = meth, 
   norm = norm, pcs = PCs, tensorResolution = 0.1, cores = cores, filterThreshold =0.99)
+
+stop here
 
 ```
 
-## Plotting vesalius images of the PC or LSI embeddings
+## Plotting vesalius images of the PC or LSI embeddings (Grayscale)
 
 Imageplot with chosen number of dimensions (for the different PCs)
 
