@@ -20,7 +20,7 @@ alias <- "mouse_liver_met_2"
 al.num <- "_rna_201002_04"
 
 norm <- "SCT"             # Normalization method: "log","SCT","TFIDF","raw"
-meth <- "UMAP"               # Dimensionality reduction method: "PCA","PCA_L","UMAP","LSI","LSI_UMAP"
+meth <- "PCA"               # Dimensionality reduction method: "PCA","PCA_L","UMAP","LSI","LSI_UMAP"
 PCs <- 30                   # Number of Embeddings / dimensions / Principal Components / "LSI topics"
 plotPC <- 8                 # Number of PC plots to export. 
 
