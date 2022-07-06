@@ -1,0 +1,183 @@
+---
+title: "PostVesaliusTerritories"
+author: "Heidi Ottesen"
+date: '2022-07-06'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+in.path <- "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/"
+out.path <- paste0("~/Thesis_SpatialGenomics/R_Output/VesaliusDev/RNA/", alias, "/")
+
+
+files <- paste0("~/Thesis_SpatialGenomics/VesaliusDev_2022/Vesalius/R/",list.files("~/Thesis_SpatialGenomics/VesaliusDev_2022/Vesalius/R",pattern = ".R"))
+## If on macbook:
+#files <- paste0("~/Thesis/VesaliusDev_2022/Vesalius/R/",list.files("~/Thesis/VesaliusDev_2022/Vesalius/R",pattern = ".R"))
+for(i in seq_along(files)){
+  source(files[i])
+}
+
+terr <- load(file=paste0(out.path, "Object_Territories_mouse_liver_met_2_SCTNorm_PCA30_dims1-30_colD6_Iter10_markerMethod_chisq.rd"))
+```
+
+```{r}
+
+territoryPlot(vesTerrLay,cex=10,cex.pt=0.25)
+```
+
+
+```{r}
+# Specify territories for comparison, seed vs query
+vs <- "CloneBInnerVsOuter"
+s <- c(4)           #c(8,7) or NULL
+q <- c(6,13)             #c(2,3) or NULL
+v <- c()
+pval <- 0.05
+
+vesMark <- extractMarkers(vesTerr,method=st.meth, seed=s, query=q, pval=pval)
+
+
+
+vesTerrLay <- layerTerritory(vesTerr, c(s,q),morphologyFactor=c(-100, 100),layerDepth=5)
+
+param <- paste(param2, paste0("markerMethod", st.meth), sep="_")
+print(paste("Runtime so far: ", difftime(Sys.time(), start.time, units="mins"), "min"))
+```
+
+
+
+
+
+## Pick top marker bins
+ - Based on lowest adjusted p value and highest, furthest from 0, Log fold change
+ - With RNA we only get around 25 Genes - no need to subset..
+
+```{r}
+mark <- vesMark@DEG$DEG_Territory_Trial_1
+#m.df <- as.data.frame(mark)
+#padj <- slice_min(m.df, order_by=m.df$p.value.adj, n=100)
+#logfc.min <- slice_min(padj, order_by=padj$logFC, n=5)
+#logfc.max <- slice_max(padj, order_by=padj$logFC, n=5)
+#int.genes <- bind_rows(list(logfc.min, logfc.max))
+int.genes <- as.data.frame(mark)
+int.genes <- int.genes[order(int.genes$p.value.adj),]
+```
+
+population[order(population$age),]
+
+
+```{r}
+check number of genes - acceptable to run with?
+  filter by logfc as well?
+```
+
+
+## Plot marker bins - export to pdf
+Investigate individual marker bins over the whole tissue slice.
+Are some bin patterns correlating with the territory regions?
+
+The beads are overlapping - change cex size from default 10 to less - or change alpha to change opacity/transparency
+
+
+
+
+viewGeneExpression
+  - why vesMorph as input? better with territory?
+  - as.layer - should it show marker bin's expression/distribution per bead or overall per territory? - TRUE / FALSE
+  
+
+
+```{r}
+layer <- "FALSE"           
+p <- list()
+for(i in seq(int.genes$genes)){
+  p[[i]] <- viewGeneExpression(vesMorph, gene=int.genes$genes[[i]], as.layer=layer,norm=F, cex=0.1, territory1=s, territory2=q)
+}
+
+setwd(in.path)
+fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "MarkerGenes", vs, alias, param, paste0("layer", layer), ".pdf", sep="_")
+pdf(fname)
+grid.arrange(p[[1]], p[[2]], p[[3]], p[[4]], nrow = 2)
+grid.arrange(p[[5]], p[[6]], p[[7]], p[[8]], nrow = 2)
+grid.arrange(p[[9]], p[[10]], nrow = 2)
+dev.off()
+file.rename(from = paste0(in.path, fname), to = paste0(out.path, fname))
+```
+
+## Another bin plotting version: (One plot per pdf page)
+setwd(in.path)
+fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "MarkerGenes", vs, alias, param, paste0("layer-", layer), ".pdf", sep="_")
+pdf(fname)
+for(i in seq_along(int.genes$genes)){
+  print(viewGeneExpression(vesMorph, gene=int.genes$genes[[i]], as.layer=layer,norm=F,cex=0.5))
+}
+dev.off()
+file.rename(from = paste0(in.path, fname), to = paste0(out.path, fname))
+
+## Plot genes here in markdown:
+for(i in seq_along(int.genes$genes)){
+  print(viewGeneExpression(vesMorph, gene=int.genes$genes[[i]], as.layer=F,norm=F,cex=2))
+}
+
+
+
+Here I need to investigate the genes... How?!
+ 
+
+
+```{r}
+
+fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "MarkerBins", vs, alias, param, "table.csv", sep="_")
+write.csv(int.genes, file=paste0(out.path,fname))
+
+print(paste("Runtime so far: ", difftime(Sys.time(), start.time, units="mins"), "min"))
+
+```
+```{r}
+
+```
+
+
+
+```{r}
+print(int.genes)
+
+viewGeneExpression(vesTerr, gene=int.genes$genes[[2]], as.layer=layer,norm=F, cex=0.1, territory1=s, territory2=q)
+
+
+territoryPlot(vesTerrLay,cex=10,cex.pt=pt.sz)
+
+
+```
+
+
+
+
+```{r}
+#Get new marker genes?
+
+
+# Specify territories for comparison, seed vs query
+vs <- "Sublayers"
+s <- c(2)           #c(8,7) or NULL
+q <- c(3)             #c(2,3) or NULL
+pval <- 0.05
+
+vesMark <- extractMarkers(vesTerr,method=st.meth, seed=s, query=q, pval=pval)
+
+
+param <- paste(param2, paste0("markerMethod", st.meth), sep="_")
+print(paste("Runtime so far: ", difftime(Sys.time(), start.time, units="mins"), "min"))
+#Specify the new territories!
+viewGeneExpression(vesTerrLay, gene=int.genes$genes[[2]], as.layer=layer,norm=F, cex=0.1, territory1=s, territory2=q)
+```
+
+
+
+## Check the log of your current vesalius object
+getLastLog(vesTerr)
+
