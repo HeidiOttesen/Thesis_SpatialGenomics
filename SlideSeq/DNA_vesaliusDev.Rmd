@@ -461,6 +461,7 @@ viewGeneExpression
 
 
 ```{r}
+How many bins do you have? - Grid.arrange
 layer <- "FALSE"           
 p <- list()
 for(i in seq(int.bins$genes)){
@@ -470,10 +471,10 @@ for(i in seq(int.bins$genes)){
 setwd(in.path)
 fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "MarkerBins", vs, alias, param, paste0("layer", layer), ".pdf", sep="_")
 pdf(fname)
-grid.arrange(p[[1]], nrow = 2)
-#grid.arrange(p[[1]], p[[2]], p[[3]], p[[4]], nrow = 2)
-#grid.arrange(p[[5]], p[[6]], p[[7]], p[[8]], nrow = 2)
-#grid.arrange(p[[9]], p[[10]], nrow = 2)
+#grid.arrange(p[[1]], nrow = 2)
+grid.arrange(p[[1]], p[[2]], p[[3]], p[[4]], nrow = 2)
+grid.arrange(p[[5]], p[[6]], p[[7]], p[[8]], nrow = 2)
+grid.arrange(p[[9]], p[[10]], nrow = 2)
 dev.off()
 file.rename(from = paste0(in.path, fname), to = paste0(out.path, fname))
 ```
@@ -545,7 +546,7 @@ print(paste("Runtime so far: ", difftime(Sys.time(), start.time, units="mins"), 
 ```{r}
 genes <- genesBioMart(bin.chr, alias)
 fname.g <- paste0("Genes_", fname)
-fname.g <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "Genes", alias, param, "table.csv", sep="_")
+#fname.g <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "Genes", alias, param, "table.csv", sep="_")
 write.csv(genes, file=paste0(out.path,fname.g))
 
 ```
