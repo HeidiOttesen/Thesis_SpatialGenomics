@@ -326,6 +326,12 @@ param <- paste(param, paste0("dims1-", PCs), paste0("colD", colD), paste0("Iter"
 print(paste("Runtime so far: ", difftime(Sys.time(), start.time, units="mins"), "min"))
 ```
 
+## Export territory Object
+```{r}
+vesTerrDNA <- vesTerrDNA
+fname <- paste0(out.path, "Object_DNA_Territories_", alias, "_", param, ".rd")
+save(vesTerrDNA, file=fname)
+```
 
 
 # Export territory plots to pdf
