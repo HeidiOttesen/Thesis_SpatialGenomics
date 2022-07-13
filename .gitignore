@@ -6,4 +6,7 @@ SlideSeq/cancer.Rmd
 VesaliusDev/*
 Vesalius_2021/*
 VesaliusDev_2022/*
+R_Output/*
+Object*
+*.rd
 .netrc
