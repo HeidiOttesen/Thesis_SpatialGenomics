@@ -11,12 +11,12 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 in.path <- "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/"
-out.path <- paste0("~/Thesis_SpatialGenomics/R_Output/VesaliusDev/RNA/", alias, "/")
+out.path <- paste0("~/Thesis/R_Output/VesaliusDev/RNA/", alias, "/")
 
 
 files <- paste0("~/Thesis_SpatialGenomics/VesaliusDev_2022/Vesalius/R/",list.files("~/Thesis_SpatialGenomics/VesaliusDev_2022/Vesalius/R",pattern = ".R"))
 ## If on macbook:
-#files <- paste0("~/Thesis/VesaliusDev_2022/Vesalius/R/",list.files("~/Thesis/VesaliusDev_2022/Vesalius/R",pattern = ".R"))
+files <- paste0("~/Thesis/Vesalius/R/",list.files("~/Thesis/Vesalius/R",pattern = ".R"))
 for(i in seq_along(files)){
   source(files[i])
 }
@@ -92,20 +92,14 @@ viewGeneExpression
 
 
 ```{r}
-layer <- "FALSE"           
-p <- list()
+layer <- "FALSE" 
 for(i in seq(int.genes$genes)){
-  p[[i]] <- viewGeneExpression(vesMorph, gene=int.genes$genes[[i]], as.layer=layer,norm=F, cex=0.1, territory1=s, territory2=q)
+  f <- paste0(out.path, "GeneExpression/", int.genes$genes[[i]], "_", vs, "_", fname, ".png")
+  png(f) 
+  print(viewGeneExpression(layMark, gene=int.genes$genes[[i]], as.layer=layer, norm=F, cex=0.1, territory1=s, territory2=q))
+  dev.off()
 }
 
-setwd(in.path)
-fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "MarkerGenes", vs, alias, param, paste0("layer", layer), ".pdf", sep="_")
-pdf(fname)
-grid.arrange(p[[1]], p[[2]], p[[3]], p[[4]], nrow = 2)
-grid.arrange(p[[5]], p[[6]], p[[7]], p[[8]], nrow = 2)
-grid.arrange(p[[9]], p[[10]], nrow = 2)
-dev.off()
-file.rename(from = paste0(in.path, fname), to = paste0(out.path, fname))
 ```
 
 ## Another bin plotting version: (One plot per pdf page)

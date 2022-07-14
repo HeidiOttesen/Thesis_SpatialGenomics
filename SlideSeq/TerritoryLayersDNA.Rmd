@@ -4,6 +4,11 @@ author: "Heidi Ottesen"
 date: '2022-07-06'
 output: html_document
 ---
+
+For investigating layers within a clone
+and also for comparing marker bins with the marker genes from the same RNA layers
+
+
 ## Load packages and functions
 
 ```{r setup, include=FALSE}
@@ -15,7 +20,7 @@ library(stats)
 
 files <- paste0("~/Thesis_SpatialGenomics/VesaliusDev_2022/Vesalius/R/",list.files("~/Thesis_SpatialGenomics/VesaliusDev_2022/Vesalius/R",pattern = ".R"))
 ## If on macbook:
-#files <- paste0("~/Thesis/VesaliusDev_2022/Vesalius/R/",list.files("~/Thesis/VesaliusDev_2022/Vesalius/R",pattern = ".R"))
+files <- paste0("~/Thesis/Vesalius/R/",list.files("~/Thesis/Vesalius/R",pattern = ".R"))
 for(i in seq_along(files)){
   source(files[i])
 }
@@ -24,17 +29,58 @@ for(i in seq_along(files)){
 ## Load vesalius Territory object
 and have a look
 
-```{r}
-fname <- "Object_Territories_mouse_liver_met_2_SCTNorm_PCA30_dims1-30_colD6_Iter10_markerMethod_chisq"
+RNA:
+Object_Territories_mouse_liver_met_2_SCTNorm_PCA30_dims1-30_colD6_Iter10_markerMethod_chisq
 
-#in.path <- "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/"
-in.path <- paste0("~/Thesis_SpatialGenomics/R_Output/VesaliusDev/RNA/mouse_liver_met_2/")
+DNA:
+Object_DNA_Territories_mouse_liver_met_2_counts0-6_counts0-6_TFIDFNorm_LSI10_knnDuplicate25_dims1-10_colD6_Iter10
+
+
+```{r}
+fname <- "Object_DNA_Territories_mouse_liver_met_2_counts0-6_counts0-6_TFIDFNorm_LSI10_knnDuplicate25_dims1-10_colD6_Iter10"
+
+ref.path <- "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/"
+in.path <- "~/Thesis_SpatialGenomics/R_Output/VesaliusDev/RNA/mouse_liver_met_2/"
+##MacBook:
+in.path <- "~/Thesis/R_Output/VesaliusDev/mouse_liver_met_2/"
+ref.path <- "~/Thesis/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/"
 
 load(file=paste0(in.path, fname, ".rd"))
-vesTerrDNA <- vesTerr
-territoryPlot(vesTerr,cex=10,cex.pt=0.25)
+territoryPlot(vesTerrDNA,cex=10,cex.pt=0.25)
 #territoryPlot(vesTerr,cex=10,cex.pt=0.25, split=TRUE)
 ```
+
+
+## Specify clone 
+Select territories for inter-clonal comparisons and further layering
+
+seed against query - pick territories manually!! based on the territory plot
+  - eg inner vs outer part of metastasis    "CloneAInnerVsOuter"
+  - outer part vs normal
+  - outer part vs other metastasis
+  - metastasis vs metastasis                "CloneBVsCloneA"
+  
+```{r}
+
+vs <- "CloneBInnerVsOuter"
+s <- c(8)           
+q <- c(9)    
+
+st.meth <- "wilcox"
+pval <- 0.05
+```
+
+
+## Extract marker bins and morph territories
+ExtractMarkers - DGE between selected territories - identify marker bins
+  - Takes like 20 mins - if not specifying seed and query..
+      - More territories = more time?
+  - Seed - set to 3 because? - Territories to be included in group 1 for DiffGeneExp
+    - If I say 3 - does it only use territory 3 for comparison or does it compare 3 different territories?
+  - Query - Territories to be included in group 2 of DGE.
+  
+  Output: p.value,- logFC, - seedPct (percentage of cells containing gene in first group), - queryPct (percentage of cells containing gene in second group), - seedTerritory (territory used as group 1) - queryTerritory (territory used as group 2)
+  
 ## Identify sublayers
 For further investigating the underlying gene expression
 
@@ -43,49 +89,60 @@ layerTerritory() -
   - choose territories of interest to further layer
   layerDepth - number of sub-territories/layers you would like (for investigating gradual change)
 
+  
+
+  
+TerritoryMorphing
+  - c(1,10) - Shrinking/Growing factor??!!! - Nope territories
+ - Territory morphing can manipulate territories by growing, shrinking, filling, and cleaning territories.
+ - Growing = Positive integers - Territory will be dilated by x number of pixels
+ - Shrinking = Negative integers - Territory will be contracted by x number of pixels
+ - Filling = grow followed by shrink.
+ - Cleaning = shrink followed by grow.
+ - Morphology factor - integer or vector of integers describing growth and/or shrink extent.
+
+
+
+
 ```{r}
-# Specify territories for investigating layering, seed vs query
-vs <- "CloneBInnerVsOuter"
-s <- c(4)           
-q <- c(6,13)    
 
-st.meth <- "wilcox"
-pval <- 0.05
+vesMark <- extractMarkers(vesTerrDNA, method=st.meth, seed=s, query=q, pval=pval)
+vesTerrLay <- layerTerritory(vesMark, c(s,q),morphologyFactor=0,layerDepth=5)
 
-vesMark <- extractMarkers(vesTerr,method=st.meth, seed=s, query=q, pval=pval)
-int.genes <- as.data.frame(vesMark@DEG$DEG_Territory_Trial_1)
-int.genes <- int.genes[order(int.genes$p.value.adj),]
-length(int.genes$genes)
+````
 
-vesLay <- layerTerritory(vesTerr, c(s,q),morphologyFactor=0,layerDepth=5)
 
-territoryPlot(vesLay,cex=10,cex.pt=0.25)
-```
 
-## Extract significant marker Genes
+
+## Pick top marker bins
  - Based on lowest adjusted p value and highest, furthest from 0, Log fold change
- - With RNA we only get around 25 Genes - no need to subset..
+
 ```{r}
+mark <- ves@DEG$DEG_Territory_Trial_1
+m.df <- as.data.frame(mark)
+padj <- slice_min(m.df, order_by=m.df$p.value.adj, n=100)
+int.bins <- padj
 
-s <- 2
-q <- 4
+```
 
-layMark <- extractMarkers(vesTerrLay,method=st.meth, seed=s, query=q, pval=pval)
-vs <- paste0("LayerTerr", "2vs4")
-int.genes <- as.data.frame(layMark@DEG$DEG_Layer_Trial_1)[order(int.genes$p.value.adj),]
+Further subsetting:
+
+padj <- slice_min(m.df, order_by=m.df$p.value.adj, n=100)
+#logfc.min <- slice_min(padj, order_by=padj$logFC, n=5)
+#logfc.max <- slice_max(padj, order_by=padj$logFC, n=5)
+#int.bins <- bind_rows(list(logfc.min, logfc.max))
+int.bins <- padj
+
+
+```{r}
+length(int.bins$genes)
+Appropriate number of bins?
+  
 ```
 
 
-
-```{r}
-length(int.genes$genes)
-check number of genes - acceptable to run with?
-  filter by logfc as well?
-```
-
-
-## Plot marker genes - export to pdf
-Investigate individual marker genes over the whole tissue slice.
+## Plot marker bins - export to pdf
+Investigate individual marker bins over the whole tissue slice.
 Are some bin patterns correlating with the territory regions?
 
 The beads are overlapping - change cex size from default 10 to less - or change alpha to change opacity/transparency
@@ -93,100 +150,125 @@ The beads are overlapping - change cex size from default 10 to less - or change 
 
 
 
+
+
 viewGeneExpression
-  - why vesMorph as input? better with territory?
-  - as.layer - should it show marker bin's expression/distribution per bead or overall per territory? - TRUE / FALSE
+  - Use object from extractMarkers()
+  - as.layer - should it show marker bin's counts/distribution per bead or overall per territory? - TRUE / FALSE
   
-for(i in seq(int.genes$genes))
-fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "MarkerGenes", vs, alias, param, paste0("layer", layer), ".png", sep="_")
-file.rename(from = paste0(in.path, fname), to = paste0(out.path, "GeneExpressions/", fname))
+
+
+
+
 
 ```{r}
-layer <- "FALSE" 
 
-for(i in seq(int.genes$genes)){
-  f <- paste0(out.path, "GeneExpressions/", int.genes$genes[[i]], "_", vs, "_", fname, ".png")
+layer <- "FALSE" 
+for(i in seq(int.bins$genes)){
+  f <- paste0(in.path, "BinCountLayer/", int.bins$genes[[i]], "_", vs, "_", fname, ".png")
   png(f) 
-  print(viewGeneExpression(layMark, gene=int.genes$genes[[i]], as.layer=layer, norm=F, cex=0.1, territory1=s, territory2=q))
+  print(viewGeneExpression(vesMark, gene=int.bins$genes[[i]], as.layer=layer, norm=F, cex=0.1, territory1=s, territory2=q))
   dev.off()
 }
 
+
 ```
-pdf(fname)
-grid.arrange(p[[1]], p[[2]], p[[3]], p[[4]], nrow = 2)
-grid.arrange(p[[5]], p[[6]], p[[7]], p[[8]], nrow = 2)
-grid.arrange(p[[9]], p[[10]], nrow = 2)
 
-
-## Another bin plotting version: (One plot per pdf page)
+## Another bin plotting version: (One plot per pdf page - Huge file!)
 setwd(in.path)
-fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "MarkerGenes", vs, alias, param, paste0("layer-", layer), ".pdf", sep="_")
+fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "MarkerBins", vs, alias, param, paste0("layer-", layer), ".pdf", sep="_")
 pdf(fname)
-for(i in seq_along(int.genes$genes)){
-  print(viewGeneExpression(vesMorph, gene=int.genes$genes[[i]], as.layer=layer,norm=F,cex=0.5))
+for(i in seq_along(int.bins$genes)){
+  print(viewGeneExpression(vesMorph, gene=int.bins$genes[[i]], as.layer=layer,norm=F,cex=0.5))
 }
 dev.off()
 file.rename(from = paste0(in.path, fname), to = paste0(out.path, fname))
 
-## Plot genes here in markdown:
-for(i in seq_along(int.genes$genes)){
-  print(viewGeneExpression(vesMorph, gene=int.genes$genes[[i]], as.layer=F,norm=F,cex=2))
+## Plot bins here in markdown:
+for(i in seq_along(int.bins$genes)){
+  print(viewGeneExpression(vesMorph, gene=int.bins$genes[[i]], as.layer=F,norm=F,cex=2))
 }
 
 
 
-Here I need to investigate the genes... How?!
- 
+## Chromosomal location
 
 
+Reference bins - Humans or mouse?
+Assemblies:
+  					® Human Genome used for the hg19 bins: GRCh37
+						◊    https://www.ncbi.nlm.nih.gov/assembly/GCF_000001405.13/#/st
+					® Mouse genome mm10 bins: GRCm38
+						◊ https://www.ncbi.nlm.nih.gov/assembly/GCF_000001635.20/#/st
+          
 ```{r}
+if(grepl("human",fname)){
+  bin.all <- read.table(paste0(ref.path,"hg19bins.txt"), header = T)
+  bins <- bin.all$bin_ind
+} else if(grepl("mouse",fname)){
+  bin.all <- read.table(paste0(ref.path,"mm10bins.txt"), header = T)
+  bins <- bin.all$bin_ind
+}
+```
+ In which chromosomes and where can we find the marker bins? 
+ - bin.all (vector with table from either human or mouse chromosomes and the bin indexes)
+ - find chromosome location for each bin index
+ - keep only bin index, start, stop, and chromosome number 
+ - merge the location information with the statistical output for each bin
+ - export table to csv
+
+
+## Get bin location info w Function:
+```{r}
+if(grepl("Chromosome",fname)){
+  bin.chr <- binLocationsChr(padj, bin.all)
+}else{
+  bin.chr <- binLocations(int.bins, bin.all)
+}
+
+
+#fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "MarkerBins", vs, alias, param, "table.csv", sep="_")
+#write.csv(bin.chr, file=paste0(out.path,fname))
+
+
+```
+
+chr <- data_frame()
+for(i in seq_along(padj$genes)){
+  x <- as.list(subset(bin.all, bin_ind==padj$genes[[i]]))
+  chr <- bind_rows(chr, x)
+}
+chr <- chr[c("bin_start", "bin_end", "chr_ind", "bin_ind")]
+
+names(padj)[names(padj) == 'genes'] <- 'bin_ind'
+bin.chr <- merge(chr, padj)
+bin.chr <- bin.chr[order(bin.chr$bin_start),]
+bin.chr <- bin.chr[order(bin.chr$chr_ind),]
 
 fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "MarkerBins", vs, alias, param, "table.csv", sep="_")
-write.csv(int.genes, file=paste0(out.path,fname))
+write.csv(bin.chr, file=paste0(out.path,fname))
 
 print(paste("Runtime so far: ", difftime(Sys.time(), start.time, units="mins"), "min"))
 
-```
 
 
 
 
+## Get genes from top bins:
 ```{r}
-print(int.genes)
-
-viewGeneExpression(vesTerr, gene=int.genes$genes[[2]], as.layer=layer,norm=F, cex=0.1, territory1=s, territory2=q)
-
-
-territoryPlot(vesTerrLay,cex=10,cex.pt=pt.sz)
-
+genesDNA <- genesBioMart(bin.chr, fname)
+write.csv(genesDNA, file=paste0(in.path,paste0("Genes_", fname)))
+save(genesDNA, file=paste0(in.path, "Genes_from_DNA_Bins_", fname, ".rd"))
 
 ```
 
-
-
-
-```{r}
-#Get new marker genes?
-
-
-# Specify territories for comparison, seed vs query
-vs <- "Sublayers"
-s <- c(2)           #c(8,7) or NULL
-q <- c(3)             #c(2,3) or NULL
-pval <- 0.05
-
-vesMark <- extractMarkers(vesTerr,method=st.meth, seed=s, query=q, pval=pval)
-
-
-param <- paste(param2, paste0("markerMethod", st.meth), sep="_")
-print(paste("Runtime so far: ", difftime(Sys.time(), start.time, units="mins"), "min"))
-#Specify the new territories!
-viewGeneExpression(vesTerrLay, gene=int.genes$genes[[2]], as.layer=layer,norm=F, cex=0.1, territory1=s, territory2=q)
-```
 
 
 
 ## Check the log of your current vesalius object
 getLastLog(vesTerr)
 
+
+
+  
 
