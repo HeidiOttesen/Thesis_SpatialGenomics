@@ -131,9 +131,7 @@ write.csv(int.genes, file=paste0(out.path,fname))
 print(paste("Runtime so far: ", difftime(Sys.time(), start.time, units="mins"), "min"))
 
 ```
-```{r}
 
-```
 
 
 

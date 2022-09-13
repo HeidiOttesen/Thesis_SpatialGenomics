@@ -30,31 +30,31 @@ al.num <- "_dna_200114_10"
 
 
 
-norm <- "TFIDF"             # Normalization method: "log","SCT","TFIDF","raw"
-meth <- "LSI"               # Dimensionality reduction method: "PCA","PCA_L","UMAP","LSI","LSI_UMAP"
-PCs <- 10                    # Number of Embeddings / dimensions / Principal Components / "LSI topics"
+norm <- "log"             # Normalization method: "log","SCT","TFIDF","raw"
+meth <- "PCA"               # Dimensionality reduction method: "PCA","PCA_L","UMAP","LSI","LSI_UMAP"
+PCs <- 6                   # Number of Embeddings / dimensions / Principal Components / "LSI topics"
 plotPC <- 4                 # Number of PC plots to export.
 
 min.count <- 0
-max.count <- 6
+max.count <- 12
 
-#chrsum <- "Chromosome"
+chrsum <- "Chromosome"
 
 k <- 25
 knn.type <- "Duplicate"     # KNN method: "Unique", "Duplicate"
 
-cores <- 5
+cores <- 1
 
-colD <- 6                   # Column Depth (3-6)
-smIter <- 10                # Smoothing Iterations
+colD <- 3                   # Column Depth (3-6)
+smIter <- 5                # Smoothing Iterations
 #imSegDims <- 4             # Image Segmentation Dimensions
 st.meth <- "wilcox"          #Statistical method for extracting markers/bins, "wilcox", "t.test", "chisq"
 
 
 param <- paste(paste0(norm, "Norm"), paste0(meth, PCs), sep = "_")
 
-in.path <- "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/"
-out.path <- paste0("~/Thesis_SpatialGenomics/R_Output/VesaliusDev/", alias, "/")
+#in.path <- "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/"
+#out.path <- paste0("~/Thesis_SpatialGenomics/R_Output/VesaliusDev/", alias, "/")
 
 ## On MacBook:
 in.path <- "~/Thesis/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/"
@@ -88,8 +88,8 @@ library(Matrix)
 library(MatrixExtra)
 
 
-files <- list.files("~/Thesis_SpatialGenomics/VesaliusDev_2022/Vesalius/R",pattern = ".R")
-files <- paste0("~/Thesis_SpatialGenomics/VesaliusDev_2022/Vesalius/R/",files)
+#files <- list.files("~/Thesis_SpatialGenomics/VesaliusDev_2022/Vesalius/R",pattern = ".R")
+#files <- paste0("~/Thesis_SpatialGenomics/VesaliusDev_2022/Vesalius/R/",files)
 ## If on macbook:
 files <- list.files("~/Thesis/Vesalius/R",pattern = ".R")
 files <- paste0("~/Thesis/Vesalius/R/",files)
@@ -114,12 +114,10 @@ sparse      -     Sparse count matrix, dgCMatrix
 ```{r}
 counts <- paste0(in.path, alias, al.num, ".sparse_counts_1Mb.txt")
 bead <- ReadSlideSeq(paste0(in.path, alias, al.num, ".bead_locations.csv"))
-
 barcodes <- rownames(bead@coordinates)
 
 sep = "\t" 
 ctmp <- read.table(counts, header = TRUE, sep=sep ) %>% na.exclude()
-
 sparse <- sparseMatrix(i= ctmp[,2],j=ctmp[,1],x=ctmp[,3]) 
 
 # Set default point size for plotting the UMIs (KNN unique will make changes)
@@ -183,7 +181,8 @@ param <- param1
 #Remove outlier counts
 Expected CNA varies between 0-6? (Total deletion and double duplication?)
 High outlier counts might represent mitochondrial DNA bins or repeated elements or other errors?
-Mouse - outlier counts 60-506 only belong to the mitochondrial bin
+Mouse - from 8786850 to 8771833 entries
+outlier counts 60-506 only belong to the mitochondrial bin
 Human - 
 
 
@@ -199,6 +198,7 @@ if(exists("max.count")){
 }
 
 
+
 ```
 
 ## Sum counts across full chromosomes
@@ -209,6 +209,7 @@ For comparing counts over chromosomes instead of over bins.
 if(exists("chrsum")){
   sparse <- chromosomeCounts(as.matrix(sparse), bin.all)
   param <- paste("ChrSummed", param, sep="_")
+  bins <- c(1:(length(unique(bin.all$chr_ind)) -1))
 }
 ```
 
@@ -223,11 +224,11 @@ Sums counts over a group of neighboring barcodes
 bead.ls <- list()
 if(exists("k")){
   if(knn.type == "Unique"){
-    bead.ls <- KNN.DNA.Unique(bead, df, k)
+    bead.ls <- KNN.DNA.Unique(bead, sparse, k)
     pt.sz <- k/15 #Adjusting point size for plotting
     param <- paste(param, paste0("knn", knn.type, k), sep="_")
   }else if(knn.type == "Duplicate"){
-    bead.ls <- KNN.DNA(bead, df, k)
+    bead.ls <- KNN.DNA(bead, sparse, k)
     param <- paste(param, paste0("knn", knn.type, k), sep="_")
   }
   sparse <- bead.ls[[1]] #Retrieve sparse matrix output from knn function
