@@ -30,15 +30,14 @@ al.num <- "_dna_200114_10"
 
 
 
-norm <- "log"             # Normalization method: "log","SCT","TFIDF","raw"
-meth <- "PCA"               # Dimensionality reduction method: "PCA","PCA_L","UMAP","LSI","LSI_UMAP"
-PCs <- 6                   # Number of Embeddings / dimensions / Principal Components / "LSI topics"
-plotPC <- 4                 # Number of PC plots to export.
+norm <- "TFIDF"             # Normalization method: "log","SCT","TFIDF","raw"
+meth <- "LSI"               # Dimensionality reduction method: "PCA","PCA_L","UMAP","LSI","LSI_UMAP"
+PCs <- 8                   # Number of Embeddings / dimensions / Principal Components / "LSI topics"
 
 min.count <- 0
 max.count <- 12
 
-chrsum <- "Chromosome"
+#chrsum <- "Chromosome"
 
 k <- 25
 knn.type <- "Duplicate"     # KNN method: "Unique", "Duplicate"
@@ -153,10 +152,21 @@ if(grepl("human",alias)){
 ## Name column/rows in sparse matrix
 Assign bin index numbers to identify the rows. 
 Assign the barcodes to identify the columns
+## Vector holders - Checkpoint
 
 ```{r}
 colnames(sparse) <- barcodes
 rownames(sparse) <- bins
+
+
+
+df.orig <- as.matrix(sparse) 
+bead.orig <- bead
+param.orig <- param
+
+df <- df.orig
+bead <- bead.orig
+param <- param.orig
 ```
 
 
@@ -166,17 +176,6 @@ max <- sort(sparse@x, decreasing = TRUE)
 
 
 
-## Vector holders - Checkpoint
-
-```{r}
-df1 <- as.matrix(sparse) 
-bead1 <- bead
-param1 <- param
-
-df <- df1
-bead <- bead1
-param <- param1
-```
 
 #Remove outlier counts
 Expected CNA varies between 0-6? (Total deletion and double duplication?)
@@ -197,21 +196,11 @@ if(exists("max.count")){
   param <- paste(miax, param, sep="_")
 }
 
-
-
 ```
 
 ## Sum counts across full chromosomes
 For comparing counts over chromosomes instead of over bins.
 
-
-```{r}
-if(exists("chrsum")){
-  sparse <- chromosomeCounts(as.matrix(sparse), bin.all)
-  param <- paste("ChrSummed", param, sep="_")
-  bins <- c(1:(length(unique(bin.all$chr_ind)) -1))
-}
-```
 
 ## Run KNN
 Sums counts over a group of neighboring barcodes
@@ -221,6 +210,14 @@ Sums counts over a group of neighboring barcodes
 
 
 ```{r}
+
+if(exists("chrsum")){
+  sparse <- chromosomeCounts(as.matrix(sparse), bin.all)
+  param <- paste("ChrSummed", param, sep="_")
+  bins <- c(1:(length(unique(bin.all$chr_ind)) -1))
+}
+
+
 bead.ls <- list()
 if(exists("k")){
   if(knn.type == "Unique"){
@@ -244,7 +241,7 @@ bead <- as.data.frame(bead)
 bead <- transform(bead, xcoord = as.numeric(xcoord), 
                   ycoord = as.numeric(ycoord))
 
-sparse.df <- as.data.frame(sparse)
+#sparse.df <- as.data.frame(sparse)
 sparse.spmx <- Matrix(sparse, sparse = TRUE)
 
 ```
@@ -280,12 +277,12 @@ ves <- buildVesaliusEmbeddings(vesalius, method = meth,
 Imageplot with chosen number of dimensions for the different PCs
 
 ```{r}
-cat( paste(Sys.time()," Plotting top", plotPC, "principal components and exporting to pdf.\n\t\t\t File located in:", out.path, "\n"))
+cat( paste(Sys.time()," Plotting top 4 principal components and exporting to pdf.\n\t\t\t File located in:", out.path, "\n"))
 setwd(in.path)
 fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "Embeddings", alias, paste0(param, ".pdf"), sep="_")
 pdf(fname)
-#layout(matrix(c(1,3,2,4), 2, 2))
-for(i in seq(plotPC)){
+layout(matrix(c(1,3,2,4), 2, 2))
+for(i in seq(4)){
   print(imagePlot(ves, dims = i))
 }
 dev.off()
@@ -307,8 +304,8 @@ LayerTerritory - not relevant for DNA data?
 ## For testing different smoothing iterations and column depths:
 #smIter <- 8 
 #colD <- 3
-param2 <- param
-param <- param2
+param.vesEmbed <- param
+param <- param.vesEmbed
 
 ```
 

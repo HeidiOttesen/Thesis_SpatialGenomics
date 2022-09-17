@@ -46,7 +46,7 @@ Object_DNA_Territories_mouse_liver_met_2_ChrSummed_counts0-6_logNorm_PCA10_knnDu
 
 
 ```{r}
-fname <- "Object_DNA_Territories_mouse_liver_met_2_ChrSummed_counts0-6_logNorm_PCA10_knnDuplicate5_dims1-10_colD6_Iter10"
+fname <- "Object_DNA_Territories_mouse_liver_met_2_ChrSummed_counts0-6_logNorm_PCA10_knnDuplicate25_dims1-10_colD6_Iter10"
 
 
 #ref.path <- "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/"
@@ -79,7 +79,7 @@ Specify which territories to investigate further and desired number of sublayers
   
 ```{r}
 
-vs <- "CloneBandAvsNormal"
+vs <- "CloneBvsCloneA"
 s <- c(13, 14)           
 q <- 2
 
@@ -147,7 +147,7 @@ int.bins <- vesMark@DEG$DEG_Territory_Trial_1
 length(int.bins$genes)
 Appropriate number of bins?
 
-padj <- slice_min(mark, order_by=mark$p.value.adj, n=100)
+padj <- slice_min(int.bins, order_by=int.bins$p.value.adj, n=100)
 int.bins <- padj
 
 length(int.bins$genes)
@@ -160,10 +160,10 @@ Optional further subsetting:
 
 
 ```{r}
-logfc.min <- slice_min(padj, order_by=padj$logFC, n=10)
-logfc.max <- slice_max(padj, order_by=padj$logFC, n=10)
+logfc.min <- slice_min(int.bins, order_by=int.bins$logFC, n=20)
+logfc.max <- slice_max(int.bins, order_by=int.bins$logFC, n=20)
 int.bins <- bind_rows(list(logfc.min, logfc.max))
-
+length(int.bins$genes)
 ```
 
 ## Plot marker bins - export to pdf
@@ -186,7 +186,7 @@ viewGeneExpression
 
 layer <- "FALSE" 
 for(i in seq(int.bins$genes)){
-  f <- paste0(path, "BinCountLayer/", int.bins$genes[[i]], "_", vs, "_", fname, ".png")
+  f <- paste0(path, "BinCountLayer/", vs, "/", int.bins$genes[[i]], "_", vs, "_", fname, ".png")
   png(f) 
   print(viewGeneExpression(vesMark, gene=int.bins$genes[[i]], as.layer=layer, norm=F, cex=0.15, territory1=s, territory2=q))
   dev.off()

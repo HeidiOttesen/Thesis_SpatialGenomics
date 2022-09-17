@@ -1,0 +1,463 @@
+---
+title: "SlideSeqDNA_Vesalius_Dev"
+output: html_document
+---
+
+
+## Settings - Parameters etc
+
+Specify dataset + Normalisation + dimensionality reduction method and other parameters
+
+For DNA use log and PCA, or use TFIDF and LSI?
+
+SlideDNASeq datasets:
+human_colon_cancer_3_dna_191204_19
+human_colon_cancer_4_dna_200114_13
+human_colon_cancer_dna_4x_201027_17
+mouse_liver_met_2_dna_200114_10
+mouse_liver_met_1_dna_191114_05
+mouse_liver_met_1_dna_191114_06
+
+KNN duplicate vs unique - unique makes the dataset much smaller! More efficient for testing.. Duplicate makes the downstream PCA etc more robust and meaningful.
+
+```{r}
+start.time <- Sys.time()
+# SlideSeq DNA datasets:
+alias <- "mouse_liver_met_2"
+al.num <- "_dna_200114_10"
+norm <- "log"             # Normalization method: "log","SCT","TFIDF","raw"
+meth <- "PCA"               # Dimensionality reduction method: "PCA","PCA_L","UMAP","LSI","LSI_UMAP"
+PCs <- 20                    # Number of Embeddings / dimensions / Principal Components / "LSI topics"
+plotPC <- 4                 # Number of PC plots to export.
+min.count <- 0
+max.count <- 12
+k <- 25
+knn.type <- "Chromosome"     # KNN method: "Unique", "Duplicate", "Chromosome"
+cores <- 1
+colD <- 6                   # Column Depth (3-6)
+smIter <- 5                # Smoothing Iterations
+#imSegDims <- 4             # Image Segmentation Dimensions
+st.meth <- "wilcox"          #Statistical method for extracting markers/bins, "wilcox", "t.test", "chisq"
+param <- paste(paste0(norm, "Norm"), paste0(meth, PCs), sep = "_")
+in.path <- "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/"
+out.path <- paste0("~/Thesis_SpatialGenomics/R_Output/VesaliusDev/", alias, "/")
+## On MacBook:
+in.path <- "~/Thesis/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/"
+out.path <- paste0("~/Thesis/R_Output/VesaliusDev/", alias, "/")
+```
+
+
+## Load packages needed
+
+```{r setup, include=FALSE}
+knitr::opts_knit$set(root.dir = "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/")
+knitr::opts_chunk$set(echo = TRUE)
+library(imagerExtra)
+library(Seurat)
+library(Signac)
+library(ggplot2)
+library(patchwork)
+library(viridis)
+library(RColorBrewer)
+library(dplyr)
+library(tvR)
+library(sp)
+library(spdep)
+library(grid)
+library(gridExtra)
+library(Matrix)
+library(MatrixExtra)
+files <- list.files("~/Thesis_SpatialGenomics/VesaliusDev_2022/Vesalius/R",pattern = ".R")
+files <- paste0("~/Thesis_SpatialGenomics/VesaliusDev_2022/Vesalius/R/",files)
+## If on macbook:
+files <- list.files("~/Thesis/Vesalius/R",pattern = ".R")
+files <- paste0("~/Thesis/Vesalius/R/",files)
+for(i in seq_along(files)){
+  source(files[i])
+}
+source("~/Thesis/Thesis_SpatialGenomics/SlideSeq/June22_Heidi_Functions.R")
+
+
+library(utils)
+library(stats)
+library(graphics)
+library(grDevices)
+### Set seed
+set.seed(1)
+```
+
+
+
+## Read data from files
+Vectors:
+barcodes    -     holds the barcode sequences
+sparse      -     Sparse count matrix, dgCMatrix
+
+```{r}
+counts <- paste0(in.path, alias, al.num, ".sparse_counts_1Mb.txt")
+bead <- ReadSlideSeq(paste0(in.path, alias, al.num, ".bead_locations.csv"))
+barcodes <- rownames(bead@coordinates)
+sep = "\t" 
+ctmp <- read.table(counts, header = TRUE, sep=sep ) %>% na.exclude()
+sparse <- sparseMatrix(i= ctmp[,2],j=ctmp[,1],x=ctmp[,3]) 
+# Set default point size for plotting the UMIs (KNN unique will make changes)
+pt.sz <- 0.25
+```
+
+
+## Genomic Bins Human/Mouse:
+Each bin index corresponds to 1 million bases in a specific location on a chromosome.
+bin size: 1 million bases, index 1 = chromosome 1 from base 1 -> 1.000.000
+Keep only the bin index numbers (1-3114. ~3.1bn bases)
+
+Human: 3114 bins human bins. Chr2 starts at bin 251
+Mouse: 2738 bins total 
+
+```{r}
+if(grepl("human",alias)){
+  bin.all <- read.table(paste0(in.path,"hg19bins.txt"), header = T)
+  bins <- bin.all$bin_ind
+} else if(grepl("mouse",alias)){
+  bin.all <- read.table(paste0(in.path,"mm10bins.txt"), header = T)
+  bins <- bin.all$bin_ind
+}
+```
+
+
+
+## Name column/rows in sparse matrix
+Assign bin index numbers to identify the rows. 
+Assign the barcodes to identify the columns
+
+```{r}
+colnames(sparse) <- barcodes
+rownames(sparse) <- bins
+```
+
+#Remove outlier counts
+Expected CNA varies between 0-6? (Total deletion and double duplication?)
+High outlier counts might represent mitochondrial DNA bins (probably not since I only have chromosomes in my bins list?) or repeated elements or other errors?
+
+
+```{r}
+if(exists("min.count")){
+  sparse <- filterSparse(sparse, function(x) x >= min.count)
+}
+if(exists("max.count")){
+  sparse <- filterSparse(sparse, function(x) x <= max.count)
+  miax <- paste0("counts", min.count, "-", max.count)
+  param <- paste(miax, param, sep="_")
+}
+```
+
+
+## Vector holders - Checkpoint
+
+```{r}
+df1 <- as.matrix(sparse) 
+bead1 <- bead
+param1 <- param
+df <- df1
+bead <- bead1
+param <- param1
+```
+
+
+
+## Run KNN
+- Decide between only using each barcode once (KNN.DNA.Unique function)
+  or having many duplicate groups of barcodes, each barcode gets a group of k nearest neighbors (KNN.DNA function)
+
+
+```{r}
+if(exists("k")){
+  if(knn.type == "Unique"){
+    ls <- KNN.DNA.Unique(bead, df, k)
+    pt.sz <- k/15 #Adjusting point size for plotting
+  }else if(knn.type == "Duplicate"){
+    ls <- KNN.DNA(bead, df, k)
+  }else if(knn.type == "Chromosome"){
+    ls <- chromosomeCounts(df, bin.all)
+  }
+  param <- paste(param, paste0("knn", knn.type, k), sep="_")
+  sparse <- ls[[1]] #Retrieve sparse matrix output from knn function
+  bead <- ls[[2]] #Retrieve Bead info (barcodes and coordinates) in SlideSeq assay format compatible with Seurat/Vesalius object
+  rm(ls)
+}
+bead <- cbind(rownames(bead), bead[[1]], bead[[2]])
+colnames(bead) <- c("barcodes","xcoord","ycoord")
+bead <- as.data.frame(bead)
+bead <- transform(bead, xcoord = as.numeric(xcoord), 
+               ycoord = as.numeric(ycoord))
+sparse.df <- as.data.frame(sparse)
+sparse.spmx <- Matrix(sparse, sparse = TRUE)
+```
+
+## Create Vesalius Object - Milestone
+Based on the counts and bead coordinates
+
+Beads in data.frame format - coordinates numerical
+Counts either dataframe or sparse matrix.
+
+# Dimensionality Reduction
+Latent space
+PCA / UMAP / tSNE (/LSI)
+
+buildVesaliusEmbeddings - 
+  - method - dimensionality reduction method, pcs - number of principal components (default 30)
+  - tensorResolution - image compression ratio 0-1
+  - filterThreshold - to remove outlier beads - quantile threshold at which tiles should be retained
+    - 0.99 means that 99 % of barcodes and tile triangles will be retained
+  
+```{r}
+#sparse <- sparse.df
+sparse <- sparse.spmx
+vesalius <- buildVesaliusObject(bead,sparse)
+ves <- buildVesaliusEmbeddings(vesalius, method = meth, 
+  norm = norm, pcs = PCs, tensorResolution = 0.1, cores = cores, filterThreshold =0.98)
+```
+
+## Plotting vesalius images of the PC or LSI embeddings
+
+Imageplot with chosen number of dimensions for the different PCs
+
+```{r}
+cat( paste(Sys.time()," Plotting top", plotPC, "principal components and exporting to pdf.\n\t\t\t File located in:", out.path, "\n"))
+setwd(in.path)
+fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "Embeddings", alias, paste0(param, ".pdf"), sep="_")
+pdf(fname)
+#layout(matrix(c(1,3,2,4), 2, 2))
+for(i in seq(plotPC)){
+  print(imagePlot(ves, dims = i))
+}
+dev.off()
+file.rename(from = paste0(in.path, fname), to = paste0(out.path, fname))
+print(paste("Runtime so far: ", difftime(Sys.time(), start.time, units="mins"), "min"))
+imagePlot(ves, dims = 1)
+```
+
+
+
+## Image processing:
+imageSegmentation - iterative k-means clustering
+  - dims: number of dimred embeddings
+  - Embedding "last": last dimred method used (if you have multiple dimred obejcts stored in your ves object)
+LayerTerritory - not relevant for DNA data?
+
+```{r}
+## For testing different smoothing iterations and column depths:
+#smIter <- 8 
+#colD <- 3
+param2 <- param
+param <- param2
+```
+
+
+```{r}
+vesImSeg <- imageSegmentation(ves,dims=1:PCs, colDepth = colD, smoothIter=smIter,smoothType="iso",sigma=2,embedding=meth)
+vesTerr <- isolateTerritories(vesImSeg, trial = "last")
+param <- paste(param, paste0("dims1-", PCs), paste0("colD", colD), paste0("Iter", smIter), sep="_")
+print(paste("Runtime so far: ", difftime(Sys.time(), start.time, units="mins"), "min"))
+```
+
+
+
+# Export territory plots to pdf
+Is there a difference between the territory isolation and the territory morphing?
+Also plot the first imagesegmentation
+
+```{r}
+setwd(in.path)
+fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "Territories", alias, paste0(param, ".pdf"), sep="_")
+pdf(fname)
+layout(matrix(c(1,3,2,4), 2, 2))
+territoryPlot(vesTerr,cex=10,cex.pt=pt.sz)
+print(imagePlot(vesImSeg))
+print(getLastLog(vesTerr))
+dev.off()
+file.rename(from = paste0(in.path, fname), to = paste0(out.path, fname))
+```
+
+
+
+## Plot territory in markdown
+to decide which territories to compare
+
+```{r}
+param3 <- param
+territoryPlot(vesTerr,cex=10,cex.pt=pt.sz)
+```
+
+
+## Stop in Pipeline
+Change parameters
+
+```{r}
+change territories and info in the next chunk!!
+```
+
+
+## Extract marker bins and morph territories
+ExtractMarkers - DGE between selected territories - identify marker bins
+  - Takes like 20 mins - if not specifying seed and query..
+      - More territories = more time?
+  - Seed - set to 3 because? - Territories to be included in group 1 for DiffGeneExp
+    - If I say 3 - does it only use territory 3 for comparison or does it compare 3 different territories?
+  - Query - Territories to be included in group 2 of DGE.
+
+
+seed against query - pick territories manually!! based on the territory plot
+  - eg inner vs outer part of metastasis
+  - outer part vs normal
+  - outer part vs other metastasis
+  
+Output:
+ - p.value,
+ - logFC,
+ - seedPct (percentage of cells containing gene in first group),
+ - queryPct (percentage of cells containing gene in second group),
+ - seedTerritory (territory used as group 1)
+ - queryTerritory (territory used as group 2)
+  
+TerritoryMorphing
+  - c(1,10) - Shrinking/Growing factor??!!!
+ - Territory morphing can manipulate territories by growing, shrinking, filling, and cleaning territories.
+ - Growing = Positive integers - Territory will be dilated by x number of pixels
+ - Shrinking = Negative integers - Territory will be contracted by x number of pixels
+ - Filling = grow followed by shrink.
+ - Cleaning = shrink followed by grow.
+ - Morphology factor - integer or vector of integers describing growth and/or shrink extent.
+
+```{r}
+# Specify territories for comparison, seed vs query
+vs <- "CloneAVsAll"
+s <- c(13,14)           #eg c(8,7) or NULL
+q <- NULL             #eg c(7,5) or NULL
+pval <- 0.05
+vesMark <- extractMarkers(vesTerr,method=st.meth, seed=s, query=q, pval=pval)
+vesMorph <- territoryMorphing(vesMark, c(1,10))
+#vesTerrLay <- layerTerritory(vesMorph, c(28,34,32),morphologyFactor=0,layerDepth=5)
+param <- paste(param2, paste0("markerMethod", st.meth), sep="_")
+print(paste("Runtime so far: ", difftime(Sys.time(), start.time, units="mins"), "min"))
+```
+
+
+
+
+
+## Pick top marker bins
+ - Based on lowest adjusted p value and highest, furthest from 0, Log fold change
+
+```{r}
+mark <- vesMark@DEG$DEG_Territory_Trial_1
+m.df <- as.data.frame(mark)
+padj <- slice_min(m.df, order_by=m.df$p.value.adj, n=100)
+logfc.min <- slice_min(padj, order_by=padj$logFC, n=5)
+logfc.max <- slice_max(padj, order_by=padj$logFC, n=5)
+int.bins <- bind_rows(list(logfc.min, logfc.max))
+```
+
+
+
+
+## Plot marker bins - export to pdf
+Investigate individual marker bins over the whole tissue slice.
+Are some bin patterns correlating with the territory regions?
+
+The beads are overlapping - change cex size from default 10 to less - or change alpha to change opacity/transparency
+
+
+
+
+
+
+viewGeneExpression
+  - why vesMorph as input? better with territory?
+  - as.layer - should it show marker bin's expression/distribution per bead or overall per territory? - TRUE / FALSE
+  
+
+
+
+
+
+```{r}
+layer <- "FALSE"           
+p <- list()
+for(i in seq(int.bins$genes)){
+  p[[i]] <- viewGeneExpression(vesMorph, gene=int.bins$genes[[i]], as.layer=layer,norm=F, cex=0.1, territory1=s, territory2=q)
+}
+setwd(in.path)
+fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "MarkerBins", vs, alias, param, paste0("layer", layer), ".pdf", sep="_")
+pdf(fname)
+grid.arrange(p[[1]], p[[2]], p[[3]], p[[4]], nrow = 2)
+grid.arrange(p[[5]], p[[6]], p[[7]], p[[8]], nrow = 2)
+grid.arrange(p[[9]], p[[10]], nrow = 2)
+dev.off()
+file.rename(from = paste0(in.path, fname), to = paste0(out.path, fname))
+```
+
+## Another bin plotting version: (One plot per pdf page)
+setwd(in.path)
+fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "MarkerBins", vs, alias, param, paste0("layer-", layer), ".pdf", sep="_")
+pdf(fname)
+for(i in seq_along(int.bins$genes)){
+  print(viewGeneExpression(vesMorph, gene=int.bins$genes[[i]], as.layer=layer,norm=F,cex=0.5))
+}
+dev.off()
+file.rename(from = paste0(in.path, fname), to = paste0(out.path, fname))
+
+## Plot bins here in markdown:
+for(i in seq_along(int.bins$genes)){
+  print(viewGeneExpression(vesMorph, gene=int.bins$genes[[i]], as.layer=F,norm=F,cex=2))
+}
+
+
+
+## Chromosomal location
+In which chromosomes and where can we find the marker bins? 
+ - bin.all (vector with table from either human or mouse chromosomes and the bin indexes)
+ - find chromosome location for each bin index
+ - keep only bin index, start, stop, and chromosome number 
+ - merge the location information with the statistical output for each bin
+ - export table to csv
+ 
+
+
+```{r}
+chr <- data_frame()
+for(i in seq_along(padj$genes)){
+  x <- as.list(subset(bin.all, bin_ind==padj$genes[[i]]))
+  chr <- bind_rows(chr, x)
+}
+chr <- chr[c("bin_start", "bin_end", "chr_ind", "bin_ind")]
+names(padj)[names(padj) == 'genes'] <- 'bin_ind'
+bin.chr <- merge(chr, padj)
+bin.chr <- bin.chr[order(bin.chr$bin_start),]
+bin.chr <- bin.chr[order(bin.chr$chr_ind),]
+fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "MarkerBins", vs, alias, param, "table.csv", sep="_")
+write.csv(bin.chr, file=paste0(out.path,fname))
+print(paste("Runtime so far: ", difftime(Sys.time(), start.time, units="mins"), "min"))
+```
+## Get bin location info w Function: - not working atm...?
+```{r}
+bin.chr <- binLocations(int.bins, bin.all)
+fname <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "MarkerBins", vs, alias, param, "table.csv", sep="_")
+write.csv(bin.chr, file=paste0(out.path,fname))
+print(paste("Runtime so far: ", difftime(Sys.time(), start.time, units="mins"), "min"))
+```
+
+
+
+## Get genes from top bins:
+```{r}
+genes <- genesBioMart(int.bins, alias)
+fname.g <- paste0("Genes_", fname)
+fname.g <- paste(format(Sys.time(), "%Y%m%d_%H%M%S"), "Genes", alias, param, "table.csv", sep="_")
+write.csv(genes, file=paste0(out.path,fname.g))
+```
+
+
+
+
+## Check the log of your current vesalius object
+getLastLog(vesTerr)

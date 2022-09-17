@@ -10,8 +10,13 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
-in.path <- "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/"
-out.path <- paste0("~/Thesis/R_Output/VesaliusDev/RNA/", alias, "/")
+
+fname <- "Object_Territories_mouse_liver_met_2_SCTNorm_PCA30_dims1-30_colD6_Iter10_markerMethod_chisq"
+fname <- "Object_Territories_mouse_liver_met_2_SCTNorm_PCA30_dims1-30_colD6_Iter10_markerMethod_chisq"
+#in.path <- "~/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/"
+#out.path <- paste0("~/Thesis/R_Output/VesaliusDev/RNA/", alias, "/")
+path <- "~/Thesis/R_Output/VesaliusDev/RNA/mouse_liver_met_2/"
+ref.path <- "~/Thesis/Thesis_SpatialGenomics/SlideSeq/SlideSeq_ves_test/"
 
 
 files <- paste0("~/Thesis_SpatialGenomics/VesaliusDev_2022/Vesalius/R/",list.files("~/Thesis_SpatialGenomics/VesaliusDev_2022/Vesalius/R",pattern = ".R"))
@@ -21,12 +26,14 @@ for(i in seq_along(files)){
   source(files[i])
 }
 
-terr <- load(file=paste0(out.path, "Object_Territories_mouse_liver_met_2_SCTNorm_PCA30_dims1-30_colD6_Iter10_markerMethod_chisq.rd"))
+
+load(file=paste0(path, fname, ".rd"))
+
 ```
 
 ```{r}
 
-territoryPlot(vesTerrLay,cex=10,cex.pt=0.25)
+territoryPlot(vesTerr,cex=10,cex.pt=0.25)
 ```
 
 
